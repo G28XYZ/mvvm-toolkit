@@ -1,8 +1,8 @@
 import React from 'react';
 import invariant from 'tiny-invariant';
-import { Service } from 'typedi';
-import { ReactComponent, VMProps } from '../view';
-import { state } from '../store';
+import { ServiceOptions } from 'typedi';
+import { ReactComponent, VMProps, ViewModel } from '../view';
+import { SetService } from '.';
 
 const hasSymbol = typeof Symbol === 'function' && Symbol.for;
 
@@ -11,22 +11,14 @@ const ReactMemoSymbol = hasSymbol
   : typeof React.memo === 'function' && React.memo((props: any) => null)['$$typeof'];
 
 export const ApplyViewModel = <V extends VMProps>(
-  fc: React.FC<V> & { $$typeof?: typeof ReactMemoSymbol; type?: (...args: any[]) => any }
+  fc: React.FC<V> & { $$typeof?: typeof ReactMemoSymbol; type?: (...args: any[]) => any },
+  serviceOptions?: ServiceOptions<unknown>
 ) => {
-  return <T extends new (...args: any[]) => any>(base: T): T => {
+  return <T extends (new (...args: any[]) => any) & Partial<typeof ViewModel>>(base: T): T => {
     invariant(fc);
     const baseName = base.name || Object.getPrototypeOf(base).name;
 
-    Service(baseName)(
-      class extends base {
-        constructor(...args: any[]) {
-          super(...args);
-          if (args.length && args[0].services) {
-            state.storeServices = args[0].services;
-          }
-        }
-      }
-    );
+    SetService({ eager: true, ...serviceOptions, id: baseName })(base);
 
     if (!base.toString().includes('makeObservable')) {
       throw new Error(`[mvvm-toolkit] add 'makeObservable' from 'mobx' in class constructor or method in '${baseName}'`);

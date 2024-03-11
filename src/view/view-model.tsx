@@ -1,5 +1,4 @@
 import React, { FC, createContext, useContext, useEffect } from 'react';
-import { Container } from 'typedi';
 import { action, computed, makeObservable } from 'mobx';
 import { state } from '../store';
 
@@ -10,23 +9,21 @@ const VmContext = createContext(null);
 const useVmContext = () => useContext(VmContext);
 
 export abstract class ViewModel<T = any> {
-  private parentVmName: string;
-
-  constructor() {
+  constructor(private parentCtxName: string = null) {
     makeObservable(this);
   }
 
-  @computed get parent() {
-    return this.parentVmName ? (this.getStore(this.parentVmName) as T) : null;
+  @computed get parentCtx(): T {
+    return this.parentCtxName ? this.getStore(this.parentCtxName) : null;
   }
 
-  @action getStore(name?: string) {
+  @action getStore<T = any>(name?: string) {
     try {
       if (name) {
-        const store = state.storeServices.find((item) => 'id' in item && item.id === name);
-        return (store && 'value' in store && store.value) || store;
+        const store = state.storeServices.find((item) => 'id' in item && item.id === name)?.value;
+        return store as T;
       }
-      return state.storeServices.map((item) => 'value' in item && item.value);
+      return state.storeServices.map((item) => item.value) as T;
     } catch {}
   }
 
@@ -45,14 +42,14 @@ export abstract class ViewModel<T = any> {
   protected onUnmount() {}
 }
 
-export const ReactComponent = (fc: FC, vm: string) => {
-  return (props: VMProps, ref: any) => {
-    const viewModel = Container.get<ViewModel>(vm);
+export const ReactComponent = (fc: FC, vmName: string) => {
+  const viewModel = state.getService(vmName);
 
-    const vmName = useVmContext();
+  return (props: VMProps, ref: any) => {
+    const vmNameCtx = useVmContext();
 
     useEffect(() => {
-      viewModel['parentVmName'] = vmName;
+      viewModel['parentCtxName'] = vmNameCtx;
       viewModel['mount']();
 
       Object.entries(props).forEach(([key, value]) => {
@@ -62,7 +59,7 @@ export const ReactComponent = (fc: FC, vm: string) => {
               value,
             });
           } catch {
-            console.warn(`[mvvm-toolkit] can not define field '${key}' in '${vm}'`);
+            console.warn(`[mvvm-toolkit] can't define field '${key}' in '${vmName}'`);
           }
         }
       });
@@ -73,7 +70,7 @@ export const ReactComponent = (fc: FC, vm: string) => {
     const Fc = fc.bind(this, { ...props, viewModel }, ref);
 
     return (
-      <VmContext.Provider value={vm}>
+      <VmContext.Provider value={vmName}>
         <Fc />
       </VmContext.Provider>
     );
