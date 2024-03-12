@@ -20,9 +20,9 @@ export const ApplyViewModel = <V extends VMProps>(
 
     SetService({ eager: true, ...serviceOptions, id: baseName })(base);
 
-    if (!base.toString().includes('makeObservable')) {
-      throw new Error(`[mvvm-toolkit] add 'makeObservable' from 'mobx' in class constructor or method in '${baseName}'`);
-    }
+    // if (!base.toString().includes('makeObservable')) {
+    //   throw new Error(`[mvvm-toolkit] add 'makeObservable' from 'mobx' in class constructor or method in '${baseName}'`);
+    // }
 
     if (ReactMemoSymbol && !(fc['$$typeof'] === ReactMemoSymbol)) {
       throw new Error('[mvvm-toolkit] wrap ' + (fc.name || fc.displayName) + " FC to 'observer' from 'mobx-react-lite' or 'mobx-react'");
