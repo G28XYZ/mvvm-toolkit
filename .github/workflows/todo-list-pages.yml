@@ -31,13 +31,13 @@ jobs:
       - name: Install and build mvvm-toolkit
         working-directory: .
         run: |
-          npm install
+          npm install --include=optional --no-package-lock
           npm run build
 
       - name: Install and build todo-list
         working-directory: examples/todo-list
         run: |
-          npm install
+          npm install --include=optional --no-package-lock
           npm run build
 
       - name: Prepare Pages site
