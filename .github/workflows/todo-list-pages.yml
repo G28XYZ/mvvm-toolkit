@@ -40,10 +40,18 @@ jobs:
           npm install
           npm run build
 
+      - name: Prepare Pages site
+        run: |
+          rm -rf site
+          mkdir -p site/examples/todo-list
+          cp examples/index.html site/index.html
+          cp examples/index.css site/index.css
+          cp -R examples/todo-list/dist/. site/examples/todo-list/
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: examples/todo-list/dist
+          path: site
 
   deploy:
     needs: build

@@ -2,11 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { mvvmServiceDiPlugin } from 'mvvm-toolkit/vite-plugins/mvvm-di';
 
-const repoName = process.env.GITHUB_REPOSITORY?.split("/")[1];
-let base = "./";
-if (repoName) {
-	base = repoName.endsWith(".github.io") ? "/" : `/${repoName}/`;
-}
+const base = process.env.VITE_BASE ?? "./";
 
 export default defineConfig({
   base,
