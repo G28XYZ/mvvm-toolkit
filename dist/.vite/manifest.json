@@ -1,0 +1,28 @@
+{
+  "_tslib.es6-DqNExo46.cjs": {
+    "file": "tslib.es6-DqNExo46.cjs",
+    "name": "tslib.es6"
+  },
+  "_tslib.es6-uRq23Qk6.js": {
+    "file": "tslib.es6-uRq23Qk6.js",
+    "name": "tslib.es6"
+  },
+  "src/index.ts": {
+    "file": "index.js",
+    "name": "index",
+    "src": "src/index.ts",
+    "isEntry": true,
+    "imports": [
+      "_tslib.es6-uRq23Qk6.js"
+    ]
+  },
+  "src/vite-plugins/mvvm-di.ts": {
+    "file": "vite-plugins/mvvm-di.js",
+    "name": "vite-plugins/mvvm-di",
+    "src": "src/vite-plugins/mvvm-di.ts",
+    "isEntry": true,
+    "imports": [
+      "_tslib.es6-uRq23Qk6.js"
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "module": "esnext",
+    "target": "es5", // Тип кода создаваемого итогового файла.
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "useDefineForClassFields": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+		"strictNullChecks": false, // Значения "null" и "undefined" могут быть присвоены только значениям данного типа и значениям только с типом "any"?
+  },
+  "include": ["src", "vite-env.d.ts", "di.d.ts"]
+}
