@@ -1,5 +1,5 @@
 import type { Todo } from "./types";
-import { InjectType, view, ViewProps } from "mvvm-tools";
+import { InjectType, view, ViewProps } from "mvvm-toolkit";
 import { useI18n } from "../i18n/I18nProvider";
 
 type Props = ViewProps<InjectType<'ItemVM'>, {

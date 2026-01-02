@@ -1,5 +1,5 @@
 import { action, computed } from "mobx";
-import { Store, StoreBase } from "mvvm-tools";
+import { Store, StoreBase } from "mvvm-toolkit";
 import { TodoModel } from "./model";
 
 @Store

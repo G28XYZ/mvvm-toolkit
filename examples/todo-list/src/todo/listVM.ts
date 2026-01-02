@@ -1,5 +1,5 @@
 import { computed, action } from "mobx";
-import { Inject, InjectStore, type InjectStoreType, type InjectType, MakeObservable, Service, ViewModel } from "mvvm-tools";
+import { Inject, InjectStore, type InjectStoreType, type InjectType, MakeObservable, Service, ViewModel } from "mvvm-toolkit";
 import { TodoFilter } from "./types";
 
 @Service

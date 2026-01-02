@@ -1,5 +1,5 @@
 import { action, computed, observable } from "mobx";
-import { GetStore, MakeObservable, Service, ViewModel } from "mvvm-tools";
+import { GetStore, MakeObservable, Service, ViewModel } from "mvvm-toolkit";
 
 @Service
 @MakeObservable

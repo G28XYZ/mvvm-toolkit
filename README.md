@@ -1,4 +1,4 @@
-# mvvm-tools
+# mvvm-toolkit
 
 Библиотека для MVVM‑подхода на базе MobX + React. Содержит:
 
@@ -12,7 +12,7 @@
 ### 1) Model + decorators
 
 ```ts
-import { Model, field, validation, submit, exclude } from "mvvm-tools";
+import { Model, field, validation, submit, exclude } from "mvvm-toolkit";
 
 interface UserDto {
   id: number;
@@ -62,7 +62,7 @@ console.log(model.service.dumpData); // { id: 1, name: "", trimmedName: "" }
 Пример:
 
 ```ts
-import { Model, field, validation, submit, exclude, PropFromView } from "mvvm-tools";
+import { Model, field, validation, submit, exclude, PropFromView } from "mvvm-toolkit";
 
 class PostModel extends Model<{ title: string; count: number }> {
   @field
@@ -115,7 +115,7 @@ const payload = model.service.dumpData;
 `Store` — отдельная сущность для коллекций моделей и работы со списками.
 
 ```ts
-import { Store, StoreBase } from "mvvm-tools";
+import { Store, StoreBase } from "mvvm-toolkit";
 
 @Store({ id: "UsersStore" })
 class UsersStore extends StoreBase<UserModel> {
@@ -140,7 +140,7 @@ class UsersStore extends StoreBase<UserModel> {
 DI для stores:
 
 ```ts
-import { GetStore, InjectStore, type InjectStoreType } from "mvvm-tools";
+import { GetStore, InjectStore, type InjectStoreType } from "mvvm-toolkit";
 
 const usersStore = GetStore("UsersStore");
 
@@ -179,7 +179,7 @@ class UsersStore extends StoreBase<UserModel> {}
 ### 2) DI сервисы
 
 ```ts
-import { Service, Inject, GetService } from "mvvm-tools";
+import { Service, Inject, GetService } from "mvvm-toolkit";
 
 @Service
 class AuthService {
@@ -226,7 +226,7 @@ const options = GetService("AuthService", "options"); // опции
 Примеры:
 
 ```ts
-import { Service, GetService } from "mvvm-tools";
+import { Service, GetService } from "mvvm-toolkit";
 
 @Service({ id: "ApiService" })
 class ApiService {}
@@ -248,7 +248,7 @@ const created = GetService("LazyService", "instance"); // создается с�
 Пример инъекции по строковому ключу:
 
 ```ts
-import { Service, Inject, GetService } from "mvvm-tools";
+import { Service, Inject, GetService } from "mvvm-toolkit";
 
 @Service("AuthService")
 class AuthService {
@@ -267,7 +267,7 @@ const auth = GetService("AuthService", "instance");
 
 ```tsx
 import React from "react";
-import { Service, view } from "mvvm-tools";
+import { Service, view } from "mvvm-toolkit";
 
 @Service
 class AppVM {
@@ -294,7 +294,7 @@ export const App = view("AppVM", ({ viewModel }) => {
 
 ```ts
 import { defineConfig } from "vite";
-import { mvvmServiceDiPlugin } from "mvvm-tools/vite-plugins/mvvm-di";
+import { mvvmServiceDiPlugin } from "mvvm-toolkit/vite-plugins/mvvm-di";
 
 export default defineConfig({
   plugins: [mvvmServiceDiPlugin()],
@@ -303,7 +303,7 @@ export default defineConfig({
 
 ### Как работает
 
-- Ищет классы с декоратором `@Service` (из `mvvm-tools`).
+- Ищет классы с декоратором `@Service` (из `mvvm-toolkit`).
 - Добавляет типы в ближайший `container.d.ts` (рядом с модулем).
 - Добавляет контейнеры в `di.d.ts` проекта.
 - Если `di.d.ts` отсутствует — создает его на старте.
@@ -312,7 +312,7 @@ export default defineConfig({
 
 ```ts
 // src/modules/users/service.ts
-import { Service } from "mvvm-tools";
+import { Service } from "mvvm-toolkit";
 
 @Service("UsersService")
 export class UsersService {}
@@ -333,7 +333,7 @@ export interface UsersServices {
 // di.d.ts
 import type { UsersServices } from "./src/modules/users/container";
 
-declare module "mvvm-tools" {
+declare module "mvvm-toolkit" {
   interface DiServices extends UsersServices {}
 }
 ```
@@ -341,7 +341,7 @@ declare module "mvvm-tools" {
 Теперь типы DI доступны через `GetService`/`InjectType`:
 
 ```ts
-import { GetService, type InjectType } from "mvvm-tools";
+import { GetService, type InjectType } from "mvvm-toolkit";
 
 const service = GetService("UsersService", "instance");
 const typed: InjectType<"UsersService"> = service;

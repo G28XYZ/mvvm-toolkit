@@ -1,5 +1,5 @@
 import { observer } from "mobx-react"
-import { InjectType, ViewFC } from "mvvm-tools";
+import { InjectType, ViewFC } from "mvvm-toolkit";
 import { TodoFilter as TodoFilterType } from './types';
 import { useI18n } from "../i18n/I18nProvider";
 

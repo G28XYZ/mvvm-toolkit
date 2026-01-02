@@ -1,6 +1,6 @@
-# mvvm-tools Todo example
+# mvvm-toolkit Todo example
 
-Small GitHub Pages-ready demo that shows how to use mvvm-tools with a Todo list
+Small GitHub Pages-ready demo that shows how to use mvvm-toolkit with a Todo list
 plus a full API showcase (decorators, Model.service, StoreBase, DI, and utils).
 
 ## Setup

@@ -1,4 +1,4 @@
-import { Model, field, validation } from "mvvm-tools";
+import { Model, field, validation } from "mvvm-toolkit";
 
 export type TodoDto = {
   id  : number;

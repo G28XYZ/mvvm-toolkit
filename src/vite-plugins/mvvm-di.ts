@@ -20,7 +20,7 @@ type ContainerTarget = {
 
 const SERVICE_DECORATOR = "Service";
 const STORE_DECORATOR = "Store";
-const MVVM_MODULE = "mvvm-tools";
+const MVVM_MODULE = "mvvm-toolkit";
 
 type VitePluginLike = {
   name: string;
@@ -39,7 +39,7 @@ type VitePluginLike = {
  *
  * @example
  * // vite.config.ts
- * import { mvvmServiceDiPlugin } from "mvvm-tools/vite-plugins/mvvm-di";
+ * import { mvvmServiceDiPlugin } from "mvvm-toolkit/vite-plugins/mvvm-di";
  *
  * export default defineConfig({
  *   plugins: [mvvmServiceDiPlugin()],

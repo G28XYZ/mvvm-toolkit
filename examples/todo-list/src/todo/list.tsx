@@ -1,5 +1,5 @@
 import { TodoItem } from "./item";
-import { view } from "mvvm-tools";
+import { view } from "mvvm-toolkit";
 import { useI18n } from "../i18n/I18nProvider";
 
 
