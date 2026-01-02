@@ -36,7 +36,8 @@
     "test": "vitest --config vitest.config.ts",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "tsc": "tsc --noEmit -- --watch"
+    "tsc": "tsc --noEmit -- --watch",
+    "examples:build": "cd ./examples/todo-list && npm i && npm run build"
   },
   "keywords": ["react", "mobx", "mvvm"],
   "peerDependencies": {
