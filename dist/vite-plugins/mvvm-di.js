@@ -2,14 +2,14 @@ import { _ as v } from "../tslib.es6-uRq23Qk6.js";
 import m from "node:fs/promises";
 import a from "node:path";
 import l from "typescript";
-const Q = "Service", Y = "Store", I = "mvvm-tools";
+const Q = "Service", Y = "Store", I = "mvvm-toolkit";
 function re() {
   let P, p = "", u = "";
   function W() {
     return v(this, void 0, void 0, function* () {
       const t = yield K(p);
       for (const i of t)
-        yield C(i);
+        yield k(i);
     });
   }
   function z() {
@@ -46,7 +46,7 @@ function re() {
       yield m.writeFile(u, s, "utf8");
     });
   }
-  function C(t) {
+  function k(t) {
     return v(this, void 0, void 0, function* () {
       const i = yield B(t);
       for (const e of i)
@@ -110,14 +110,14 @@ function re() {
           ""
         ].join(`
 `);
-        yield m.writeFile(i.containerPath, d, "utf8"), yield k(i.containerPath, n, s);
+        yield m.writeFile(i.containerPath, d, "utf8"), yield C(i.containerPath, n, s);
         return;
       }
       const o = yield m.readFile(i.containerPath, "utf8"), c = V(o, i.containerPath, Object.assign(Object.assign({}, t), {
         entryKey: r,
         interfaceName: n
       }));
-      c !== o && (yield m.writeFile(i.containerPath, c, "utf8")), yield k(i.containerPath, n, s);
+      c !== o && (yield m.writeFile(i.containerPath, c, "utf8")), yield C(i.containerPath, n, s);
     });
   }
   function U(t) {
@@ -161,7 +161,7 @@ ${c}` + s.slice(o.endIndex);
     }
     return s;
   }
-  function k(t, i, e) {
+  function C(t, i, e) {
     return v(this, void 0, void 0, function* () {
       if (!u)
         return;
@@ -309,7 +309,7 @@ ${c}` + s.slice(o.endIndex);
     },
     handleHotUpdate(t) {
       return v(this, void 0, void 0, function* () {
-        t.file.startsWith(p) && (!/\.tsx?$/.test(t.file) || t.file.endsWith(".d.ts") || (yield C(t.file)));
+        t.file.startsWith(p) && (!/\.tsx?$/.test(t.file) || t.file.endsWith(".d.ts") || (yield k(t.file)));
       });
     }
   };
