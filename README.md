@@ -1,5 +1,14 @@
 # mvvm-toolkit
 
+[![Tests](https://github.com/G28XYZ/mvvm-toolkit/actions/workflows/tests.yml/badge.svg)](https://github.com/G28XYZ/mvvm-toolkit/actions/workflows/tests.yml)
+[![GitHub Pages](https://github.com/G28XYZ/mvvm-toolkit/actions/workflows/todo-list-pages.yml/badge.svg)](https://g28xyz.github.io/mvvm-toolkit/)
+[![License](https://img.shields.io/github/license/G28XYZ/mvvm-toolkit?style=flat)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/G28XYZ/mvvm-toolkit?style=flat)](https://github.com/G28XYZ/mvvm-toolkit/stargazers)
+[![Issues](https://img.shields.io/github/issues/G28XYZ/mvvm-toolkit?style=flat)](https://github.com/G28XYZ/mvvm-toolkit/issues)
+[![Views](https://visitor-badge.laobi.icu/badge?page_id=G28XYZ.mvvm-toolkit)](https://github.com/G28XYZ/mvvm-toolkit)
+
+Примеры и демо: https://g28xyz.github.io/mvvm-toolkit/
+
 Библиотека для MVVM‑подхода на базе MobX + React. Содержит:
 
 - Model: управление состоянием, валидации, сериализация, откат/коммит.
