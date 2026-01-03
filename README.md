@@ -28,14 +28,7 @@ mvvm-toolkit нужен, когда бизнес‑логика и состоя�
 
 ## Документация
 
-- Онлайн: https://g28xyz.github.io/mvvm-toolkit/docs/
-- `docs/README.md` — индекс и оглавление.
-- `docs/model.md` — Model, декораторы и `model.service`.
-- `docs/store.md` — StoreBase, Store и коллекции.
-- `docs/di.md` — Service/Inject/GetService.
-- `docs/view.md` — view(), ViewModel lifecycle, PropFromView.
-- `docs/devtools.md` — Redux DevTools.
-- `docs/vite-plugin-mvvm-di.md` — Vite‑плагин для DI типов.
+- https://g28xyz.github.io/mvvm-toolkit/docs/
 
 ## Быстрый старт
 
@@ -72,5 +65,3 @@ model.name = "";
 console.log(model.service.validation.name); // "name required"
 console.log(model.service.dumpData); // { id: 1, name: "", trimmedName: "" }
 ```
-
-Дальше: `docs/model.md`, `docs/store.md`, `docs/di.md`, `docs/view.md`, `docs/devtools.md`, `docs/vite-plugin-mvvm-di.md`.
