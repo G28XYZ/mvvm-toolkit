@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.0.1",
   "name": "mvvm-toolkit",
   "author": {
     "name": "Aleksandr Kucherenko",
@@ -39,7 +39,11 @@
     "tsc": "tsc --noEmit -- --watch",
     "examples:build": "cd ./examples/todo-list && npm i && npm run build"
   },
-  "keywords": ["react", "mobx", "mvvm"],
+  "keywords": [
+    "react",
+    "mobx",
+    "mvvm"
+  ],
   "peerDependencies": {
     "immer": "^11.1.0",
     "lodash": "^4.17.21",
