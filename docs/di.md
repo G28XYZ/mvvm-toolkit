@@ -1,3 +1,9 @@
+---
+layout: default
+title: DI сервисы
+permalink: /di/
+---
+
 # DI сервисы
 
 DI помогает управлять зависимостями между ViewModel и сервисами. Основные элементы: `@Service`, `@Inject`, `GetService`.

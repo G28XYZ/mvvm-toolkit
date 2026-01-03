@@ -1,3 +1,9 @@
+---
+layout: default
+title: Store / StoreBase
+permalink: /store/
+---
+
 # Store / StoreBase
 
 `Store` — отдельная сущность для коллекций моделей и работы со списками. Базовый класс `StoreBase` дает список моделей, CRUD-операции и утилиты загрузки.

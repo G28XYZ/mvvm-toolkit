@@ -1,3 +1,9 @@
+---
+layout: default
+title: DevTools
+permalink: /devtools/
+---
+
 # DevTools
 
 Для отладки состояния можно подключить Redux DevTools Extension. В dev-режиме модели и сторы будут автоматически подключаться к devtools, если один раз выставить флаг.

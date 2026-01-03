@@ -1,3 +1,9 @@
+---
+layout: default
+title: View и ViewModel
+permalink: /view/
+---
+
 # View и ViewModel
 
 `view()` связывает React-компонент с ViewModel и управляет жизненным циклом. `ViewModel` инкапсулирует сценарии UI, а View остается декларативной.

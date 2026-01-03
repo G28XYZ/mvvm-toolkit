@@ -1,3 +1,9 @@
+---
+layout: default
+title: Vite-плагин mvvm-di
+permalink: /vite-plugin-mvvm-di/
+---
+
 # Vite-плагин mvvm-di
 
 Плагин автоматически создает/обновляет файлы `container.d.ts` и `di.d.ts` для корректной типизации DI.

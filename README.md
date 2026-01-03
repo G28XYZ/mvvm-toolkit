@@ -28,6 +28,7 @@ mvvm-toolkit нужен, когда бизнес‑логика и состоя�
 
 ## Документация
 
+- Онлайн: https://g28xyz.github.io/mvvm-toolkit/docs/
 - `docs/README.md` — индекс и оглавление.
 - `docs/model.md` — Model, декораторы и `model.service`.
 - `docs/store.md` — StoreBase, Store и коллекции.
