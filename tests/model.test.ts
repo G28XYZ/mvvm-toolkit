@@ -158,6 +158,16 @@ describe("Model", () => {
     expect(model.service.validation.views).toBe("too high");
   });
 
+  it("не сбрасывает изменения при позднем initLegacyFields", () => {
+    const model = new ExampleModel({ id: 1, name: "alpha", views: 1, tags: [], count: 0 });
+
+    model.name = "beta";
+    expect(model.name).toBe("beta");
+
+    expect(model.service.validation.views).toBe("");
+    expect(model.name).toBe("beta");
+  });
+
   it("использует factory при инициализации", () => {
     const model = new FactoryModel({ id: 3, name: "sample", views: 0, tags: [], count: 0 });
 

@@ -147,14 +147,13 @@ export class Model<T = any > implements TModel<any> {
       if (hasInit) {
         const fieldInstance = fieldMetadata.fieldInstance(name, this);
         if (!fieldInstance) continue;
-        const data = cloneDeep(sourceInit);
-        const nextValue = fieldInstance.factory ? fieldInstance.factory(data, this) : Reflect.get(data, fieldInstance.name);
-        const currentValue = Reflect.get(this, name);
-        if (!isEqual(currentValue, nextValue) || !initialized.has(name)) {
+        if (!initialized.has(name)) {
+          const data = cloneDeep(sourceInit);
+          const nextValue = fieldInstance.factory ? fieldInstance.factory(data, this) : Reflect.get(data, fieldInstance.name);
           this.defineFieldValue(name, nextValue);
           Reflect.set(this, name, nextValue);
+          initialized.add(name);
         }
-        initialized.add(name);
         continue;
       }
       if (initialized.has(name)) continue;
