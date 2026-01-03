@@ -27,6 +27,7 @@ export declare class StoreBase<T extends Model = Model> {
     protected accessor _cash: unknown[];
     constructor();
     add(item: T): void;
+    addMany(items: T[]): void;
     remove(item: T): void;
     /**
      * Найти элемент по предикату.

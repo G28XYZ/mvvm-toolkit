@@ -1,6 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { mvvmServiceDiPlugin } from 'mvvm-toolkit/vite-plugins/mvvm-di';
+import { mvvmServiceDiPlugin } from "mvvm-toolkit/vite-plugins";
 
 const base = process.env.VITE_BASE ?? "./";
 

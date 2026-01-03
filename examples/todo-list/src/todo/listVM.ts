@@ -8,7 +8,6 @@ export class ListVM extends ViewModel {
   @InjectStore("TodoStore") store: InjectStoreType<"TodoStore">;
   @Inject('TodoVM') parent: InjectType<'TodoVM'>;
 
-
   onInit() {
     if (this.store.items.length > 0) return;
     this.store.addTodo("Buy a mac 💻");
@@ -18,6 +17,8 @@ export class ListVM extends ViewModel {
     this.store.addTodo("Email David 📨");
     this.store.items[1].done = true;
     this.store.items[4].done = true;
+
+    this.store.addTodos(Array.from({ length: 10_000 }, (_, i) => `Todo ${i}`));
   }
 
   @computed get items() {

@@ -22,6 +22,9 @@ export default defineConfig((env) => ({
     lib: {
       entry: {
         index: path.resolve(__dirname, "src", "index.ts"),
+        "hooks/index": path.resolve(__dirname, "src", "hooks", "index.ts"),
+        "hooks/virtual-scroll": path.resolve(__dirname, "src", "hooks", "virtual-scroll.ts"),
+        "vite-plugins/index": path.resolve(__dirname, "src", "vite-plugins", "index.ts"),
         "vite-plugins/mvvm-di": path.resolve(__dirname, "src", "vite-plugins", "mvvm-di.ts"),
       },
       name: "mvvm-toolkit",

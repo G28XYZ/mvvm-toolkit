@@ -19,6 +19,18 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./hooks": {
+      "import": "./dist/hooks/index.js",
+      "require": "./dist/hooks/index.cjs"
+    },
+    "./hooks/virtual-scroll": {
+      "import": "./dist/hooks/virtual-scroll.js",
+      "require": "./dist/hooks/virtual-scroll.cjs"
+    },
+    "./vite-plugins": {
+      "import": "./dist/vite-plugins/index.js",
+      "require": "./dist/vite-plugins/index.cjs"
+    },
     "./vite-plugins/mvvm-di": {
       "import": "./dist/vite-plugins/mvvm-di.js",
       "require": "./dist/vite-plugins/mvvm-di.cjs"

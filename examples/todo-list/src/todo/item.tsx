@@ -1,21 +1,27 @@
+import type { CSSProperties } from "react";
 import type { Todo } from "./types";
 import { InjectType, view, ViewProps } from "mvvm-toolkit";
 import { useI18n } from "../i18n/I18nProvider";
 
 type Props = ViewProps<InjectType<'ItemVM'>, {
   item: Todo;
+  style?: CSSProperties;
 }>;
 
 export const TodoItem = view('ItemVM', ({
 	viewModel: vm,
   item,
+  style,
 }: Props) => {
   const { t } = useI18n();
   const { id, done } = item;
   const errorText = vm.errors.text ? t(vm.errors.text) : "";
 
   return (
-    <li className={`todoItem ${done ? "isDone" : ""} ${vm.isEditing ? "isEditing" : ""}`}>
+    <li
+      className={`todoItem ${done ? "isDone" : ""} ${vm.isEditing ? "isEditing" : ""}`}
+      style={style}
+    >
       <div className="todoItem__left">
         <button
           type       = "button"

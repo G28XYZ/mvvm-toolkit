@@ -1,5 +1,5 @@
 import { immerable } from "immer";
-import { ModelOptions, TModel, TPatch, THistoryEntry } from "./types";
+import { ModelOptions, ModelService, TModel, TPatch, THistoryEntry } from "./types";
 /**
  * Класс для управлением состоянием модели.
  */
@@ -140,23 +140,8 @@ export declare class Model<T = any> implements TModel<any> {
     /**
      * Публичный API модели для вью.
      */
-    get service(): {
-        dirty: boolean;
-        dumpData: T;
-        loadData: (data?: Partial<T>) => Model<T>;
-        validation: Partial<T>;
-        reject: () => void;
-        commit: () => void;
-        commitField: <K extends keyof T>(field: K) => void;
-        changes: TPatch[];
-        inverseChanges: TPatch[];
-        history: THistoryEntry[];
-        historyIndex: number;
-        toInit: () => Model<T>;
-        undo: () => void;
-        redo: () => void;
-        goToHistory: (index: number) => void;
-    };
+    private readonly serviceApi;
+    get service(): ModelService<T>;
 }
 export * from './types';
 export * from './devtools';

@@ -18,7 +18,7 @@ type VitePluginLike = {
  *
  * @example
  * // vite.config.ts
- * import { mvvmServiceDiPlugin } from "mvvm-toolkit/vite-plugins/mvvm-di";
+ * import { mvvmServiceDiPlugin } from "mvvm-toolkit/vite-plugins";
  *
  * export default defineConfig({
  *   plugins: [mvvmServiceDiPlugin()],

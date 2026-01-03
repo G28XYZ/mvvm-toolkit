@@ -4,7 +4,7 @@ import { action, computed, isObservable, observable, runInAction } from "mobx";
 import { FieldMetadata, SubmitMetadata, ValidationMetadata, ExcludeMetadata } from "./data";
 import { define_prop } from "../decorators/define_prop";
 import { attachModelDevtools } from "./devtools";
-import { ModelOptions, TModel, TPatch, THistoryEntry } from "./types";
+import { ModelOptions, ModelService, TModel, TPatch, THistoryEntry } from "./types";
 enablePatches();
 /** */
 const submitMetadata = new SubmitMetadata();
@@ -629,24 +629,31 @@ export class Model<T = any > implements TModel<any> {
   /**
    * Публичный API модели для вью.
    */
-  @computed.struct public get service() {
+  private readonly serviceApi: Pick<
+    ModelService<T>,
+    "loadData" | "reject" | "commit" | "commitField" | "toInit" | "undo" | "redo" | "goToHistory"
+  > = {
+    loadData   : (data?: Partial<T>): Model<T> => this.loadData(data),
+    reject     : (): void => this.reject(),
+    commit     : (): void => this.commit(),
+    commitField: (field: keyof T): void => this.commitField(field),
+    toInit     : (): Model<T> => this.toInit(),
+    undo       : (): void => this.undo(),
+    redo       : (): void => this.redo(),
+    goToHistory: (index: number): void => this.goToHistory(index),
+  };
+
+  @computed.struct public get service(): ModelService<T> {
     return {
         dirty         : this.dirty,
         dumpData      : this.dumpData,
         // toJSON        : this.serviceToJSON,
-        loadData      : (data?: Partial<T>): Model<T> => this.loadData(data),
         validation    : this.validation,
-        reject        : this.reject.bind(this),
-        commit        : this.commit.bind(this),
-        commitField   : this.commitField.bind(this),
         changes       : this.changes,
         inverseChanges: this.inverseChanges,
         history       : this.history,
         historyIndex  : this.historyIndex,
-        toInit        : (): Model<T> => this.toInit(),
-        undo          : this.undo.bind(this),
-        redo          : this.redo.bind(this),
-        goToHistory   : this.goToHistory.bind(this)
+        ...this.serviceApi,
     };
   }
 }

@@ -8,11 +8,19 @@ export class TodoStore extends StoreBase<TodoModel> {
   private nextId = 1;
 
   @computed get remaining() {
-    return this.items.filter((todo) => !todo.done).length;
+    let count = 0;
+    for (const todo of this.items) {
+      if (!todo.done) count += 1;
+    }
+    return count;
   }
 
   @computed get completed() {
-    return this.items.filter((todo) => todo.done).length;
+    let count = 0;
+    for (const todo of this.items) {
+      if (todo.done) count += 1;
+    }
+    return count;
   }
 
   @action.bound addTodo(text: string) {
@@ -22,6 +30,16 @@ export class TodoStore extends StoreBase<TodoModel> {
       done: false,
     });
     this.add(todo);
+  }
+
+  @action.bound addTodos(texts: string[]) {
+    if (!texts?.length) return;
+    const todos = texts.map((text) => new TodoModel({
+      id: this.nextId++,
+      text,
+      done: false,
+    }));
+    this.addMany(todos);
   }
 
   @action.bound toggle(todo: TodoModel) {

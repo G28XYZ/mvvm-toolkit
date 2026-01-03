@@ -49,6 +49,16 @@ describe("store", () => {
     expect(store.size).toBe(0);
   });
 
+  it("добавляет несколько моделей за один вызов", () => {
+    const store = GetStore("TestStore");
+    const items = [new ExampleModel({ count: 1 }), new ExampleModel({ count: 2 })];
+
+    store.clear();
+    store.addMany(items);
+
+    expect(store.size).toBe(2);
+  });
+
   it("поддерживает поиск через find/filter/findBy", () => {
     const store = GetStore("TestStore");
     const first = new ExampleModel({ count: 1 });

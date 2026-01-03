@@ -214,7 +214,12 @@ export class StoreBase<T extends Model = Model> {
   }
 
   @action add(item: T) {
-    this.items = [...this.items, item];
+    this.items = this.items.concat(item);
+  }
+
+  @action addMany(items: T[]) {
+    if (!items?.length) return;
+    this.items = this.items.concat(items);
   }
 
   @action remove(item: T) {
@@ -272,7 +277,8 @@ export class StoreBase<T extends Model = Model> {
     const { model, mode = "replace", cash = true } = options;
     if (cash) this.setCash(items);
     if (mode === "append") {
-      this.items = [...this.items, ...[model ? items.map((el) => new model(el)) : items].flat(1)];
+      const resolved = model ? items.map((el) => new model(el)) : items;
+      this.addMany(resolved);
       return;
     }
     this.items = model ? items.map((el) => new model(el)) : items;
