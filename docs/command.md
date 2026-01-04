@@ -85,42 +85,66 @@ export interface ICommand<TArgs extends any[] = [], TResult = void> {
   readonly state: string;
   readonly states: Record<string, string>;
   readonly isExecuting: boolean;
+  readonly activeCount: number;
+  readonly isCanceled: boolean;
+  readonly isDisposed: boolean;
   readonly error: unknown;
   resetError: () => void;
   cancel?: () => void;
   dispose?: () => void;
+  clearQueue?: () => void;
 }
 ```
 
 ## Результат и ошибки
 
-`execute` всегда возвращает `Promise<TResult>`. По умолчанию `swallowError: true`, поэтому ошибка не пробрасывается наружу, а `execute` резолвится в `undefined` (если `TResult` не `void`). Чтобы ловить ошибку снаружи — укажите `swallowError: false`.
+`execute` возвращает `Promise<TResult>`, но при `swallowError: true` (по умолчанию) тип становится `Promise<TResult | undefined>`, так как ошибка не пробрасывается наружу, а `execute` может резолвиться в `undefined` (если `TResult` не `void`). Чтобы ловить ошибку снаружи и сохранить строгий `TResult` — укажите `swallowError: false`.
 
-`error` заполняется только если `trackError: true` (по умолчанию). Сброс — через `resetError()`. Так же можно использовать `onError` для логирования/тостов.
+`error` заполняется только если `trackError: true` (по умолчанию). По умолчанию ошибка автоматически сбрасывается при новом запуске; это можно отключить через `resetErrorOnExecute: false`. Ручной сброс — через `resetError()`. Так же можно использовать `onError` для логирования/тостов.
 
 ## Опции
 
-- `canExecute`: computed-предикат, получает scope с `state`, `states`, `isExecuting`, `error`.
+- `canExecute`: computed-предикат, получает scope с `state`, `states`, `isExecuting`, `activeCount`, `isCanceled`, `isDisposed`, `error`.
 - `onError`: хук для логирования или централизованных тостов.
 - `onCancel`: хук при отмене (например, чтобы прервать пользовательские операции).
+- `onStart`: хук перед запуском, получает аргументы `execute`.
+- `onSuccess`: хук при успешном завершении, получает `(result, ...args)`.
+- `onFinally`: хук после завершения, получает `({ ok, canceled, error }, ...args)`.
 - `concurrency`: `ignore` | `restart` | `queue` | `parallel`.
 - `trackError`: писать ошибку в `error` (по умолчанию true).
+- `resetErrorOnExecute`: автоматически очищать `error` при новом запуске (по умолчанию true).
 - `swallowError`: не бросать ошибку наружу (по умолчанию true).
 - `abortable`: если true, в `execute` добавляется `AbortSignal` как последний аргумент.
+- `cancelQueued`: при `cancel()` сбрасывать очередь (актуально для `queue`).
+- `queueLimit`: лимит количества ожидающих запусков в `queue`, лишние вызовы игнорируются.
 - `states`: карта состояний, по умолчанию `{ load: "load", failure: "failure", ready: "ready" }`.
 - `stateKeys`: позволяет использовать другой ключ для `load`/`failure`/`ready` в `states`.
 
 ## canExecute и scope
 
-`canExecute` получает scope: `{ state, states, isExecuting, error }`. Это удобно для блокировок по состоянию или ошибке:
+`canExecute` получает scope: `{ state, states, isExecuting, activeCount, isCanceled, isDisposed, error }`. Это удобно для блокировок по состоянию или ошибке:
 
 ```ts
 const cmd = asyncCommand(loadData, {
-  canExecute: ({ state, states, error }) => state === states.ready && !error,
+  canExecute: ({ state, states, activeCount, error }) => state === states.ready && !error && activeCount === 0,
 });
 ```
 
 Обратите внимание: для `concurrency: "ignore"` команда сама блокируется на время выполнения. Для остальных режимов блокировку можно настроить через `canExecute`.
+
+## Хуки выполнения
+
+```ts
+const save = asyncCommand(saveUser, {
+  onStart: (id: string) => console.info("start", id),
+  onSuccess: (result, id) => console.info("success", result, id),
+  onFinally: ({ ok, canceled, error }, id) => {
+    console.info("done", { ok, canceled, error, id });
+  },
+});
+```
+
+`onSuccess` вызывается только при успешном выполнении без отмены. Если команда была отменена (`cancel()` или `AbortSignal`), `canceled: true`, `ok: false`.
 
 ## Состояния
 
@@ -222,3 +246,14 @@ const flow = flowCommand(function* () {
 ## Отмена и очистка
 
 Если `abortable: true`, команда создаёт `AbortController`. Вызов `cancel()` отменяет активные запросы, `dispose()` отменяет и делает команду недоступной: `canExecute` становится `false`, а `execute()` резолвится в `undefined`.
+
+Для `queue` доступны:
+
+- `clearQueue()` — сбросить ожидающие (не начавшиеся) вызовы.
+- `cancelQueued: true` — автоматически очищать очередь при `cancel()` (и всегда при `dispose()`).
+
+Дополнительно:
+
+- `isCanceled` выставляется при `cancel()` и при прерывании через `AbortSignal`.
+- `isDisposed` выставляется при `dispose()` и остаётся true.
+- `isCanceled` сбрасывается при новом запуске.

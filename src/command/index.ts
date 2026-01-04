@@ -27,6 +27,9 @@ export type CommandScope<TStates extends CommandStatesMap = CommandStates> = {
   state: CommandStateValue<TStates>;
   states: TStates;
   isExecuting: boolean;
+  activeCount: number;
+  isCanceled: boolean;
+  isDisposed: boolean;
   error: unknown;
 };
 
@@ -34,15 +37,28 @@ type AsyncFn<TArgs extends any[], TResult> = (...args: [...TArgs, AbortSignal?])
 type FlowFn<TArgs extends any[], TResult, TYield = unknown, TNext = unknown> =
   (...args: [...TArgs, AbortSignal?]) => Generator<TYield, TResult, TNext> | AsyncGenerator<TYield, TResult, TNext>;
 type FlowPromise<TResult> = Promise<TResult> & { cancel?: () => void };
+type QueueEntry<TResult> = {
+  promise: Promise<TResult>;
+  resolve: (value: TResult | PromiseLike<TResult>) => void;
+  reject: (reason?: unknown) => void;
+  canceled: boolean;
+  settled: boolean;
+};
 
-export interface CommandOptions<TArgs extends any[], TExtraStates extends CommandStatesMap = {}> {
+export interface CommandOptions<TArgs extends any[], TExtraStates extends CommandStatesMap = {}, TResult = void> {
   canExecute?: (scope: CommandScope<CommandStates<TExtraStates>>) => boolean;
   onError?: (e: unknown) => void;
   onCancel?: () => void;
+  onStart?: (...args: TArgs) => void;
+  onSuccess?: (result: TResult, ...args: TArgs) => void;
+  onFinally?: (info: { ok: boolean; canceled: boolean; error: unknown }, ...args: TArgs) => void;
   concurrency?: Concurrency;
   trackError?: boolean;
+  resetErrorOnExecute?: boolean;
   swallowError?: boolean;
   abortable?: boolean;
+  cancelQueued?: boolean;
+  queueLimit?: number;
   states?: TExtraStates;
   stateKeys?: CommandStateKeys<CommandStates<TExtraStates>>;
 }
@@ -58,6 +74,12 @@ export interface ICommand<TArgs extends any[] = [], TResult = void, TExtraStates
   /** observable */
   readonly isExecuting: boolean;
   /** observable */
+  readonly activeCount: number;
+  /** observable */
+  readonly isCanceled: boolean;
+  /** observable */
+  readonly isDisposed: boolean;
+  /** observable */
   readonly error: unknown;
   /** action */
   resetError: () => void;
@@ -65,12 +87,17 @@ export interface ICommand<TArgs extends any[] = [], TResult = void, TExtraStates
   cancel?: () => void;
   /** optional: cleanup */
   dispose?: () => void;
+  /** optional: clear queued calls for concurrency="queue" */
+  clearQueue?: () => void;
 }
 
-type RequiredOptions<TArgs extends any[], TExtraStates extends CommandStatesMap> = Required<
-  Pick<CommandOptions<TArgs, TExtraStates>, "concurrency" | "trackError" | "swallowError" | "abortable">
+type RequiredOptions<TArgs extends any[], TExtraStates extends CommandStatesMap, TResult> = Required<
+  Pick<
+    CommandOptions<TArgs, TExtraStates, TResult>,
+    "concurrency" | "trackError" | "resetErrorOnExecute" | "swallowError" | "abortable"
+  >
 > &
-  CommandOptions<TArgs, TExtraStates>;
+  CommandOptions<TArgs, TExtraStates, TResult>;
 
 const noop = (): void => {};
 
@@ -78,24 +105,28 @@ class AsyncCommandImpl<TArgs extends any[], TResult, TExtraStates extends Comman
   implements ICommand<TArgs, TResult, TExtraStates>
 {
   isExecuting = false;
+  activeCount = 0;
+  isCanceled = false;
+  isDisposed = false;
   error: unknown = null;
   readonly states: CommandStates<TExtraStates>;
 
   private readonly fn: AsyncFn<TArgs, TResult>;
-  private readonly opt: RequiredOptions<TArgs, TExtraStates>;
+  private readonly opt: RequiredOptions<TArgs, TExtraStates, TResult>;
   private readonly stateKeys: CommandStateKeys<CommandStates<TExtraStates>>;
 
   private readonly controllers = new Set<AbortController>();
-  private runningCount = 0;
+  private readonly queue: QueueEntry<TResult>[] = [];
   private runningPromise: Promise<TResult> | null = null;
   private queueTail: Promise<unknown> = Promise.resolve();
-  private disposed = false;
+  private cancelToken = 0;
 
-  constructor(fn: AsyncFn<TArgs, TResult>, opt?: CommandOptions<TArgs, TExtraStates>) {
+  constructor(fn: AsyncFn<TArgs, TResult>, opt?: CommandOptions<TArgs, TExtraStates, TResult>) {
     this.fn = fn;
     this.opt = {
       concurrency: opt?.concurrency ?? "ignore",
       trackError: opt?.trackError ?? true,
+      resetErrorOnExecute: opt?.resetErrorOnExecute ?? true,
       swallowError: opt?.swallowError ?? true,
       abortable: opt?.abortable ?? false,
       ...opt,
@@ -112,10 +143,10 @@ class AsyncCommandImpl<TArgs extends any[], TResult, TExtraStates extends Comman
       | "resolveState"
       | "getScope"
       | "controllers"
-      | "runningCount"
+      | "queue"
       | "runningPromise"
       | "queueTail"
-      | "disposed"
+      | "cancelToken"
     >(
       this,
       {
@@ -126,17 +157,17 @@ class AsyncCommandImpl<TArgs extends any[], TResult, TExtraStates extends Comman
         resolveState: false,
         getScope: false,
         controllers: false,
-        runningCount: false,
+        queue: false,
         runningPromise: false,
         queueTail: false,
-        disposed: false,
+        cancelToken: false,
       },
       { autoBind: true }
     );
   }
 
   get canExecute(): boolean {
-    if (this.disposed) return false;
+    if (this.isDisposed) return false;
     const allowed = this.opt.canExecute ? this.opt.canExecute(this.getScope()) : true;
     if (!allowed) return false;
     if (this.opt.concurrency === "ignore") return !this.isExecuting;
@@ -153,6 +184,9 @@ class AsyncCommandImpl<TArgs extends any[], TResult, TExtraStates extends Comman
       state: this.state,
       states: this.states,
       isExecuting: this.isExecuting,
+      activeCount: this.activeCount,
+      isCanceled: this.isCanceled,
+      isDisposed: this.isDisposed,
       error: this.error,
     };
   }
@@ -168,19 +202,36 @@ class AsyncCommandImpl<TArgs extends any[], TResult, TExtraStates extends Comman
   }
 
   cancel() {
+    this.cancelToken += 1;
+    this.isCanceled = true;
     this.opt.onCancel?.();
+    if (this.opt.cancelQueued) this.clearQueue();
     for (const controller of this.controllers) {
       controller.abort();
     }
   }
 
   dispose() {
-    this.disposed = true;
+    if (this.isDisposed) return;
+    this.isDisposed = true;
+    this.clearQueue();
     this.cancel();
   }
 
+  clearQueue() {
+    if (this.queue.length === 0) return;
+    const pending = this.queue.splice(0, this.queue.length);
+    for (const entry of pending) {
+      entry.canceled = true;
+      if (!entry.settled) {
+        entry.settled = true;
+        entry.resolve(undefined as TResult);
+      }
+    }
+  }
+
   execute(...args: TArgs): Promise<TResult> {
-    if (this.disposed) return Promise.resolve(undefined as TResult);
+    if (this.isDisposed) return Promise.resolve(undefined as TResult);
 
     if (!this.canExecute) {
       return this.runningPromise ?? Promise.resolve(undefined as TResult);
@@ -196,27 +247,47 @@ class AsyncCommandImpl<TArgs extends any[], TResult, TExtraStates extends Comman
     };
 
     const runOnce = async (): Promise<TResult> => {
-      if (this.disposed) return undefined as TResult;
+      if (this.isDisposed) return undefined as TResult;
 
       const controller = this.opt.abortable ? new AbortController() : null;
       if (controller) this.controllers.add(controller);
 
       runInAction(() => {
-        this.runningCount += 1;
-        this.isExecuting = this.runningCount > 0;
-        if (this.opt.trackError) this.error = null;
+        this.activeCount += 1;
+        this.isExecuting = this.activeCount > 0;
+        this.isCanceled = false;
+        if (this.opt.trackError && this.opt.resetErrorOnExecute) this.error = null;
       });
+
+      const startCancelToken = this.cancelToken;
+      let ok = false;
+      let canceled = false;
+      let error: unknown = null;
 
       let promise: Promise<TResult> | null = null;
       try {
+        this.opt.onStart?.(...args);
+
         const signal = this.opt.abortable ? controller!.signal : undefined;
         promise = this.fn(...([...args, signal] as any));
         const result = await promise;
+
+        canceled = this.cancelToken !== startCancelToken;
+        if (!canceled) {
+          this.opt.onSuccess?.(result, ...args);
+          ok = true;
+        }
         return result;
       } catch (e) {
         if (this.opt.abortable && controller?.signal.aborted) {
+          runInAction(() => {
+            this.isCanceled = true;
+          });
+          canceled = true;
           return undefined as TResult;
         }
+        error = e;
+        canceled = this.cancelToken !== startCancelToken;
         if (this.opt.trackError) {
           runInAction(() => {
             this.error = e;
@@ -227,10 +298,14 @@ class AsyncCommandImpl<TArgs extends any[], TResult, TExtraStates extends Comman
         return undefined as TResult;
       } finally {
         runInAction(() => {
-          this.runningCount = Math.max(0, this.runningCount - 1);
-          this.isExecuting = this.runningCount > 0;
+          this.activeCount = Math.max(0, this.activeCount - 1);
+          this.isExecuting = this.activeCount > 0;
         });
         if (controller) this.controllers.delete(controller);
+        if (!canceled && this.cancelToken !== startCancelToken) {
+          canceled = true;
+        }
+        this.opt.onFinally?.({ ok, canceled, error }, ...args);
       }
     };
 
@@ -243,9 +318,56 @@ class AsyncCommandImpl<TArgs extends any[], TResult, TExtraStates extends Comman
         return trackPromise(runOnce());
 
       case "queue": {
-        const next = this.queueTail.then(runOnce, runOnce);
+        const limit = this.opt.queueLimit;
+        if (typeof limit === "number" && limit > 0 && this.queue.length >= limit) {
+          return Promise.resolve(undefined as TResult);
+        }
+
+        const entry: QueueEntry<TResult> = {
+          promise: Promise.resolve(undefined as TResult),
+          resolve: noop,
+          reject: noop,
+          canceled: false,
+          settled: false,
+        };
+
+        const isIdle = this.activeCount === 0 && this.queue.length === 0;
+
+        entry.promise = new Promise<TResult>((resolve, reject) => {
+          entry.resolve = resolve;
+          entry.reject = reject;
+        });
+
+        this.queue.push(entry);
+
+        const runQueued = async (): Promise<void> => {
+          if (entry.settled) return;
+          if (entry.canceled || this.isDisposed) {
+            entry.settled = true;
+            entry.resolve(undefined as TResult);
+            return;
+          }
+
+          const index = this.queue.indexOf(entry);
+          if (index >= 0) this.queue.splice(index, 1);
+
+          try {
+            const result = await runOnce();
+            if (!entry.settled) {
+              entry.settled = true;
+              entry.resolve(result);
+            }
+          } catch (error) {
+            if (!entry.settled) {
+              entry.settled = true;
+              entry.reject(error);
+            }
+          }
+        };
+
+        const next = isIdle ? runQueued() : this.queueTail.then(runQueued, runQueued);
         this.queueTail = next.then(noop, noop);
-        return trackPromise(next);
+        return trackPromise(entry.promise);
       }
 
       case "ignore":
@@ -258,8 +380,16 @@ class AsyncCommandImpl<TArgs extends any[], TResult, TExtraStates extends Comman
 
 export function asyncCommand<TArgs extends any[], TResult, TExtraStates extends CommandStatesMap = {}>(
   fn: AsyncFn<TArgs, TResult>,
-  opt?: CommandOptions<TArgs, TExtraStates>
-): ICommand<TArgs, TResult, TExtraStates> {
+  opt: CommandOptions<TArgs, TExtraStates, TResult> & { swallowError: false }
+): ICommand<TArgs, TResult, TExtraStates>;
+export function asyncCommand<TArgs extends any[], TResult, TExtraStates extends CommandStatesMap = {}>(
+  fn: AsyncFn<TArgs, TResult>,
+  opt?: CommandOptions<TArgs, TExtraStates, TResult>
+): ICommand<TArgs, TResult | undefined, TExtraStates>;
+export function asyncCommand<TArgs extends any[], TResult, TExtraStates extends CommandStatesMap = {}>(
+  fn: AsyncFn<TArgs, TResult>,
+  opt?: CommandOptions<TArgs, TExtraStates, TResult>
+): ICommand<TArgs, TResult | undefined, TExtraStates> {
   return new AsyncCommandImpl<TArgs, TResult, TExtraStates>(fn, opt);
 }
 
@@ -271,8 +401,28 @@ export function flowCommand<
   TExtraStates extends CommandStatesMap = {}
 >(
   fn: FlowFn<TArgs, TResult, TYield, TNext>,
-  opt?: CommandOptions<TArgs, TExtraStates>
-): ICommand<TArgs, TResult, TExtraStates> {
+  opt: CommandOptions<TArgs, TExtraStates, TResult> & { swallowError: false }
+): ICommand<TArgs, TResult, TExtraStates>;
+export function flowCommand<
+  TArgs extends any[],
+  TResult,
+  TYield = unknown,
+  TNext = unknown,
+  TExtraStates extends CommandStatesMap = {}
+>(
+  fn: FlowFn<TArgs, TResult, TYield, TNext>,
+  opt?: CommandOptions<TArgs, TExtraStates, TResult>
+): ICommand<TArgs, TResult | undefined, TExtraStates>;
+export function flowCommand<
+  TArgs extends any[],
+  TResult,
+  TYield = unknown,
+  TNext = unknown,
+  TExtraStates extends CommandStatesMap = {}
+>(
+  fn: FlowFn<TArgs, TResult, TYield, TNext>,
+  opt?: CommandOptions<TArgs, TExtraStates, TResult>
+): ICommand<TArgs, TResult | undefined, TExtraStates> {
   const runner = flow(fn);
   const active = new Set<FlowPromise<TResult>>();
   const userOnCancel = opt?.onCancel;

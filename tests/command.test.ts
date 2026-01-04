@@ -83,6 +83,37 @@ describe("command", () => {
     expect(cmd.canExecute).toBe(true);
   });
 
+  it("activeCount отражает количество активных запусков", async () => {
+    const first = createDeferred<void>();
+    const second = createDeferred<void>();
+
+    const cmd = asyncCommand(async (label: "first" | "second") => {
+      if (label === "first") {
+        await first.promise;
+        return;
+      }
+      await second.promise;
+    }, {
+      concurrency: "parallel",
+    });
+
+    const p1 = cmd.execute("first");
+    const p2 = cmd.execute("second");
+
+    expect(cmd.activeCount).toBe(2);
+    expect(cmd.isExecuting).toBe(true);
+
+    first.resolve();
+    await p1;
+    expect(cmd.activeCount).toBe(1);
+
+    second.resolve();
+    await p2;
+
+    expect(cmd.activeCount).toBe(0);
+    expect(cmd.isExecuting).toBe(false);
+  });
+
   it("поддерживает переопределение и дополнительные состояния", async () => {
     const deferred = createDeferred<void>();
     const cmd = asyncCommand(async () => deferred.promise, {
@@ -157,6 +188,75 @@ describe("command", () => {
     expect(order).toEqual(["start:first", "end:first", "start:second", "end:second"]);
   });
 
+  it("clearQueue сбрасывает ожидающие вызовы", async () => {
+    const deferred = createDeferred<void>();
+    const fn = vi.fn(async () => deferred.promise);
+    const cmd = asyncCommand(fn, { concurrency: "queue" });
+
+    const p1 = cmd.execute();
+    const p2 = cmd.execute();
+    const p3 = cmd.execute();
+
+    await flushPromises();
+    cmd.clearQueue?.();
+
+    await expect(p2).resolves.toBeUndefined();
+    await expect(p3).resolves.toBeUndefined();
+
+    deferred.resolve();
+    await p1;
+
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it("cancelQueued сбрасывает очередь при cancel()", async () => {
+    const deferred = createDeferred<void>();
+    const fn = vi.fn(async () => deferred.promise);
+    const cmd = asyncCommand(fn, { concurrency: "queue", cancelQueued: true });
+
+    const p1 = cmd.execute();
+    const p2 = cmd.execute();
+
+    await flushPromises();
+    cmd.cancel?.();
+
+    await expect(p2).resolves.toBeUndefined();
+
+    deferred.resolve();
+    await p1;
+
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it("queueLimit ограничивает количество ожидающих вызовов", async () => {
+    const first = createDeferred<void>();
+    const second = createDeferred<void>();
+    const fn = vi.fn(async (label: "first" | "second") => {
+      if (label === "first") {
+        await first.promise;
+        return;
+      }
+      await second.promise;
+    });
+    const cmd = asyncCommand(fn, { concurrency: "queue", queueLimit: 1 });
+
+    const p1 = cmd.execute("first");
+    const p2 = cmd.execute("second");
+    const p3 = cmd.execute("first");
+
+    await expect(p3).resolves.toBeUndefined();
+    await flushPromises();
+    expect(fn).toHaveBeenCalledTimes(1);
+
+    first.resolve();
+    await p1;
+
+    second.resolve();
+    await p2;
+
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
+
   it("restart отменяет текущую операцию без записи ошибки", async () => {
     const first = createDeferred<"first">();
     const second = createDeferred<"second">();
@@ -187,6 +287,172 @@ describe("command", () => {
     expect(result2).toBe("second");
     expect(result1).toBeUndefined();
     expect(cmd.error).toBe(null);
+  });
+
+  it("isCanceled выставляется при cancel и сбрасывается новым запуском", async () => {
+    const first = createDeferred<void>();
+    const second = createDeferred<void>();
+    let current = first;
+
+    const fn = vi.fn(async (signal?: AbortSignal) => {
+      if (signal) {
+        if (signal.aborted) throw createAbortError();
+        signal.addEventListener(
+          "abort",
+          () => current.reject(createAbortError()),
+          { once: true }
+        );
+      }
+      return current.promise;
+    });
+
+    const cmd = asyncCommand(fn, { abortable: true });
+
+    const p1 = cmd.execute();
+    expect(cmd.isCanceled).toBe(false);
+
+    cmd.cancel?.();
+    expect(cmd.isCanceled).toBe(true);
+
+    await p1;
+
+    current = second;
+    const p2 = cmd.execute();
+    expect(cmd.isCanceled).toBe(false);
+
+    second.resolve();
+    await p2;
+  });
+
+  it("dispose помечает команду как недоступную", async () => {
+    const cmd = asyncCommand(async () => 1);
+
+    cmd.dispose?.();
+
+    expect(cmd.isDisposed).toBe(true);
+    expect(cmd.canExecute).toBe(false);
+    await expect(cmd.execute()).resolves.toBeUndefined();
+  });
+
+  it("resetErrorOnExecute очищает error при новом запуске", async () => {
+    const error = new Error("boom");
+    let fail = true;
+    const cmd = asyncCommand(async () => {
+      if (fail) {
+        fail = false;
+        throw error;
+      }
+      return 1;
+    });
+
+    await cmd.execute();
+    expect(cmd.error).toBe(error);
+
+    const promise = cmd.execute();
+    expect(cmd.error).toBe(null);
+
+    await promise;
+    expect(cmd.error).toBe(null);
+  });
+
+  it("resetErrorOnExecute=false сохраняет error до ручного сброса", async () => {
+    const error = new Error("boom");
+    let fail = true;
+    const cmd = asyncCommand(async () => {
+      if (fail) {
+        fail = false;
+        throw error;
+      }
+      return 1;
+    }, { resetErrorOnExecute: false });
+
+    await cmd.execute();
+    expect(cmd.error).toBe(error);
+
+    const promise = cmd.execute();
+    expect(cmd.error).toBe(error);
+
+    await promise;
+    expect(cmd.error).toBe(error);
+
+    cmd.resetError();
+    expect(cmd.error).toBe(null);
+  });
+
+  it("хуки onStart/onSuccess/onFinally вызываются при успешном выполнении", async () => {
+    const onStart = vi.fn();
+    const onSuccess = vi.fn();
+    const onFinally = vi.fn();
+
+    const cmd = asyncCommand(async (value: number) => value + 1, {
+      onStart,
+      onSuccess,
+      onFinally,
+    });
+
+    const result = await cmd.execute(2);
+
+    expect(result).toBe(3);
+    expect(onStart).toHaveBeenCalledWith(2);
+    expect(onSuccess).toHaveBeenCalledWith(3, 2);
+    expect(onFinally).toHaveBeenCalledWith({ ok: true, canceled: false, error: null }, 2);
+  });
+
+  it("хуки onStart/onFinally вызываются при ошибке", async () => {
+    const error = new Error("boom");
+    const onStart = vi.fn();
+    const onSuccess = vi.fn();
+    const onFinally = vi.fn();
+    const onError = vi.fn();
+
+    const cmd = asyncCommand(async () => {
+      throw error;
+    }, {
+      onStart,
+      onSuccess,
+      onFinally,
+      onError,
+    });
+
+    await cmd.execute();
+
+    expect(onStart).toHaveBeenCalledTimes(1);
+    expect(onSuccess).not.toHaveBeenCalled();
+    expect(onError).toHaveBeenCalledWith(error);
+    expect(onFinally).toHaveBeenCalledWith({ ok: false, canceled: false, error });
+  });
+
+  it("хуки onFinally отмечают cancel", async () => {
+    const deferred = createDeferred<void>();
+    const onStart = vi.fn();
+    const onSuccess = vi.fn();
+    const onFinally = vi.fn();
+
+    const cmd = asyncCommand(async (signal?: AbortSignal) => {
+      if (signal) {
+        if (signal.aborted) throw createAbortError();
+        signal.addEventListener(
+          "abort",
+          () => deferred.reject(createAbortError()),
+          { once: true }
+        );
+      }
+      return deferred.promise;
+    }, {
+      abortable: true,
+      onStart,
+      onSuccess,
+      onFinally,
+    });
+
+    const promise = cmd.execute();
+    cmd.cancel?.();
+
+    await promise;
+
+    expect(onStart).toHaveBeenCalledTimes(1);
+    expect(onSuccess).not.toHaveBeenCalled();
+    expect(onFinally).toHaveBeenCalledWith({ ok: false, canceled: true, error: null });
   });
 
   it("сохраняет ошибку и умеет пробрасывать при swallowError=false", async () => {
