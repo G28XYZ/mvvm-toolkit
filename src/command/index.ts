@@ -100,7 +100,7 @@ class AsyncCommandImpl<TArgs extends any[], TResult, TExtraStates extends Comman
       abortable: opt?.abortable ?? false,
       ...opt,
     };
-    this.states = { ...DEFAULT_STATES, ...(opt?.states ?? {}) } as CommandStates<TExtraStates>;
+    this.states = { ...DEFAULT_STATES, ...(opt?.states ?? {}) } as unknown as CommandStates<TExtraStates>;
     this.stateKeys = { ...DEFAULT_STATE_KEYS, ...(opt?.stateKeys ?? {}) } as CommandStateKeys<CommandStates<TExtraStates>>;
 
     makeAutoObservable<
