@@ -18,7 +18,7 @@ export class ListVM extends ViewModel {
     this.store.items[1].done = true;
     this.store.items[4].done = true;
 
-    this.store.addTodos(Array.from({ length: 10_000 }, (_, i) => `Todo ${i}`));
+    // this.store.addTodos(Array.from({ length: 10_000 }, (_, i) => `Todo ${i}`));
   }
 
   @computed get items() {
@@ -39,7 +39,7 @@ export class ListVM extends ViewModel {
 
   @computed get visibleItems() {
     if (this.parent.todoFilter === TodoFilter.Active) return this.store.filter((item) => !item.done);
-    if (this.parent.todoFilter === TodoFilter.Done) return this.store.filter((item) => item.done);;
+    if (this.parent.todoFilter === TodoFilter.Done) return this.store.filter((item) => item.done);
     return this.store.items;
   }
 }

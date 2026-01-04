@@ -6,6 +6,7 @@ import "./model";
 import "./store";
 import "./utils";
 import "./view";
+import "./command";
 
 export * from "./decorators";
 export * from "./model";
@@ -13,3 +14,4 @@ export * from "./store";
 export * from "./utils";
 export * from "./view";
 export * from "./typedi";
+export * from "./command";

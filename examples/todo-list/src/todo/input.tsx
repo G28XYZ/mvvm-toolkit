@@ -4,8 +4,10 @@ import { useI18n } from "../i18n/I18nProvider";
 export const TodoInput = view('InputVM', ({ viewModel: vm }) => {
 	const { t } = useI18n();
 
+  console.log(vm.addTodo.state);
+
   return (
-    <form className="todoInputWrap" onSubmit={(e) => (e.preventDefault(), vm.addTodo())}>
+    <form className="todoInputWrap" onSubmit={(e) => (e.preventDefault(), vm.addTodo.execute())}>
       <div className="todoInputRow">
         <input
           className   = "todoInput"
@@ -15,7 +17,7 @@ export const TodoInput = view('InputVM', ({ viewModel: vm }) => {
           aria-label  = {t("a11y.newTask")}
         />
 
-        <button type="submit" className="todoAddBtn" aria-label={t("a11y.addTodo")}>
+        <button type="submit" className="todoAddBtn" aria-label={t("a11y.addTodo")} disabled={!vm.addTodo.canExecute}>
           {t("input.add")}
         </button>
       </div>

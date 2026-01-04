@@ -13,6 +13,7 @@
 
 - Model: управление состоянием, валидации, сериализация, откат/коммит.
 - Decorators: field/validation/submit/exclude/PropFromView/MakeObservable.
+- Command: asyncCommand для работы с async-операциями, ошибками и конкурентностью.
 - View: обертка для проброса ViewModel и жизненный цикл onInit/onDispose.
 - Vite‑плагин: генерация контейнеров типов для DI.
 

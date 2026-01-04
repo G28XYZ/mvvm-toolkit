@@ -11,6 +11,7 @@ title: mvvm-toolkit docs
 
 - [Model и декораторы](model/)
 - [Store / StoreBase](store/)
+- [Command и asyncCommand](command/)
 - [DI сервисы](di/)
 - [View и ViewModel](view/)
 - [DevTools](devtools/)
