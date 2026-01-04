@@ -17,7 +17,7 @@ export const TodoInput = view('InputVM', ({ viewModel: vm }) => {
           aria-label  = {t("a11y.newTask")}
         />
 
-        <button type="submit" className="todoAddBtn" aria-label={t("a11y.addTodo")} disabled={!vm.addTodo.canExecute}>
+        <button type="submit" className={"todoAddBtn" + (vm.addTodo.isExecuting ? ' spinner' : '')} aria-label={t("a11y.addTodo")} disabled={!vm.addTodo.canExecute}>
           {t("input.add")}
         </button>
       </div>
