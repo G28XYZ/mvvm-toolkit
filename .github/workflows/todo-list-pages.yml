@@ -28,7 +28,7 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Install and build mvvm-toolkit
+      - name: Install and build rvm-toolkit
         working-directory: .
         run: |
           npm install --include=optional --no-package-lock

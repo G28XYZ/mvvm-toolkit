@@ -1,5 +1,5 @@
 import { action, computed, observable } from "mobx";
-import { flowCommand, GetStore, MakeObservable, Service, ViewModel } from "mvvm-toolkit";
+import { flowCommand, GetStore, MakeObservable, Service, ViewModel } from "rvm-toolkit";
 
 @Service
 @MakeObservable

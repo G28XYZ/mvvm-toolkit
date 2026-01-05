@@ -14,7 +14,7 @@ permalink: /vite-plugin-mvvm-di/
 
 ```ts
 import { defineConfig } from "vite";
-import { mvvmServiceDiPlugin } from "mvvm-toolkit/vite-plugins";
+import { mvvmServiceDiPlugin } from "rvm-toolkit/vite-plugins";
 
 export default defineConfig({
   plugins: [mvvmServiceDiPlugin()],
@@ -23,7 +23,7 @@ export default defineConfig({
 
 ## Как работает
 
-- Ищет классы с декоратором `@Service` (из `mvvm-toolkit`).
+- Ищет классы с декоратором `@Service` (из `rvm-toolkit`).
 - Добавляет типы в ближайший `container.d.ts` (рядом с модулем).
 - Добавляет контейнеры в `di.d.ts` проекта.
 - Если `di.d.ts` отсутствует — создает его на старте.
@@ -32,7 +32,7 @@ export default defineConfig({
 
 ```ts
 // src/modules/users/service.ts
-import { Service } from "mvvm-toolkit";
+import { Service } from "rvm-toolkit";
 
 @Service("UsersService")
 export class UsersService {}
@@ -53,7 +53,7 @@ export interface UsersServices {
 // di.d.ts
 import type { UsersServices } from "./src/modules/users/container";
 
-declare module "mvvm-toolkit" {
+declare module "rvm-toolkit" {
   interface DiServices extends UsersServices {}
 }
 ```
@@ -61,7 +61,7 @@ declare module "mvvm-toolkit" {
 Теперь типы DI доступны через `GetService`/`InjectType`:
 
 ```ts
-import { GetService, type InjectType } from "mvvm-toolkit";
+import { GetService, type InjectType } from "rvm-toolkit";
 
 const service = GetService("UsersService", "instance");
 const typed: InjectType<"UsersService"> = service;

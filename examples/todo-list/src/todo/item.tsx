@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import type { Todo } from "./types";
-import { InjectType, view, ViewProps } from "mvvm-toolkit";
+import { InjectType, view, ViewProps } from "rvm-toolkit";
 import { useI18n } from "../i18n/I18nProvider";
 
 type Props = ViewProps<InjectType<'ItemVM'>, {

@@ -1,4 +1,4 @@
-import { view } from "mvvm-toolkit";
+import { view } from "rvm-toolkit";
 import { useI18n } from "../i18n/I18nProvider";
 
 export const TodoInput = view('InputVM', ({ viewModel: vm }) => {

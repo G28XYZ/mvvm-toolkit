@@ -1,13 +1,13 @@
 {
   "version": "1.0.4",
-  "name": "mvvm-toolkit",
+  "name": "rvm-toolkit",
   "author": {
     "name": "Aleksandr Kucherenko",
     "email": "g28xyz@ya.ru"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/G28XYZ/mvvm-toolkit"
+    "url": "https://github.com/G28XYZ/rvm-toolkit"
   },
   "description": "Tools to help build apps based on the MVVM pattern using React and mobx.",
   "main": "./dist/index.cjs",

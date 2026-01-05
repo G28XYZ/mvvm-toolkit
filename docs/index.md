@@ -1,9 +1,9 @@
 ---
 layout: default
-title: mvvm-toolkit docs
+title: rvm-toolkit docs
 ---
 
-# mvvm-toolkit docs
+# rvm-toolkit docs
 
 Краткое руководство по основным модулям библиотеки. Полные примеры кода вынесены в отдельные разделы.
 
@@ -19,5 +19,5 @@ title: mvvm-toolkit docs
 
 ## Примеры
 
-- Демо: https://g28xyz.github.io/mvvm-toolkit/
+- Демо: https://g28xyz.github.io/rvm-toolkit/
 - Код примера: `examples/todo-list`

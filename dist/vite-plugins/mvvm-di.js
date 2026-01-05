@@ -2,7 +2,7 @@ import { d as v } from "../tslib.es6-COgJoJmX.js";
 import m from "node:fs/promises";
 import a from "node:path";
 import l from "typescript";
-const Q = "Service", Y = "Store", I = "mvvm-toolkit";
+const Q = "Service", Y = "Store", I = "rvm-toolkit";
 function re() {
   let P, p = "", u = "";
   function W() {

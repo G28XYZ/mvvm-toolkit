@@ -1,4 +1,4 @@
-import { attachModelDevtools, Model } from "mvvm-toolkit";
+import { attachModelDevtools, Model } from "rvm-toolkit";
 
 const globalAny = globalThis as unknown as { __MVVM_DEVTOOLS_AUTO__?: boolean };
 const isDev = false && '__REDUX_DEVTOOLS_EXTENSION__' in globalAny;

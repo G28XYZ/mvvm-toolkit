@@ -11,7 +11,7 @@ permalink: /store/
 ## Базовый пример
 
 ```ts
-import { Store, StoreBase } from "mvvm-toolkit";
+import { Store, StoreBase } from "rvm-toolkit";
 import { UserModel } from "./model";
 
 @Store({ id: "UsersStore" })
@@ -38,7 +38,7 @@ class UsersStore extends StoreBase<UserModel> {
 ## DI для stores
 
 ```ts
-import { GetStore, InjectStore, type InjectStoreType } from "mvvm-toolkit";
+import { GetStore, InjectStore, type InjectStoreType } from "rvm-toolkit";
 
 const usersStore = GetStore("UsersStore");
 

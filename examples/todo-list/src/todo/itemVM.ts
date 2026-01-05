@@ -1,13 +1,13 @@
 import { action, computed, observable } from "mobx";
-import { Inject, InjectStore, type InjectStoreType, type InjectType, MakeObservable, PropFromView, Service, ViewModel } from "mvvm-toolkit";
+import { Inject, InjectStore, type InjectStoreType, type InjectType, MakeObservable, PropFromView, Service, ViewModel } from "rvm-toolkit";
 import { TodoModel } from "./model";
 import type { Todo } from "./types";
 
 @Service({ id: 'ItemVM', transient: true })
 @MakeObservable
 export class ItemVM extends ViewModel {
-  @InjectStore("TodoStore") store: InjectStoreType<"TodoStore">;
-  @Inject('TodoVM') parent: InjectType<'TodoVM'>;
+  @InjectStore("TodoStore") store : InjectStoreType<"TodoStore">;
+  @Inject ('TodoVM')        parent: InjectType<'TodoVM'>;
 
   @PropFromView('item') item: Todo;
 
@@ -37,6 +37,8 @@ export class ItemVM extends ViewModel {
   @action.bound onCommit() {
     this.isEditing = false;
     this.item.service.commit();
+    console.log(this.item.service.dumpData);
+
   }
 
   @action.bound onCancel() {

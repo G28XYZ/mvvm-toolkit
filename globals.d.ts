@@ -1,1 +1,1 @@
-declare module "mvvm-toolkit";
+declare module "rvm-toolkit";

@@ -2,7 +2,7 @@ import { TodoCard } from "./card";
 import { TodoHeader } from "./header";
 import { TodoList } from "./list";
 import { TodoInput } from "./input";
-import { view } from "mvvm-toolkit";
+import { view } from "rvm-toolkit";
 import { TodoFilter } from "./filter";
 import { useI18n } from "../i18n/I18nProvider";
 

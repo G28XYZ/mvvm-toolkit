@@ -1,5 +1,5 @@
 {
-  "name": "todo-list-mvvm-toolkit-example",
+  "name": "todo-list-rvm-toolkit-example",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
   "dependencies": {
     "mobx": "^6.13.7",
     "mobx-react": "^9.2.0",
-    "mvvm-toolkit": "file:../../",
+    "rvm-toolkit": "file:../../",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "reflect-metadata": "^0.2.2"

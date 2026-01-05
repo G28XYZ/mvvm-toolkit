@@ -27,7 +27,7 @@ export default defineConfig((env) => ({
         "vite-plugins/index": path.resolve(__dirname, "src", "vite-plugins", "index.ts"),
         "vite-plugins/mvvm-di": path.resolve(__dirname, "src", "vite-plugins", "mvvm-di.ts"),
       },
-      name: "mvvm-toolkit",
+      name: "rvm-toolkit",
       fileName: (format, entryName) => {
         if (entryName === "index") return `index.${format === "cjs" ? "cjs" : "js"}`;
         return `${entryName}.${format === "cjs" ? "cjs" : "js"}`;

@@ -1,8 +1,8 @@
 import { TodoItem } from "./item";
-import { view } from "mvvm-toolkit";
+import { view } from "rvm-toolkit";
 import { useI18n } from "../i18n/I18nProvider";
 import { useRef } from "react";
-import { useVirtualScroller } from "mvvm-toolkit/hooks";
+import { useVirtualScroller } from "rvm-toolkit/hooks";
 
 
 export const TodoList = view('ListVM', ({ viewModel: vm }) => {

@@ -11,7 +11,7 @@ permalink: /command/
 ## Базовый пример
 
 ```ts
-import { Service, asyncCommand } from "mvvm-toolkit";
+import { Service, asyncCommand } from "rvm-toolkit";
 import { UserModel } from "./UserModel";
 
 @Service
@@ -42,7 +42,7 @@ class UserVM {
 `flowCommand` оборачивает generator через `mobx.flow`, поэтому изменения стейта внутри генератора безопасны в `enforceActions: "always"`.
 
 ```ts
-import { flowCommand } from "mvvm-toolkit";
+import { flowCommand } from "rvm-toolkit";
 
 const load = flowCommand(function* () {
   const data = yield api.load();
@@ -219,7 +219,7 @@ const cmd = asyncCommand(async () => {
 Можно использовать `flowCommand` или helper `commandAction`:
 
 ```ts
-import { commandAction, flowCommand } from "mvvm-toolkit";
+import { commandAction, flowCommand } from "rvm-toolkit";
 
 const apply = commandAction((value: string) => {
   model.value = value;

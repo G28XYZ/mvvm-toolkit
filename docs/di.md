@@ -11,7 +11,7 @@ DI помогает управлять зависимостями между Vie
 ## Базовый пример
 
 ```ts
-import { Service, Inject, GetService } from "mvvm-toolkit";
+import { Service, Inject, GetService } from "rvm-toolkit";
 
 @Service
 class AuthService {
@@ -58,7 +58,7 @@ const options = GetService("AuthService", "options"); // опции
 Примеры:
 
 ```ts
-import { Service, GetService } from "mvvm-toolkit";
+import { Service, GetService } from "rvm-toolkit";
 
 @Service({ id: "ApiService" })
 class ApiService {}
@@ -80,7 +80,7 @@ const created = GetService("LazyService", "instance"); // создается с�
 ## Инъекция по строковому ключу
 
 ```ts
-import { Service, Inject, GetService } from "mvvm-toolkit";
+import { Service, Inject, GetService } from "rvm-toolkit";
 
 @Service("AuthService")
 class AuthService {

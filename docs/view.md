@@ -12,7 +12,7 @@ permalink: /view/
 
 ```tsx
 import React from "react";
-import { Service, view } from "mvvm-toolkit";
+import { Service, view } from "rvm-toolkit";
 
 @Service
 class AppVM {
@@ -34,7 +34,7 @@ export const App = view("AppVM", ({ viewModel }) => {
 `@PropFromView(name)` позволяет прокинуть prop из view в ViewModel.
 
 ```ts
-import { PropFromView, Service, ViewModel } from "mvvm-toolkit";
+import { PropFromView, Service, ViewModel } from "rvm-toolkit";
 
 @Service
 class PostVM extends ViewModel {
@@ -45,7 +45,7 @@ class PostVM extends ViewModel {
 
 ```tsx
 import React from "react";
-import { view } from "mvvm-toolkit";
+import { view } from "rvm-toolkit";
 
 export const PostView = view("PostVM", ({ viewModel, postId }: { postId: string }) => {
   return <div>Post: {viewModel.postId}</div>;

@@ -11,7 +11,7 @@ permalink: /model/
 ## Базовый пример
 
 ```ts
-import { Model, field, validation, submit, exclude } from "mvvm-toolkit";
+import { Model, field, validation, submit, exclude } from "rvm-toolkit";
 
 interface UserDto {
   id: number;

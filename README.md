@@ -1,13 +1,13 @@
-# mvvm-toolkit
+# rvm-toolkit
 
-[![Tests](https://github.com/G28XYZ/mvvm-toolkit/actions/workflows/tests.yml/badge.svg)](https://github.com/G28XYZ/mvvm-toolkit/actions/workflows/tests.yml)
-[![GitHub Pages](https://github.com/G28XYZ/mvvm-toolkit/actions/workflows/todo-list-pages.yml/badge.svg)](https://g28xyz.github.io/mvvm-toolkit/examples/todo-list)
-[![License](https://img.shields.io/github/license/G28XYZ/mvvm-toolkit?style=flat)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/G28XYZ/mvvm-toolkit?style=flat)](https://github.com/G28XYZ/mvvm-toolkit/stargazers)
-[![Issues](https://img.shields.io/github/issues/G28XYZ/mvvm-toolkit?style=flat)](https://github.com/G28XYZ/mvvm-toolkit/issues)
-[![Views](https://visitor-badge.laobi.icu/badge?page_id=G28XYZ.mvvm-toolkit)](https://github.com/G28XYZ/mvvm-toolkit)
+[![Tests](https://github.com/G28XYZ/rvm-toolkit/actions/workflows/tests.yml/badge.svg)](https://github.com/G28XYZ/rvm-toolkit/actions/workflows/tests.yml)
+[![GitHub Pages](https://github.com/G28XYZ/rvm-toolkit/actions/workflows/todo-list-pages.yml/badge.svg)](https://g28xyz.github.io/rvm-toolkit/examples/todo-list)
+[![License](https://img.shields.io/github/license/G28XYZ/rvm-toolkit?style=flat)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/G28XYZ/rvm-toolkit?style=flat)](https://github.com/G28XYZ/rvm-toolkit/stargazers)
+[![Issues](https://img.shields.io/github/issues/G28XYZ/rvm-toolkit?style=flat)](https://github.com/G28XYZ/rvm-toolkit/issues)
+[![Views](https://visitor-badge.laobi.icu/badge?page_id=G28XYZ.rvm-toolkit)](https://github.com/G28XYZ/rvm-toolkit)
 
-Примеры и демо: https://g28xyz.github.io/mvvm-toolkit/
+Примеры и демо: https://g28xyz.github.io/rvm-toolkit/
 
 Библиотека для MVVM‑подхода на базе MobX + React. Содержит:
 
@@ -19,7 +19,7 @@
 
 ## Зачем и чем помогает
 
-mvvm-toolkit нужен, когда бизнес‑логика и состояние React‑приложения начинают расползаться по компонентам. Он задает понятную структуру MVVM поверх MobX: Model отвечает за данные и валидацию, Store — за коллекции, ViewModel — за сценарии UI, а View остается чистой.
+rvm-toolkit нужен, когда бизнес‑логика и состояние React‑приложения начинают расползаться по компонентам. Он задает понятную структуру MVVM поверх MobX: Model отвечает за данные и валидацию, Store — за коллекции, ViewModel — за сценарии UI, а View остается чистой.
 
 - Меньше бойлерплейта: декораторы связывают поля модели с сериализацией и MobX‑наблюдаемостью.
 - Управляемые изменения: `model.service` дает `dirty`, `dumpData`, `changes` и операции `commit/reject/toInit`, что удобно для форм и черновиков.
@@ -29,14 +29,14 @@ mvvm-toolkit нужен, когда бизнес‑логика и состоя�
 
 ## Документация
 
-- https://g28xyz.github.io/mvvm-toolkit/docs/
+- https://g28xyz.github.io/rvm-toolkit/docs/
 
 ## Быстрый старт
 
 ### 1) Model + decorators
 
 ```ts
-import { Model, field, validation, submit, exclude } from "mvvm-toolkit";
+import { Model, field, validation, submit, exclude } from "rvm-toolkit";
 
 interface UserDto {
   id: number;
