@@ -2,9 +2,7 @@ import { view } from "mvvm-toolkit";
 import { useI18n } from "../i18n/I18nProvider";
 
 export const TodoInput = view('InputVM', ({ viewModel: vm }) => {
-	const { t } = useI18n();
-
-  console.log(vm.addTodo.state);
+  const { t } = useI18n();
 
   return (
     <form className="todoInputWrap" onSubmit={(e) => (e.preventDefault(), vm.addTodo.execute())}>

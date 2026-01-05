@@ -6,13 +6,29 @@ const DEFAULT_STATES = {
   load: "load",
   failure: "failure",
   ready: "ready",
+  canceled: "canceled",
+  disposed: "disposed",
 } as const;
 
 const DEFAULT_STATE_KEYS = {
   load: "load",
   failure: "failure",
   ready: "ready",
+  canceled: "canceled",
+  disposed: "disposed",
 } as const;
+
+type StripAbortSignal<T extends any[]> =
+  T extends [...infer A, infer L]
+    ? (L extends AbortSignal | undefined ? A : T)
+    : T;
+
+type PromiseResult<F> = F extends (...args: any[]) => Promise<infer R> ? R : never;
+
+type GeneratorResult<F> =
+  F extends (...args: any[]) => Generator<any, infer R, any> ? R :
+  F extends (...args: any[]) => AsyncGenerator<any, infer R, any> ? R :
+  never;
 
 export type DefaultCommandStates = typeof DEFAULT_STATES;
 export type CommandStatesMap = Record<string, string>;
@@ -22,6 +38,8 @@ export type CommandStateKeys<TStates extends CommandStatesMap = CommandStates> =
   load?: keyof TStates & string;
   failure?: keyof TStates & string;
   ready?: keyof TStates & string;
+  canceled?: keyof TStates & string;
+  disposed?: keyof TStates & string;
 };
 export type CommandScope<TStates extends CommandStatesMap = CommandStates> = {
   state: CommandStateValue<TStates>;
@@ -34,8 +52,6 @@ export type CommandScope<TStates extends CommandStatesMap = CommandStates> = {
 };
 
 type AsyncFn<TArgs extends any[], TResult> = (...args: [...TArgs, AbortSignal?]) => Promise<TResult>;
-type FlowFn<TArgs extends any[], TResult, TYield = unknown, TNext = unknown> =
-  (...args: [...TArgs, AbortSignal?]) => Generator<TYield, TResult, TNext> | AsyncGenerator<TYield, TResult, TNext>;
 type FlowPromise<TResult> = Promise<TResult> & { cancel?: () => void };
 type QueueEntry<TResult> = {
   promise: Promise<TResult>;
@@ -101,7 +117,7 @@ type RequiredOptions<TArgs extends any[], TExtraStates extends CommandStatesMap,
 
 const noop = (): void => {};
 
-class AsyncCommandImpl<TArgs extends any[], TResult, TExtraStates extends CommandStatesMap = {}>
+class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown), TExtraStates extends CommandStatesMap = {}>
   implements ICommand<TArgs, TResult, TExtraStates>
 {
   isExecuting = false;
@@ -192,8 +208,10 @@ class AsyncCommandImpl<TArgs extends any[], TResult, TExtraStates extends Comman
   }
 
   get state(): CommandStateValue<CommandStates<TExtraStates>> {
-    if (this.isExecuting) return this.resolveState("load");
-    if (this.error) return this.resolveState("failure");
+     if (this.isDisposed) return this.resolveState("disposed");
+     if (this.isExecuting) return this.resolveState("load");
+     if (this.error) return this.resolveState("failure");
+     if (this.isCanceled) return this.resolveState("canceled");
     return this.resolveState("ready");
   }
 
@@ -225,16 +243,16 @@ class AsyncCommandImpl<TArgs extends any[], TResult, TExtraStates extends Comman
       entry.canceled = true;
       if (!entry.settled) {
         entry.settled = true;
-        entry.resolve(undefined as TResult);
+        entry.resolve(undefined);
       }
     }
   }
 
   execute(...args: TArgs): Promise<TResult> {
-    if (this.isDisposed) return Promise.resolve(undefined as TResult);
+    if (this.isDisposed) return Promise.resolve(undefined);
 
     if (!this.canExecute) {
-      return this.runningPromise ?? Promise.resolve(undefined as TResult);
+      return this.runningPromise ?? Promise.resolve(undefined);
     }
 
     const trackPromise = (promise: Promise<TResult>): Promise<TResult> => {
@@ -247,7 +265,7 @@ class AsyncCommandImpl<TArgs extends any[], TResult, TExtraStates extends Comman
     };
 
     const runOnce = async (): Promise<TResult> => {
-      if (this.isDisposed) return undefined as TResult;
+      if (this.isDisposed) return undefined;
 
       const controller = this.opt.abortable ? new AbortController() : null;
       if (controller) this.controllers.add(controller);
@@ -273,10 +291,11 @@ class AsyncCommandImpl<TArgs extends any[], TResult, TExtraStates extends Comman
         const result = await promise;
 
         canceled = this.cancelToken !== startCancelToken;
-        if (!canceled) {
-          this.opt.onSuccess?.(result, ...args);
-          ok = true;
+        if (canceled) {
+          return undefined;
         }
+        this.opt.onSuccess?.(result, ...args);
+        ok = true;
         return result;
       } catch (e) {
         if (this.opt.abortable && controller?.signal.aborted) {
@@ -284,7 +303,8 @@ class AsyncCommandImpl<TArgs extends any[], TResult, TExtraStates extends Comman
             this.isCanceled = true;
           });
           canceled = true;
-          return undefined as TResult;
+          error = null;
+          return undefined;
         }
         error = e;
         canceled = this.cancelToken !== startCancelToken;
@@ -295,7 +315,7 @@ class AsyncCommandImpl<TArgs extends any[], TResult, TExtraStates extends Comman
         }
         this.opt.onError?.(e);
         if (!this.opt.swallowError) throw e;
-        return undefined as TResult;
+        return undefined;
       } finally {
         runInAction(() => {
           this.activeCount = Math.max(0, this.activeCount - 1);
@@ -320,11 +340,11 @@ class AsyncCommandImpl<TArgs extends any[], TResult, TExtraStates extends Comman
       case "queue": {
         const limit = this.opt.queueLimit;
         if (typeof limit === "number" && limit > 0 && this.queue.length >= limit) {
-          return Promise.resolve(undefined as TResult);
+          return Promise.resolve(undefined);
         }
 
         const entry: QueueEntry<TResult> = {
-          promise: Promise.resolve(undefined as TResult),
+          promise: Promise.resolve(undefined),
           resolve: noop,
           reject: noop,
           canceled: false,
@@ -344,7 +364,7 @@ class AsyncCommandImpl<TArgs extends any[], TResult, TExtraStates extends Comman
           if (entry.settled) return;
           if (entry.canceled || this.isDisposed) {
             entry.settled = true;
-            entry.resolve(undefined as TResult);
+            entry.resolve(undefined);
             return;
           }
 
@@ -378,57 +398,62 @@ class AsyncCommandImpl<TArgs extends any[], TResult, TExtraStates extends Comman
   }
 }
 
-export function asyncCommand<TArgs extends any[], TResult, TExtraStates extends CommandStatesMap = {}>(
-  fn: AsyncFn<TArgs, TResult>,
-  opt: CommandOptions<TArgs, TExtraStates, TResult> & { swallowError: false }
-): ICommand<TArgs, TResult, TExtraStates>;
-export function asyncCommand<TArgs extends any[], TResult, TExtraStates extends CommandStatesMap = {}>(
-  fn: AsyncFn<TArgs, TResult>,
-  opt?: CommandOptions<TArgs, TExtraStates, TResult>
-): ICommand<TArgs, TResult | undefined, TExtraStates>;
-export function asyncCommand<TArgs extends any[], TResult, TExtraStates extends CommandStatesMap = {}>(
-  fn: AsyncFn<TArgs, TResult>,
-  opt?: CommandOptions<TArgs, TExtraStates, TResult>
-): ICommand<TArgs, TResult | undefined, TExtraStates> {
-  return new AsyncCommandImpl<TArgs, TResult, TExtraStates>(fn, opt);
+export function asyncCommand<
+  F extends (...args: any[]) => Promise<any>,
+  TExtraStates extends CommandStatesMap = {}
+>(
+  fn: F,
+  opt: CommandOptions<StripAbortSignal<Parameters<F>>, TExtraStates, PromiseResult<F>> & { swallowError: false }
+): ICommand<StripAbortSignal<Parameters<F>>, PromiseResult<F> | undefined, TExtraStates>;
+
+export function asyncCommand<
+  F extends (...args: any[]) => Promise<any>,
+  TExtraStates extends CommandStatesMap = {}
+>(
+  fn: F,
+  opt?: CommandOptions<StripAbortSignal<Parameters<F>>, TExtraStates, PromiseResult<F>>
+): ICommand<StripAbortSignal<Parameters<F>>, PromiseResult<F> | undefined, TExtraStates>;
+
+export function asyncCommand<
+  F extends (...args: any[]) => Promise<any>,
+  TExtraStates extends CommandStatesMap = {}
+>(
+  fn: F,
+  opt?: CommandOptions<StripAbortSignal<Parameters<F>>, TExtraStates, PromiseResult<F>>
+): ICommand<StripAbortSignal<Parameters<F>>, PromiseResult<F> | undefined, TExtraStates> {
+  return new AsyncCommandImpl<any, any, any>(fn as any, opt as any);
 }
 
+
 export function flowCommand<
-  TArgs extends any[],
-  TResult,
-  TYield = unknown,
-  TNext = unknown,
+  F extends (...args: any[]) => (Generator<any, any, any> | AsyncGenerator<any, any, any>),
   TExtraStates extends CommandStatesMap = {}
 >(
-  fn: FlowFn<TArgs, TResult, TYield, TNext>,
-  opt: CommandOptions<TArgs, TExtraStates, TResult> & { swallowError: false }
-): ICommand<TArgs, TResult, TExtraStates>;
+  fn: F,
+  opt: CommandOptions<StripAbortSignal<Parameters<F>>, TExtraStates, GeneratorResult<F>> & { swallowError: false }
+): ICommand<StripAbortSignal<Parameters<F>>, GeneratorResult<F> | undefined, TExtraStates>;
+
 export function flowCommand<
-  TArgs extends any[],
-  TResult,
-  TYield = unknown,
-  TNext = unknown,
+  F extends (...args: any[]) => (Generator<any, any, any> | AsyncGenerator<any, any, any>),
   TExtraStates extends CommandStatesMap = {}
 >(
-  fn: FlowFn<TArgs, TResult, TYield, TNext>,
-  opt?: CommandOptions<TArgs, TExtraStates, TResult>
-): ICommand<TArgs, TResult | undefined, TExtraStates>;
+  fn: F,
+  opt?: CommandOptions<StripAbortSignal<Parameters<F>>, TExtraStates, GeneratorResult<F>>
+): ICommand<StripAbortSignal<Parameters<F>>, GeneratorResult<F> | undefined, TExtraStates>;
+
 export function flowCommand<
-  TArgs extends any[],
-  TResult,
-  TYield = unknown,
-  TNext = unknown,
+  F extends (...args: any[]) => (Generator<any, any, any> | AsyncGenerator<any, any, any>),
   TExtraStates extends CommandStatesMap = {}
 >(
-  fn: FlowFn<TArgs, TResult, TYield, TNext>,
-  opt?: CommandOptions<TArgs, TExtraStates, TResult>
-): ICommand<TArgs, TResult | undefined, TExtraStates> {
-  const runner = flow(fn);
-  const active = new Set<FlowPromise<TResult>>();
+  fn: F,
+  opt?: CommandOptions<StripAbortSignal<Parameters<F>>, TExtraStates, GeneratorResult<F>>
+): ICommand<StripAbortSignal<Parameters<F>>, GeneratorResult<F> | undefined, TExtraStates> {
+  const runner = flow(fn as any);
+  const active = new Set<FlowPromise<any>>();
   const userOnCancel = opt?.onCancel;
 
-  const cmd = asyncCommand((...args: [...TArgs, AbortSignal?]) => {
-    const flowPromise = runner(...args) as FlowPromise<TResult>;
+  const cmd = asyncCommand((...args: any[]) => {
+    const flowPromise = runner(...args) as FlowPromise<any>;
     active.add(flowPromise);
 
     const cleanup = (): void => {
@@ -436,27 +461,26 @@ export function flowCommand<
     };
     flowPromise.then(cleanup, cleanup);
 
-    return new Promise<TResult>((resolve, reject) => {
+    return new Promise<any>((resolve, reject) => {
       flowPromise.then(resolve, (error) => {
         if (isFlowCancellationError(error as Error)) {
-          resolve(undefined as TResult);
+          resolve(undefined);
           return;
         }
         reject(error);
       });
     });
   }, {
-    ...opt,
+    ...(opt as any),
     onCancel: () => {
-      for (const promise of active) {
-        promise.cancel?.();
-      }
+      for (const promise of active) promise.cancel?.();
       userOnCancel?.();
     },
   });
 
-  return cmd;
+  return cmd as any;
 }
+
 
 export function commandAction<TThis, TArgs extends any[], TResult>(
   fn: (this: TThis, ...args: TArgs) => TResult

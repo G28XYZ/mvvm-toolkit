@@ -3,7 +3,12 @@ declare const DEFAULT_STATES: {
     readonly load: "load";
     readonly failure: "failure";
     readonly ready: "ready";
+    readonly canceled: "canceled";
+    readonly disposed: "disposed";
 };
+type StripAbortSignal<T extends any[]> = T extends [...infer A, infer L] ? (L extends AbortSignal | undefined ? A : T) : T;
+type PromiseResult<F> = F extends (...args: any[]) => Promise<infer R> ? R : never;
+type GeneratorResult<F> = F extends (...args: any[]) => Generator<any, infer R, any> ? R : F extends (...args: any[]) => AsyncGenerator<any, infer R, any> ? R : never;
 export type DefaultCommandStates = typeof DEFAULT_STATES;
 export type CommandStatesMap = Record<string, string>;
 export type CommandStates<TExtra extends CommandStatesMap = {}> = Omit<DefaultCommandStates, keyof TExtra> & TExtra;
@@ -12,6 +17,8 @@ export type CommandStateKeys<TStates extends CommandStatesMap = CommandStates> =
     load?: keyof TStates & string;
     failure?: keyof TStates & string;
     ready?: keyof TStates & string;
+    canceled?: keyof TStates & string;
+    disposed?: keyof TStates & string;
 };
 export type CommandScope<TStates extends CommandStatesMap = CommandStates> = {
     state: CommandStateValue<TStates>;
@@ -22,8 +29,6 @@ export type CommandScope<TStates extends CommandStatesMap = CommandStates> = {
     isDisposed: boolean;
     error: unknown;
 };
-type AsyncFn<TArgs extends any[], TResult> = (...args: [...TArgs, AbortSignal?]) => Promise<TResult>;
-type FlowFn<TArgs extends any[], TResult, TYield = unknown, TNext = unknown> = (...args: [...TArgs, AbortSignal?]) => Generator<TYield, TResult, TNext> | AsyncGenerator<TYield, TResult, TNext>;
 export interface CommandOptions<TArgs extends any[], TExtraStates extends CommandStatesMap = {}, TResult = void> {
     canExecute?: (scope: CommandScope<CommandStates<TExtraStates>>) => boolean;
     onError?: (e: unknown) => void;
@@ -72,13 +77,13 @@ export interface ICommand<TArgs extends any[] = [], TResult = void, TExtraStates
     /** optional: clear queued calls for concurrency="queue" */
     clearQueue?: () => void;
 }
-export declare function asyncCommand<TArgs extends any[], TResult, TExtraStates extends CommandStatesMap = {}>(fn: AsyncFn<TArgs, TResult>, opt: CommandOptions<TArgs, TExtraStates, TResult> & {
+export declare function asyncCommand<F extends (...args: any[]) => Promise<any>, TExtraStates extends CommandStatesMap = {}>(fn: F, opt: CommandOptions<StripAbortSignal<Parameters<F>>, TExtraStates, PromiseResult<F>> & {
     swallowError: false;
-}): ICommand<TArgs, TResult, TExtraStates>;
-export declare function asyncCommand<TArgs extends any[], TResult, TExtraStates extends CommandStatesMap = {}>(fn: AsyncFn<TArgs, TResult>, opt?: CommandOptions<TArgs, TExtraStates, TResult>): ICommand<TArgs, TResult | undefined, TExtraStates>;
-export declare function flowCommand<TArgs extends any[], TResult, TYield = unknown, TNext = unknown, TExtraStates extends CommandStatesMap = {}>(fn: FlowFn<TArgs, TResult, TYield, TNext>, opt: CommandOptions<TArgs, TExtraStates, TResult> & {
+}): ICommand<StripAbortSignal<Parameters<F>>, PromiseResult<F> | undefined, TExtraStates>;
+export declare function asyncCommand<F extends (...args: any[]) => Promise<any>, TExtraStates extends CommandStatesMap = {}>(fn: F, opt?: CommandOptions<StripAbortSignal<Parameters<F>>, TExtraStates, PromiseResult<F>>): ICommand<StripAbortSignal<Parameters<F>>, PromiseResult<F> | undefined, TExtraStates>;
+export declare function flowCommand<F extends (...args: any[]) => (Generator<any, any, any> | AsyncGenerator<any, any, any>), TExtraStates extends CommandStatesMap = {}>(fn: F, opt: CommandOptions<StripAbortSignal<Parameters<F>>, TExtraStates, GeneratorResult<F>> & {
     swallowError: false;
-}): ICommand<TArgs, TResult, TExtraStates>;
-export declare function flowCommand<TArgs extends any[], TResult, TYield = unknown, TNext = unknown, TExtraStates extends CommandStatesMap = {}>(fn: FlowFn<TArgs, TResult, TYield, TNext>, opt?: CommandOptions<TArgs, TExtraStates, TResult>): ICommand<TArgs, TResult | undefined, TExtraStates>;
+}): ICommand<StripAbortSignal<Parameters<F>>, GeneratorResult<F> | undefined, TExtraStates>;
+export declare function flowCommand<F extends (...args: any[]) => (Generator<any, any, any> | AsyncGenerator<any, any, any>), TExtraStates extends CommandStatesMap = {}>(fn: F, opt?: CommandOptions<StripAbortSignal<Parameters<F>>, TExtraStates, GeneratorResult<F>>): ICommand<StripAbortSignal<Parameters<F>>, GeneratorResult<F> | undefined, TExtraStates>;
 export declare function commandAction<TThis, TArgs extends any[], TResult>(fn: (this: TThis, ...args: TArgs) => TResult): (this: TThis, ...args: TArgs) => TResult;
 export {};

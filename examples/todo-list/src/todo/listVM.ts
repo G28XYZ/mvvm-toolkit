@@ -18,7 +18,7 @@ export class ListVM extends ViewModel {
     this.store.items[1].done = true;
     this.store.items[4].done = true;
 
-    // this.store.addTodos(Array.from({ length: 10_000 }, (_, i) => `Todo ${i}`));
+    this.store.addTodos(Array.from({ length: 10_000 }, (_, i) => `Todo ${i}`));
   }
 
   @computed get items() {
