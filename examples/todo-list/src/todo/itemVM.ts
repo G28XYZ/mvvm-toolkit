@@ -43,11 +43,11 @@ export class ItemVM extends ViewModel {
 
   @action.bound onCancel() {
     this.isEditing = false;
-    this.item.service.reject();
+    this.item.service?.reject();
   }
 
   @computed get errors() {
-    return this.item.service.validation;
+    return this.item.service?.validation;
   }
 
 }

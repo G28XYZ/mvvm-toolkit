@@ -214,7 +214,7 @@ export class StoreBase<T extends Model = Model> {
   }
 
   @action add(item: T) {
-    this.items = this.items.concat(item);
+    this.items.push(item)
   }
 
   @action addMany(items: T[]) {

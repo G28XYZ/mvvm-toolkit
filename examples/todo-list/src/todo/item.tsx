@@ -15,7 +15,7 @@ export const TodoItem = view('ItemVM', ({
 }: Props) => {
   const { t } = useI18n();
   const { id, done } = item;
-  const errorText = vm.errors.text ? t(vm.errors.text) : "";
+  const errorText = vm.errors?.text ? t(vm.errors.text) : "";
 
   return (
     <li

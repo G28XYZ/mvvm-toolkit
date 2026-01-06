@@ -3,7 +3,7 @@ import { Store, StoreBase } from "rvm-toolkit";
 import { TodoModel } from "./model";
 
 @Store
-export class TodoStore extends StoreBase<TodoModel> {
+export class TodoStore extends StoreBase<any> {
 
   private nextId = 1;
 
@@ -34,12 +34,11 @@ export class TodoStore extends StoreBase<TodoModel> {
 
   @action.bound addTodos(texts: string[]) {
     if (!texts?.length) return;
-    const todos = texts.map((text) => new TodoModel({
-      id: this.nextId++,
-      text,
-      done: false,
-    }));
-    this.addMany(todos);
+    this.addMany(texts.map((text) => new TodoModel({
+        id: this.nextId++,
+        text,
+        done: false,
+    })));
   }
 
   @action.bound toggle(todo: TodoModel) {

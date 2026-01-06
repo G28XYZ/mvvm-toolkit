@@ -26,30 +26,24 @@ export class Model<T = any > implements TModel<any> {
   @define_prop
   protected accessor initData: Partial<T> = null;
 
-  @observable
   @define_prop
   protected accessor committedData: Partial<T> = {};
 
-  @observable
   @define_prop
   private accessor modified_: Partial<T> = {};
 
   @define_prop
   private draft: Draft<T | Partial<T>> = null;
 
-  @observable
   @define_prop
   protected accessor changes: TPatch[] = [];
 
-  @observable
   @define_prop
   protected accessor inverseChanges: TPatch[] = [];
 
-  @observable
   @define_prop
   protected accessor history: THistoryEntry[] = [];
 
-  @observable
   @define_prop
   protected accessor historyIndex: number = -1;
 
@@ -128,8 +122,7 @@ export class Model<T = any > implements TModel<any> {
   private initLegacyFields() {
     if (this.legacyInitDone) return;
     const fields = fieldMetadata.fields(this);
-    const hasOwnFields = fields.some((field) => Object.prototype.hasOwnProperty.call(this, field.name));
-    if (!hasOwnFields) return;
+    if (!fields.some((field) => Object.prototype.hasOwnProperty.call(this, field.name))) return;
     this.legacyInitDone = true;
     const initialized = this.getInitializedFields();
     const sourceInit = this.rawInitData ?? this.initData;
@@ -142,14 +135,13 @@ export class Model<T = any > implements TModel<any> {
     }
     for (const field of fields) {
       const name = String(field.name);
-      const hasInit = sourceInit && name in sourceInit;
-      if (hasInit) {
+      if (sourceInit && name in sourceInit) {
         const fieldInstance = fieldMetadata.fieldInstance(name, this);
         if (!fieldInstance) continue;
         if (!initialized.has(name)) {
           const data = (sourceInit);
           const nextValue = fieldInstance.factory ? fieldInstance.factory(data, this) : Reflect.get(data, fieldInstance.name);
-          this.defineFieldValue(name, nextValue);
+          this.defineFieldValue(name, nextValue, fieldInstance);
           Reflect.set(this, name, nextValue);
           initialized.add(name);
         }
@@ -185,9 +177,7 @@ export class Model<T = any > implements TModel<any> {
     const name = this.options?.devtools?.name ?? this.constructor?.name ?? "Model";
     const seq = (globalAny.__MVVM_DEVTOOLS_SEQ__ ?? 0) + 1;
     globalAny.__MVVM_DEVTOOLS_SEQ__ = seq;
-    const instanceId = this.options?.devtools?.instanceId ?? `${name}#${seq}`;
-    const schedule = globalThis.queueMicrotask ?? ((cb: () => void) => Promise.resolve().then(cb));
-    schedule(() => attachModelDevtools(this, { name, instanceId }));
+    attachModelDevtools(this, { name, instanceId: this.options?.devtools?.instanceId ?? `${name}#${seq}` });
   }
 
   private withHistoryMuted(action: () => void) {
@@ -222,13 +212,7 @@ export class Model<T = any > implements TModel<any> {
     this.withHistoryMuted(() => {
       for (const field of fields) {
         const draftValue = Reflect.get(this.draft as object, field) ?? Reflect.get(this.initData, field);
-        let nextValue = draftValue;
-        try {
-          nextValue = draftValue;
-        } catch {
-          nextValue = draftValue;
-        }
-        Reflect.set(this, field, nextValue);
+        Reflect.set(this, field, draftValue);
         this.defineFieldValue(field, Reflect.get(this, field));
       }
     });
@@ -263,9 +247,8 @@ export class Model<T = any > implements TModel<any> {
 
           if (paths.length > 1) {
             for (let i = 0; i < paths.length; i++) {
-              const isLastItem = i == paths.length - 1;
 
-              if (!isLastItem && !isObject(current)) {
+              if (!(i == paths.length - 1) && !isObject(current)) {
                 break;
               }
 
@@ -336,15 +319,13 @@ export class Model<T = any > implements TModel<any> {
       set: (target, p, newValue, receiver) => {
         // if(this.checkChange(originField, Reflect.get(this, originField))) return true;
 
-        const result = Reflect.set(target, p, newValue, receiver);
-
         value = newValue;
 
         this.produceDraft(changePath, value, String(p));
 
         this.checkChange(originField, Reflect.get(this, originField));
 
-        return result;
+        return Reflect.set(target, p, newValue, receiver);
       },
     });
   }
@@ -394,16 +375,15 @@ export class Model<T = any > implements TModel<any> {
    * Проверить изменение поля и обновить modified_.
    */
   private checkChange(field: string | keyof T, value: any) {
-    const currentValue = (value);
     const originValue = (Reflect.get(this.committedData, field)) || (Reflect.get(this.initData, field));
-    const isChanged = field && field in this.initData && !isEqual(originValue, currentValue);
+    const isChanged = field && field in this.initData && !isEqual(originValue, value);
 
     runInAction(() => {
       if (isChanged) {
-        Reflect.set(this.modified_, field, (originValue) || originValue);
+        Reflect.set(this.modified_, field, originValue);
       }
       for (const modified in this.modified_) {
-        if (field === modified && field in this.modified_ && isEqual(originValue, currentValue)) {
+        if (field === modified && field in this.modified_ && isEqual(originValue, value)) {
           delete this.modified_[modified];
         }
       }
@@ -418,8 +398,7 @@ export class Model<T = any > implements TModel<any> {
   private defineData(data: Partial<T>) {
     for (const field in this) {
       if (!Object.prototype.hasOwnProperty.call(this, field)) continue;
-      const instance = fieldMetadata.fieldInstance(field, this);
-      if (instance) {
+      if (fieldMetadata.fieldInstance(field, this)) {
         Reflect.set(this, field, Reflect.get(data, field));
         this.initField(field);
       }
@@ -479,8 +458,7 @@ export class Model<T = any > implements TModel<any> {
     this.withHistoryMuted(() => {
       for (const field in this) {
         if (field in this.initData) {
-          const value: any = Reflect.get(this.initData, field);
-          this[field] = value;
+          this[field] = Reflect.get(this.initData as object, field);
           this.initField(field);
         }
       }
@@ -495,9 +473,8 @@ export class Model<T = any > implements TModel<any> {
   @action protected undo() {
     if (this.historyIndex < 0) return;
 
-    const entry = this.history[this.historyIndex];
+    this.applyHistoryPatches(this.history[this.historyIndex].inversePatches);
     this.historyIndex -= 1;
-    this.applyHistoryPatches(entry.inversePatches);
     this.syncChangesFromHistory();
   }
 
@@ -507,10 +484,8 @@ export class Model<T = any > implements TModel<any> {
   @action protected redo() {
     if (this.historyIndex >= this.history.length - 1) return;
 
-    const nextIndex = this.historyIndex + 1;
-    const entry = this.history[nextIndex];
-    this.historyIndex = nextIndex;
-    this.applyHistoryPatches(entry.patches);
+    this.historyIndex = this.historyIndex + 1;
+    this.applyHistoryPatches(this.history[this.historyIndex].patches);
     this.syncChangesFromHistory();
   }
 
@@ -522,16 +497,13 @@ export class Model<T = any > implements TModel<any> {
     if (index === this.historyIndex) return;
 
     while (this.historyIndex < index) {
-      const nextIndex = this.historyIndex + 1;
-      const entry = this.history[nextIndex];
-      this.historyIndex = nextIndex;
-      this.applyHistoryPatches(entry.patches);
+      this.historyIndex = this.historyIndex + 1;
+      this.applyHistoryPatches(this.history[this.historyIndex].patches);
     }
 
     while (this.historyIndex > index) {
-      const entry = this.history[this.historyIndex];
+      this.applyHistoryPatches(this.history[this.historyIndex].inversePatches);
       this.historyIndex -= 1;
-      this.applyHistoryPatches(entry.inversePatches);
     }
 
     this.syncChangesFromHistory();
@@ -556,19 +528,19 @@ export class Model<T = any > implements TModel<any> {
     const result: T = Object.create({});
 
     const getValue = (field: string) => {
-      const instance = submitMetadata.fieldInstance(field, this);
-      if (instance?.callback) return instance.callback(Reflect.get(this, field), this);
-      else return Reflect.get(this, field);
+      try {
+        return submitMetadata.fieldInstance(field, this).callback(Reflect.get(this, field), this)
+      } catch {
+        return Reflect.get(this, field)
+      }
     };
 
     const isExcludeField = (field: string) => {
       const excludeInstance = excludeMetadata.fieldInstance(field, this);
       if (excludeInstance) {
         switch (typeof excludeInstance.callback) {
-          case "boolean":
-            return Boolean(excludeInstance.callback);
-          case "function":
-            return excludeInstance.callback(Reflect.get(this, field), this);
+          case "boolean":  return Boolean(excludeInstance.callback);
+          case "function": return excludeInstance.callback(Reflect.get(this, field), this);
         }
       }
 
