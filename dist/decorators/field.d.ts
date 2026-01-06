@@ -2,7 +2,7 @@
  * Декоратор для поля модели.
  * Обозначает свойство как поле модели и включает обработку для dump/validation.
  * @example
- * class VM extends Model<{ title: string }> {
+ * class VM extends TModel<{ title: string }> {
  *   @field
  *   title = "";
  * }

@@ -50,7 +50,7 @@ export function MakeObservable<This extends object, Args extends any[]>(
     if (!isDecoratorContext(context)) {
       const source = target as new (...args: any[]) => object;
       const next = decorateLegacy(source) as TInstance<This, Args>;
-      Object.defineProperty(next, "__mvvm_legacy_source__", { value: source, configurable: true });
+      Object.defineProperty(next, "__legacy_source__", { value: source, configurable: true });
       copyLegacyMetadata(source, next as new (...args: any[]) => object);
       return next;
     }

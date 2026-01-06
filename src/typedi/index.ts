@@ -248,7 +248,7 @@ export function Service<This, Args extends any[]>(
   };
 
   function callback(t: TInstance<This, Args>, ctx?: ClassDecoratorContext<TInstance<This, Args>>): void | TInstance<This, Args> {
-    const legacySource = (t as unknown as { __mvvm_legacy_source__?: TInstance<This, Args> }).__mvvm_legacy_source__;
+    const legacySource = (t as unknown as { __legacy_source__?: TInstance<This, Args> }).__legacy_source__;
     const context = isDecoratorContext(ctx)
       ? ctx
       : createLegacyClassContext(legacySource?.name ?? t?.name ?? "");

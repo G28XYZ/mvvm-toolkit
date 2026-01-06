@@ -1,7 +1,7 @@
-import { cloneDeep, isObject, isEqual, isEmpty } from "lodash";
+import { isObject, isEqual, isEmpty } from "lodash";
 import { immerable, produce, createDraft, Draft, enablePatches, applyPatches } from "immer";
 import { action, computed, isObservable, observable, runInAction } from "mobx";
-import { FieldMetadata, SubmitMetadata, ValidationMetadata, ExcludeMetadata } from "./data";
+import { FieldMetadata, SubmitMetadata, ValidationMetadata, ExcludeMetadata, IFieldMetadata } from "./data";
 import { define_prop } from "../decorators/define_prop";
 import { attachModelDevtools } from "./devtools";
 import { ModelOptions, ModelService, TModel, TPatch, THistoryEntry } from "./types";
@@ -101,7 +101,7 @@ export class Model<T = any > implements TModel<any> {
    */
   protected init(data: Partial<T> = {}) {
     this.cloneForInit(data);
-    this.resetToDefault();
+    // this.resetToDefault();
     this.createDraft(data);
     this.defineData(this.initData);
   }
@@ -112,10 +112,9 @@ export class Model<T = any > implements TModel<any> {
   protected initField(field: string, options?: { skipValidation?: boolean }) {
     const fieldInstance = fieldMetadata.fieldInstance(field, this);
     if (fieldInstance) {
-      if(field in this.initData === false) Reflect.set(this.initData, field, cloneDeep(Reflect.get(this, field)));
-      const data = cloneDeep(this.initData);
-      const value = fieldInstance?.factory ? fieldInstance.factory(data, this) : Reflect.get(data, fieldInstance.name);
-      this.defineFieldValue(field, value);
+      if(field in this.initData === false) Reflect.set(this.initData, field, (Reflect.get(this, field)));
+      const value = fieldInstance?.factory ? fieldInstance.factory(this.initData, this) : Reflect.get(this.initData, fieldInstance.name);
+      this.defineFieldValue(field, value, fieldInstance);
       if (!options?.skipValidation) this.initValidation(field);
       this.getInitializedFields().add(String(field));
     }
@@ -136,7 +135,7 @@ export class Model<T = any > implements TModel<any> {
     const sourceInit = this.rawInitData ?? this.initData;
     if (sourceInit && sourceInit !== this.initData) {
       try {
-        this.initData = cloneDeep(sourceInit);
+        this.initData = (sourceInit);
       } catch {
         this.initData = { ...sourceInit };
       }
@@ -148,7 +147,7 @@ export class Model<T = any > implements TModel<any> {
         const fieldInstance = fieldMetadata.fieldInstance(name, this);
         if (!fieldInstance) continue;
         if (!initialized.has(name)) {
-          const data = cloneDeep(sourceInit);
+          const data = (sourceInit);
           const nextValue = fieldInstance.factory ? fieldInstance.factory(data, this) : Reflect.get(data, fieldInstance.name);
           this.defineFieldValue(name, nextValue);
           Reflect.set(this, name, nextValue);
@@ -169,7 +168,7 @@ export class Model<T = any > implements TModel<any> {
 
     for(const field in data) {
       const fieldInstance = fieldMetadata.fieldInstance(field, this);
-      if(fieldInstance) Reflect.set(draft, field, cloneDeep(data[field]));
+      if(fieldInstance) Reflect.set(draft, field, (data[field]));
     }
 
     this.draft = createDraft(draft);
@@ -222,13 +221,10 @@ export class Model<T = any > implements TModel<any> {
 
     this.withHistoryMuted(() => {
       for (const field of fields) {
-        const draftRecord = this.draft as unknown as Record<string, unknown>;
-        const initRecord = this.initData as unknown as Record<string, unknown>;
-        const hasDraftField = Reflect.has(draftRecord, field);
-        const draftValue = hasDraftField ? Reflect.get(draftRecord, field) : Reflect.get(initRecord, field);
+        const draftValue = Reflect.get(this.draft as object, field) ?? Reflect.get(this.initData, field);
         let nextValue = draftValue;
         try {
-          nextValue = cloneDeep(draftValue);
+          nextValue = draftValue;
         } catch {
           nextValue = draftValue;
         }
@@ -325,7 +321,7 @@ export class Model<T = any > implements TModel<any> {
 
     value = isObservable(value) ? value : observable.box(value);
 
-    return new Proxy(value.get(), {
+    return new Proxy(value, {
       get: (target, p, receiver) => {
         // value = observable.box(Reflect.get(target, p, receiver));
 
@@ -341,9 +337,10 @@ export class Model<T = any > implements TModel<any> {
         // if(this.checkChange(originField, Reflect.get(this, originField))) return true;
 
         const result = Reflect.set(target, p, newValue, receiver);
-        value.set(newValue);
 
-        this.produceDraft(changePath, value.get(), String(p));
+        value = newValue;
+
+        this.produceDraft(changePath, value, String(p));
 
         this.checkChange(originField, Reflect.get(this, originField));
 
@@ -355,19 +352,18 @@ export class Model<T = any > implements TModel<any> {
   /**
    * Определить getter/setter для поля модели.
    */
-  protected defineFieldValue(field: string, value?: any) {
-    const fieldInstance = fieldMetadata.fieldInstance(field, this);
+  protected defineFieldValue(field: string, value?: any, fieldInstance?: IFieldMetadata<any, any>) {
+    !fieldInstance && (fieldInstance = fieldMetadata.fieldInstance(field, this));
 
     if (value && typeof value === "object") {
+      // TODO - может убрать...
       value = this.createObservable(value, field, field);
     }
 
     value = observable.box(value);
 
     Reflect.defineProperty(this, fieldInstance.name, {
-      get() {
-        return value.get();
-      },
+      get: () =>value.get(),
       set: (v) => {
         runInAction(() => value.set(v));
         this.produceDraft(fieldInstance.name, value.get());
@@ -386,14 +382,9 @@ export class Model<T = any > implements TModel<any> {
   private cloneForInit(data: Partial<T>) {
     if (data) {
       try {
-        const cloned = cloneDeep(data);
-        this.initData = cloned;
-        this.rawInitData = cloned;
-      } catch {
-        const cloned = { ...data };
-        this.initData = cloned;
-        this.rawInitData = cloned;
-      }
+        this.initData = { ...data };
+        // this.rawInitData = cloned;
+      } catch {}
     } else {
       this.rawInitData = null;
     }
@@ -403,13 +394,13 @@ export class Model<T = any > implements TModel<any> {
    * Проверить изменение поля и обновить modified_.
    */
   private checkChange(field: string | keyof T, value: any) {
-    const currentValue = cloneDeep(value);
-    const originValue = cloneDeep(Reflect.get(this.committedData, field)) || cloneDeep(Reflect.get(this.initData, field));
+    const currentValue = (value);
+    const originValue = (Reflect.get(this.committedData, field)) || (Reflect.get(this.initData, field));
     const isChanged = field && field in this.initData && !isEqual(originValue, currentValue);
 
     runInAction(() => {
       if (isChanged) {
-        Reflect.set(this.modified_, field, cloneDeep(originValue) || originValue);
+        Reflect.set(this.modified_, field, (originValue) || originValue);
       }
       for (const modified in this.modified_) {
         if (field === modified && field in this.modified_ && isEqual(originValue, currentValue)) {
@@ -447,7 +438,7 @@ export class Model<T = any > implements TModel<any> {
    */
   @action protected commit() {
     for (const field of fieldMetadata.fields(this)) {
-      this.commitField(field.name as keyof T);
+      this.commitField(field.name);
     }
 
     this.modified_ = {};
@@ -456,13 +447,13 @@ export class Model<T = any > implements TModel<any> {
   /**
    * Зафиксировать изменения конкретного поля.
    */
-  @action protected commitField<K extends keyof T>(field: K) {
+  @action protected commitField<K extends keyof T | string>(field: K) {
     for (const field in this) {
       if (field in this.modified_) {
         Reflect.set(this.committedData, field, this[field])
       }
     }
-    delete this.modified_[field];
+    delete this.modified_[field as keyof T];
 
     this.modified_ = { ...this.modified_ };
   }
@@ -474,7 +465,7 @@ export class Model<T = any > implements TModel<any> {
     for (const field in this) {
       if (field in this.modified_) {
         this[field] = Reflect.get(this.modified_ as object, field);
-        this.commitField(field as unknown as keyof T);
+        this.commitField(field);
         this.defineFieldValue(field, this[field]);
       }
     }
@@ -596,7 +587,7 @@ export class Model<T = any > implements TModel<any> {
     });
 
     try {
-      return cloneDeep(result);
+      return (result);
     } catch {
       if(result) return { ...(result) };
 

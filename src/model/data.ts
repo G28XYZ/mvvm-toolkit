@@ -12,7 +12,54 @@ const PROP_FROM_VIEW_METADATA_KEY = Symbol("prop-from-view-key");
 class MetadataModel<T extends IMetadataModel = any> implements IMetadataModel {
   name: string;
   callback?: T["callback"];
-  protected metadataKey: symbol | string = null;
+  metadataKey: symbol | string = null;
+
+  /**
+   * Кеш метаданных по prototype.
+   * Важно: в библиотеке используются singleton-экземпляры метаданных
+   * (fieldMetadata/submitMetadata/validationMetadata/...), поэтому этот кеш
+   * эффективно переиспользуется между всеми экземплярами Model.
+   */
+  private readonly cache = new WeakMap<object, { ownRef: unknown; list: T[]; map: Map<string, T> }>();
+
+  private isPrototypeObject(target: any): boolean {
+    const ctor = target?.constructor;
+    return Boolean(ctor && ctor.prototype === target);
+  }
+
+  /**
+   * Получить объект, по которому кешируются метаданные.
+   * Для инстанса — это его prototype, для prototype — он сам.
+   */
+  private getCacheTarget(target: any): object | null {
+    if (!target || typeof target !== "object") return null;
+    return this.isPrototypeObject(target) ? target : Object.getPrototypeOf(target);
+  }
+
+  private computeFromPrototype(proto: object): { ownRef: unknown; list: T[]; map: Map<string, T> } {
+    const result: T[] = [];
+    const map = new Map<string, T>();
+    const seen = new Set<string>();
+
+    let current: any = proto;
+    while (current) {
+      const items = Reflect.getOwnMetadata(this.metadataKey, current) as T[] | undefined;
+      if (Array.isArray(items)) {
+        for (const item of items) {
+          const name = (item as Partial<IMetadataModel>)?.name;
+          const key = String(name);
+          if (seen.has(key)) continue;
+          seen.add(key);
+          result.push(item);
+          map.set(key, item);
+        }
+      }
+      current = Object.getPrototypeOf(current);
+    }
+
+    const ownRef = Reflect.getOwnMetadata(this.metadataKey, proto);
+    return { ownRef, list: result, map };
+  }
 
   /**
    * Создать базовые метаданные.
@@ -32,40 +79,67 @@ class MetadataModel<T extends IMetadataModel = any> implements IMetadataModel {
    * Получить метаданные конкретного поля модели.
    */
   fieldInstance(name: string, target: any): T {
-    return this.fields(target).find((item) => item.name === name);
+    // если метаданные лежат на инстансе (редко/legacy), то кешировать нельзя
+    const own = target && typeof target === "object" ? (Reflect.getOwnMetadata(this.metadataKey, target) as T[] | undefined) : undefined;
+    if (Array.isArray(own)) return own.find((item) => item.name === name);
+
+    const proto = this.getCacheTarget(target);
+    if (!proto) return undefined;
+
+    const ownRef = Reflect.getOwnMetadata(this.metadataKey, proto);
+    const cached = this.cache.get(proto);
+    if (!cached || cached.ownRef !== ownRef) {
+      const next = this.computeFromPrototype(proto);
+      this.cache.set(proto, next);
+      return next.map.get(String(name));
+    }
+
+    return cached.map.get(String(name));
   }
   /**
    * Получить массив метаданных полей модели.
    */
   fields(target: any): T[] {
-    const result: T[] = [];
-    const seen = new Set<string | symbol>();
-    let current = target;
-
-    while (current) {
-      const items = Reflect.getOwnMetadata(this.metadataKey, current) as T[] | undefined;
-      if (Array.isArray(items)) {
-        for (const item of items) {
-          const name = (item as Partial<IMetadataModel>)?.name;
-          if (name !== undefined) {
-            const key = typeof name === "symbol" ? name : String(name);
+    // если метаданные лежат на инстансе (редко/legacy), то кешировать нельзя
+    const own = target && typeof target === "object" ? (Reflect.getOwnMetadata(this.metadataKey, target) as T[] | undefined) : undefined;
+    if (Array.isArray(own)) {
+      // fallback: старое поведение, учитывающее цепочку прототипов + инстанс
+      const result: T[] = [];
+      const seen = new Set<string>();
+      let current = target;
+      while (current) {
+        const items = Reflect.getOwnMetadata(this.metadataKey, current) as T[] | undefined;
+        if (Array.isArray(items)) {
+          for (const item of items) {
+            const name = (item as Partial<IMetadataModel>)?.name;
+            const key = String(name);
             if (seen.has(key)) continue;
             seen.add(key);
+            result.push(item);
           }
-          result.push(item);
         }
+        current = Object.getPrototypeOf(current);
       }
-      current = Object.getPrototypeOf(current);
+      return result;
     }
 
-    return result;
+    const proto = this.getCacheTarget(target);
+    if (!proto) return [];
+
+    const ownRef = Reflect.getOwnMetadata(this.metadataKey, proto);
+    const cached = this.cache.get(proto);
+    if (cached && cached.ownRef === ownRef) return cached.list;
+
+    const next = this.computeFromPrototype(proto);
+    this.cache.set(proto, next);
+    return next.list;
   }
 }
 /**
  * Метаданные для validation декоратора.
  */
 export class ValidationMetadata extends MetadataModel<IMetadataModel> {
-  protected metadataKey = VALIDATION_METADATA_KEY;
+  metadataKey = VALIDATION_METADATA_KEY;
 }
 
 export interface ISubmitMetadata extends IMetadataModel {
@@ -76,7 +150,7 @@ export interface ISubmitMetadata extends IMetadataModel {
  * Метаданные для submit декоратора.
  */
 export class SubmitMetadata extends MetadataModel<ISubmitMetadata> implements ISubmitMetadata {
-  protected metadataKey = SUBMIT_METADATA_KEY;
+  metadataKey = SUBMIT_METADATA_KEY;
 }
 
 export interface IExcludeMetadata extends Omit<IMetadataModel, "callback"> {
@@ -87,7 +161,7 @@ export interface IExcludeMetadata extends Omit<IMetadataModel, "callback"> {
  * Метаданные для exclude декоратора.
  */
 export class ExcludeMetadata extends MetadataModel<IExcludeMetadata> implements IExcludeMetadata {
-  protected metadataKey = EXCLUDE_METADATA_KEY;
+  metadataKey = EXCLUDE_METADATA_KEY;
 }
 
 export interface IFieldMetadata<T = any, I = any> extends IMetadataModel {
@@ -120,7 +194,7 @@ export class FieldMetadata extends MetadataModel<IFieldMetadata> implements IFie
 
   name: string = null;
   ctx: ClassFieldDecoratorContext = null;
-  protected metadataKey = FIELD_METADATA_KEY;
+  metadataKey = FIELD_METADATA_KEY;
 
   /**
    * Создать метаданные поля модели.
@@ -143,7 +217,7 @@ interface IPropFromViewMetadata extends Omit<IMetadataModel, "callback"> {
 export class PropFromViewMetadata extends MetadataModel<IPropFromViewMetadata> {
   originName: string;
   value: any;
-  protected metadataKey = PROP_FROM_VIEW_METADATA_KEY;
+  metadataKey = PROP_FROM_VIEW_METADATA_KEY;
 
   /**
    * Создать метаданные для PropFromView.

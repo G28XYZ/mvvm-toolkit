@@ -20,8 +20,8 @@ export function PropFromView<This, T>(propName: string): any {
     const metadata = new PropFromViewMetadata({ name: propName, originName: String(name) });
     metadata.name = propName;
     metadata.originName = String(name);
-    const propsFromView = getOwnMetadata(metadata["metadataKey"], target, new Array<PropFromViewMetadata>());
-    defineMetadata(metadata["metadataKey"], [...propsFromView, metadata], target);
+    const propsFromView = getOwnMetadata(metadata.metadataKey, target, new Array<PropFromViewMetadata>());
+    defineMetadata(metadata.metadataKey, [...propsFromView, metadata], target);
   };
 
   const define = (c: ClassFieldDecoratorContext<This, T>) => {
@@ -36,7 +36,7 @@ export function PropFromView<This, T>(propName: string): any {
           propsFromView.push(metadata);
         }
       }
-      defineMetadata(metadata["metadataKey"], propsFromView, this as object);
+      defineMetadata(metadata.metadataKey, propsFromView, this as object);
     });
   };
 

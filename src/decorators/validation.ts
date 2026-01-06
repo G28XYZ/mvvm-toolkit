@@ -1,4 +1,4 @@
-import { DecoratorCallbackType } from "../model";
+import { DecoratorCallbackType, Model } from "../model";
 import { ValidationMetadata } from "../model/data";
 import { getOwnMetadata, defineMetadata } from "../utils";
 import { isLegacyPropertyDecoratorArgs, isDecoratorContext } from "../utils/decorators";
@@ -19,26 +19,26 @@ export function validation<This, T>(fn: DecoratorCallbackType<T, This>): AnyFiel
 export function validation<This, T>(fn: DecoratorCallbackType<T, This>): any {
   const defineLegacy = (target: object, name: string | symbol) => {
     const instance = new ValidationMetadata({ callback: fn, name: String(name) });
-    const fields = getOwnMetadata(instance["metadataKey"], target, new Array<ValidationMetadata>());
-    defineMetadata(instance["metadataKey"], [...fields, instance], target);
+    const fields = getOwnMetadata(instance.metadataKey, target, new Array<ValidationMetadata>());
+    defineMetadata(instance.metadataKey, [...fields, instance], target);
   };
 
-  const define = (c: ClassFieldDecoratorContext<This, T>) => {
+  const define = (c: ClassFieldDecoratorContext<Model<T>, T>) => {
+    const instance = new ValidationMetadata({ callback: fn, name: String(c.name) });
     c.addInitializer(function (this: This) {
-      const instance = new ValidationMetadata({ callback: fn, name: String(c.name) });
-      const fields = getOwnMetadata(instance["metadataKey"], this, new Array<ValidationMetadata>());
-      defineMetadata(instance["metadataKey"], [...fields, instance], this);
-    });
+      const fields = getOwnMetadata(instance.metadataKey, this, new Array<ValidationMetadata>());
+      defineMetadata(instance.metadataKey, [...fields, instance], this);
+    } as any);
   };
 
-  function callback(t: any, c: any) {
+  function callback(t: any, c: ClassFieldDecoratorContext<This | Model<T>, T> | string | symbol) {
     if (isLegacyPropertyDecoratorArgs(t, c)) {
       defineLegacy(t, c);
       return;
     }
     if (isDecoratorContext(c)) {
-      define(c as ClassFieldDecoratorContext<This, T>);
-      if ((c as ClassFieldDecoratorContext<This, T>).kind === "field") return (value: T) => value;
+      define(c);
+      if ((c).kind === "field") return (value: T) => value;
       return c;
     }
   }

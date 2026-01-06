@@ -57,7 +57,7 @@ export function view<U, T extends TInstance = TInstance>(
           }
         }
       }
-      defineMetadata(propFromViewMetadata["metadataKey"], resolvedPropsFromView, instance);
+      defineMetadata(propFromViewMetadata.metadataKey, resolvedPropsFromView, instance);
       return reactComponent({ viewModel: instance, ...props } as any);
     }
 

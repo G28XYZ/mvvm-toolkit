@@ -17,29 +17,29 @@ import { AnyFieldDecorator } from "./types";
 export function exclude<This, T>(
   fn: DecoratorCallbackType<T, This> | boolean
 ): AnyFieldDecorator<This, T>;
-export function exclude<This, T>(fn: DecoratorCallbackType<T, This> | boolean): any {
+export function exclude<This, T>(fn: DecoratorCallbackType<T, This> | boolean) {
   const defineLegacy = (target: object, name: string | symbol) => {
     const instance = new ExcludeMetadata({ callback: fn, name: String(name) });
-    const fields = getOwnMetadata(instance["metadataKey"], target, new Array<ExcludeMetadata>());
-    defineMetadata(instance["metadataKey"], [...fields, instance], target);
+    const fields = getOwnMetadata(instance.metadataKey, target, new Array<ExcludeMetadata>());
+    defineMetadata(instance.metadataKey, [...fields, instance], target);
   };
 
   const define = (c: ClassFieldDecoratorContext<This, T>) => {
     c.addInitializer(function (this: This) {
       const instance = new ExcludeMetadata({ callback: fn, name: String(c.name) });
-      const fields = getOwnMetadata(instance["metadataKey"], this, new Array<ExcludeMetadata>());
-      defineMetadata(instance["metadataKey"], [...fields, instance], this);
+      const fields = getOwnMetadata(instance.metadataKey, this, new Array<ExcludeMetadata>());
+      defineMetadata(instance.metadataKey, [...fields, instance], this);
     });
   };
 
-  function callback(t: any, c: any) {
+  function callback(t: any, c: ClassFieldDecoratorContext<This, T>) {
     if (isLegacyPropertyDecoratorArgs(t, c)) {
       defineLegacy(t, c);
       return;
     }
     if (isDecoratorContext(c)) {
-      define(c as ClassFieldDecoratorContext<This, T>);
-      if ((c as ClassFieldDecoratorContext<This, T>).kind === "field") return;
+      define(c);
+      if (c.kind === "field") return;
       return c;
     }
   }

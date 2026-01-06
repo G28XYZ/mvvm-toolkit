@@ -1,4 +1,5 @@
 import { immerable } from "immer";
+import { IFieldMetadata } from "./data";
 import { ModelOptions, ModelService, TModel, TPatch, THistoryEntry } from "./types";
 /**
  * Класс для управлением состоянием модели.
@@ -76,7 +77,7 @@ export declare class Model<T = any> implements TModel<any> {
     /**
      * Определить getter/setter для поля модели.
      */
-    protected defineFieldValue(field: string, value?: any): any;
+    protected defineFieldValue(field: string, value?: any, fieldInstance?: IFieldMetadata<any, any>): any;
     /**
      * Сохранить исходные данные с глубоким клонированием.
      */
@@ -100,7 +101,7 @@ export declare class Model<T = any> implements TModel<any> {
     /**
      * Зафиксировать изменения конкретного поля.
      */
-    protected commitField<K extends keyof T>(field: K): void;
+    protected commitField<K extends keyof T | string>(field: K): void;
     /**
      * Откатить изменения к последнему коммиту.
      */

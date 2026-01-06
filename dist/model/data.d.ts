@@ -5,7 +5,21 @@ import { IMetadataModel } from "./types";
 declare class MetadataModel<T extends IMetadataModel = any> implements IMetadataModel {
     name: string;
     callback?: T["callback"];
-    protected metadataKey: symbol | string;
+    metadataKey: symbol | string;
+    /**
+     * Кеш метаданных по prototype.
+     * Важно: в библиотеке используются singleton-экземпляры метаданных
+     * (fieldMetadata/submitMetadata/validationMetadata/...), поэтому этот кеш
+     * эффективно переиспользуется между всеми экземплярами Model.
+     */
+    private readonly cache;
+    private isPrototypeObject;
+    /**
+     * Получить объект, по которому кешируются метаданные.
+     * Для инстанса — это его prototype, для prototype — он сам.
+     */
+    private getCacheTarget;
+    private computeFromPrototype;
     /**
      * Создать базовые метаданные.
      */
@@ -27,7 +41,7 @@ declare class MetadataModel<T extends IMetadataModel = any> implements IMetadata
  * Метаданные для validation декоратора.
  */
 export declare class ValidationMetadata extends MetadataModel<IMetadataModel> {
-    protected metadataKey: symbol;
+    metadataKey: symbol;
 }
 export interface ISubmitMetadata extends IMetadataModel {
     callback?(value: any, instance: any): any;
@@ -36,7 +50,7 @@ export interface ISubmitMetadata extends IMetadataModel {
  * Метаданные для submit декоратора.
  */
 export declare class SubmitMetadata extends MetadataModel<ISubmitMetadata> implements ISubmitMetadata {
-    protected metadataKey: symbol;
+    metadataKey: symbol;
 }
 export interface IExcludeMetadata extends Omit<IMetadataModel, "callback"> {
     callback?: boolean | ((value: any, instance: any) => boolean);
@@ -45,7 +59,7 @@ export interface IExcludeMetadata extends Omit<IMetadataModel, "callback"> {
  * Метаданные для exclude декоратора.
  */
 export declare class ExcludeMetadata extends MetadataModel<IExcludeMetadata> implements IExcludeMetadata {
-    protected metadataKey: symbol;
+    metadataKey: symbol;
 }
 export interface IFieldMetadata<T = any, I = any> extends IMetadataModel {
     /** метод для переопределения номинального значения */
@@ -75,7 +89,7 @@ export declare class FieldMetadata extends MetadataModel<IFieldMetadata> impleme
     collectChanges?: boolean;
     name: string;
     ctx: ClassFieldDecoratorContext;
-    protected metadataKey: symbol;
+    metadataKey: symbol;
     /**
      * Создать метаданные поля модели.
      */
@@ -88,7 +102,7 @@ interface IPropFromViewMetadata extends Omit<IMetadataModel, "callback"> {
 export declare class PropFromViewMetadata extends MetadataModel<IPropFromViewMetadata> {
     originName: string;
     value: any;
-    protected metadataKey: symbol;
+    metadataKey: symbol;
     /**
      * Создать метаданные для PropFromView.
      */

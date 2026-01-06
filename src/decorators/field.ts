@@ -2,7 +2,7 @@
  * Декоратор для поля модели.
  * Обозначает свойство как поле модели и включает обработку для dump/validation.
  * @example
- * class VM extends Model<{ title: string }> {
+ * class VM extends TModel<{ title: string }> {
  *   @field
  *   title = "";
  * }
@@ -53,13 +53,13 @@ export function field<This, T = unknown>(
 export function field<This, T>(
   options: undefined | Pick<IFieldMetadata<This, T>, "factory" | "mapping" | "collectChanges"> | object,
   c?: ClassFieldDecoratorContext<This, T> | string | symbol
-): any {
+) {
   const resolvedOptions = resolveFieldOptions(isLegacyPropertyDecoratorArgs(options, c) ? undefined : options);
 
   const defineLegacy = (target: object, name: string | symbol) => {
     const instance = new FieldMetadata({ ...resolvedOptions, name: String(name), ctx: null });
-    const fields = getOwnMetadata(instance["metadataKey"], target, new Array<FieldMetadata>());
-    defineMetadata(instance["metadataKey"], [...fields, instance], target);
+    const fields = getOwnMetadata(instance.metadataKey, target, new Array<FieldMetadata>());
+    defineMetadata(instance.metadataKey, [...fields, instance], target);
 
     const descriptor = Object.getOwnPropertyDescriptor(target, name);
     if (!descriptor) {
@@ -67,27 +67,21 @@ export function field<This, T>(
         configurable: true,
         enumerable: true,
         get(this: Model<T>) {
-          const self = this;
-          if (Object.prototype.hasOwnProperty.call(self, name)) {
-            return Reflect.get(self, name);
+          if (Object.prototype.hasOwnProperty.call(this, name)) {
+            return Reflect.get(this, name);
           }
-          const initField = (self as unknown as { initField?: (field: string, options?: { skipValidation?: boolean }) => void }).initField;
-          const initData = (self as unknown as { initData?: Record<string | symbol, unknown> }).initData;
-          if (initData && name in initData && typeof initField === "function") {
-            initField.call(self, String(name), { skipValidation: true });
-            return Reflect.get(self, name);
+          if (this.initData && name in this.initData && typeof this.initField === "function") {
+            this.initField.call(this, String(name), { skipValidation: true });
+            return Reflect.get(this, name);
           }
           return undefined;
         },
         set(this: Model<T>, value: T) {
-          const self = this;
-          const initField = (self as unknown as { initField?: (field: string, options?: { skipValidation?: boolean }) => void }).initField;
-          const initData = (self as unknown as { initData?: Record<string | symbol, unknown> }).initData;
-          if (initData && !(name in initData)) {
-            Reflect.set(initData, name, value);
+          if (this.initData && !(name in this.initData)) {
+            Reflect.set(this.initData, name, value);
           }
-          if (typeof initField === "function") {
-            initField.call(self, String(name), { skipValidation: true });
+          if (typeof this.initField === "function") {
+            this.initField.call(this, String(name), { skipValidation: true });
             return;
           }
           Object.defineProperty(this, name, { value, writable: true, configurable: true, enumerable: true });
@@ -96,32 +90,31 @@ export function field<This, T>(
     }
   };
 
-  const define = (c: ClassFieldDecoratorContext<This, T>) => {
-    c.addInitializer(function (this: This) {
-      const instanceTarget = this as { initField?: (field: string, options?: { skipValidation?: boolean }) => void };
-      if (typeof instanceTarget.initField === "function") {
+  const define = (c: ClassFieldDecoratorContext<Model<T>, T>) => {
+    c.addInitializer(function (this: Model<T>) {
+      if (this instanceof Model && typeof this.initField === "function") {
         const instance = new FieldMetadata({ ...resolvedOptions, name: String(c.name), ctx: c });
-        const fields = getOwnMetadata(instance["metadataKey"], this, new Array<FieldMetadata>());
-        defineMetadata(instance["metadataKey"], [...fields, instance], this);
-        instanceTarget.initField.call(this, String(c.name));
+        const fields = getOwnMetadata(instance.metadataKey, this, new Array<FieldMetadata>());
+        defineMetadata(instance.metadataKey, [...fields, instance], this);
+        this.initField.call(this, String(c.name));
       }
     });
   };
 
-  function callback(t: any, c: any) {
+  function callback(t: any, c: ClassFieldDecoratorContext<This | Model<T>, T> | string | symbol) {
     if (isLegacyPropertyDecoratorArgs(t, c)) {
       defineLegacy(t, c);
       return;
     }
     if (isDecoratorContext(c)) {
-      define(c as ClassFieldDecoratorContext<This, T>);
-      if ((c as ClassFieldDecoratorContext<This, T>).kind === "field") return (value: T) => value;
+      define(c);
+      if (c.kind === "field") return (value: T) => value;
       return c;
     }
   }
 
   if (isLegacyPropertyDecoratorArgs(options, c)) {
-    return callback(options as any, c as any);
+    return callback(options, c);
   }
 
   if (resolvedOptions && !isDecoratorContext(c)) return (t: undefined, c: ClassFieldDecoratorContext<This, T>) => callback(t, c);
