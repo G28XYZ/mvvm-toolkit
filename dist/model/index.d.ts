@@ -25,7 +25,6 @@ export declare class Model<T = any> implements TModel<any> {
     /**
      * Сбросить внутренние стейты изменений.
      */
-    private resetToDefault;
     /**
      * Инициализировать валидацию для поля или всех полей.
      */

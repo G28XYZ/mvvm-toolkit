@@ -79,14 +79,14 @@ export class Model<T = any > implements TModel<any> {
   /**
    * Сбросить внутренние стейты изменений.
    */
-  @action private resetToDefault() {
-    this.modified_ = {};
-    this.committedData = {};
-    this.changes = [];
-    this.inverseChanges = [];
-    this.history = [];
-    this.historyIndex = -1;
-  }
+  // @action private resetToDefault() {
+  //   this.modified_ = {};
+  //   this.committedData = {};
+  //   this.changes = [];
+  //   this.inverseChanges = [];
+  //   this.history = [];
+  //   this.historyIndex = -1;
+  // }
 
   /**
    * Инициализировать валидацию для поля или всех полей.
