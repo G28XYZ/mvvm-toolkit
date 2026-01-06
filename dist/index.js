@@ -132,7 +132,60 @@ const yi = (e, s) => {
     addInitializer: i,
     metadata: n
   }), st(e).instance;
-}, Pe = /* @__PURE__ */ Symbol("field-key"), Fe = /* @__PURE__ */ Symbol("validation-key"), Re = /* @__PURE__ */ Symbol("submit-key"), ze = /* @__PURE__ */ Symbol("exclude-key"), Le = /* @__PURE__ */ Symbol("prop-from-view-key");
+};
+function yt(e) {
+  const s = Object.assign({ enumerable: !1, writable: !0 }, e);
+  return function(r, o) {
+    if (N(r, o)) {
+      Object.defineProperty(r, o, {
+        configurable: !0,
+        enumerable: s.enumerable,
+        get() {
+        },
+        set(i) {
+          Object.defineProperty(this, o, Object.assign({ value: i }, s));
+        }
+      });
+      return;
+    }
+    if (B(o)) {
+      const i = o;
+      return i.kind === "field" ? function(n) {
+        return Object.defineProperty(this, i.name, Object.assign({ value: n }, s)), n;
+      } : (i.addInitializer(function() {
+        const n = Object.getOwnPropertyDescriptor(this, i.name);
+        n && Object.defineProperty(this, i.name, Object.assign(Object.assign({}, n), { enumerable: s.enumerable }));
+      }), r);
+    }
+  };
+}
+function L(e, s) {
+  return N(e, s) || B(s) ? yt()(e, s) : yt(e);
+}
+function mi(e, s) {
+  const r = (n) => class extends n {
+    constructor(...a) {
+      super(...a), gt(this);
+    }
+  }, o = (n, a) => {
+    if (typeof Reflect?.getOwnMetadataKeys == "function")
+      for (const l of Reflect.getOwnMetadataKeys(n)) {
+        const u = Reflect.getOwnMetadata(l, n);
+        Reflect.defineMetadata(l, u, a);
+      }
+  };
+  function i(n, a) {
+    if (!B(a)) {
+      const l = n, u = r(l);
+      return Object.defineProperty(u, "__mvvm_legacy_source__", { value: l, configurable: !0 }), o(l, u), u;
+    }
+    a.addInitializer(function() {
+      gt(this);
+    });
+  }
+  return e && !B(s) || e ? i(e, s) : i;
+}
+const Pe = /* @__PURE__ */ Symbol("field-key"), Fe = /* @__PURE__ */ Symbol("validation-key"), Re = /* @__PURE__ */ Symbol("submit-key"), ze = /* @__PURE__ */ Symbol("exclude-key"), Le = /* @__PURE__ */ Symbol("prop-from-view-key");
 class nt {
   /**
    * Создать базовые метаданные.
@@ -209,68 +262,18 @@ class Mt extends nt {
       s && r in s && (this[r] = Reflect.get(s, r));
   }
 }
-function yt(e) {
-  const s = Object.assign({ enumerable: !1, writable: !0 }, e);
-  return function(r, o) {
-    if (N(r, o)) {
-      Object.defineProperty(r, o, {
-        configurable: !0,
-        enumerable: s.enumerable,
-        get() {
-        },
-        set(i) {
-          Object.defineProperty(this, o, Object.assign({ value: i }, s));
-        }
-      });
-      return;
-    }
-    if (B(o)) {
-      const i = o;
-      return i.kind === "field" ? function(n) {
-        return Object.defineProperty(this, i.name, Object.assign({ value: n }, s)), n;
-      } : (i.addInitializer(function() {
-        const n = Object.getOwnPropertyDescriptor(this, i.name);
-        n && Object.defineProperty(this, i.name, Object.assign(Object.assign({}, n), { enumerable: s.enumerable }));
-      }), r);
-    }
-  };
-}
-function L(e, s) {
-  return N(e, s) || B(s) ? yt()(e, s) : yt(e);
-}
-const Ke = () => {
-  var e;
-  const s = globalThis;
-  return !!((e = s.__MVVM_DEVTOOLS_HISTORY__) !== null && e !== void 0 ? e : s.__MVVM_DEVTOOLS_AUTO__);
-}, He = (e) => Ke() ? !e || typeof e != "object" ? { collectChanges: !0 } : "collectChanges" in e ? e : Object.assign(Object.assign({}, e), { collectChanges: !0 }) : e;
-function mi(e) {
-  const s = (i, n) => {
-    const a = new bt({ callback: e, name: String(n) }), l = K(a.metadataKey, i, new Array());
-    z(a.metadataKey, [...l, a], i);
-  }, r = (i) => {
-    i.addInitializer(function() {
-      const n = new bt({ callback: e, name: String(i.name) }), a = K(n.metadataKey, this, new Array());
-      z(n.metadataKey, [...a, n], this);
-    });
-  };
-  function o(i, n) {
-    if (N(i, n)) {
-      s(i, n);
-      return;
-    }
-    if (B(n))
-      return r(n), n.kind === "field" ? (a) => a : n;
-  }
-  return e ? ((i, n) => o(i, n)) : ((i) => i);
-}
 function vi(e) {
   const s = (i, n) => {
-    const a = new Dt({ callback: e, name: String(n) }), l = K(a.metadataKey, i, new Array());
+    const a = new Mt({ name: e, originName: String(n) });
+    a.name = e, a.originName = String(n);
+    const l = K(a.metadataKey, i, new Array());
     z(a.metadataKey, [...l, a], i);
   }, r = (i) => {
     i.addInitializer(function() {
-      const n = new Dt({ callback: e, name: String(i.name) }), a = K(n.metadataKey, this, new Array());
-      z(n.metadataKey, [...a, n], this);
+      const n = new Mt(), a = n.fields(this);
+      for (const l in this)
+        a instanceof Array && i.name === l && (n.name = e, n.originName = l, n.value = this[l], a.push(n));
+      z(n.metadataKey, a, this);
     });
   };
   function o(i, n) {
@@ -304,6 +307,11 @@ function gi(e) {
   if (e)
     return ((i, n) => o(i, n));
 }
+const Ke = () => {
+  var e;
+  const s = globalThis;
+  return !!((e = s.__MVVM_DEVTOOLS_HISTORY__) !== null && e !== void 0 ? e : s.__MVVM_DEVTOOLS_AUTO__);
+}, He = (e) => Ke() ? !e || typeof e != "object" ? { collectChanges: !0 } : "collectChanges" in e ? e : Object.assign(Object.assign({}, e), { collectChanges: !0 }) : e;
 function pi(e, s) {
   const r = He(N(e, s) ? void 0 : e), o = (a, l) => {
     const u = new Ot(Object.assign(Object.assign({}, r), { name: String(l), ctx: null })), f = K(u.metadataKey, a, new Array());
@@ -348,16 +356,12 @@ function pi(e, s) {
 }
 function bi(e) {
   const s = (i, n) => {
-    const a = new Mt({ name: e, originName: String(n) });
-    a.name = e, a.originName = String(n);
-    const l = K(a.metadataKey, i, new Array());
+    const a = new Dt({ callback: e, name: String(n) }), l = K(a.metadataKey, i, new Array());
     z(a.metadataKey, [...l, a], i);
   }, r = (i) => {
     i.addInitializer(function() {
-      const n = new Mt(), a = n.fields(this);
-      for (const l in this)
-        a instanceof Array && i.name === l && (n.name = e, n.originName = l, n.value = this[l], a.push(n));
-      z(n.metadataKey, a, this);
+      const n = new Dt({ callback: e, name: String(i.name) }), a = K(n.metadataKey, this, new Array());
+      z(n.metadataKey, [...a, n], this);
     });
   };
   function o(i, n) {
@@ -370,28 +374,25 @@ function bi(e) {
   }
   return e ? ((i, n) => o(i, n)) : ((i) => i);
 }
-function Di(e, s) {
-  const r = (n) => class extends n {
-    constructor(...a) {
-      super(...a), gt(this);
-    }
-  }, o = (n, a) => {
-    if (typeof Reflect?.getOwnMetadataKeys == "function")
-      for (const l of Reflect.getOwnMetadataKeys(n)) {
-        const u = Reflect.getOwnMetadata(l, n);
-        Reflect.defineMetadata(l, u, a);
-      }
-  };
-  function i(n, a) {
-    if (!B(a)) {
-      const l = n, u = r(l);
-      return Object.defineProperty(u, "__mvvm_legacy_source__", { value: l, configurable: !0 }), o(l, u), u;
-    }
-    a.addInitializer(function() {
-      gt(this);
+function Di(e) {
+  const s = (i, n) => {
+    const a = new bt({ callback: e, name: String(n) }), l = K(a.metadataKey, i, new Array());
+    z(a.metadataKey, [...l, a], i);
+  }, r = (i) => {
+    i.addInitializer(function() {
+      const n = new bt({ callback: e, name: String(i.name) }), a = K(n.metadataKey, this, new Array());
+      z(n.metadataKey, [...a, n], this);
     });
+  };
+  function o(i, n) {
+    if (N(i, n)) {
+      s(i, n);
+      return;
+    }
+    if (B(n))
+      return r(n), n.kind === "field" ? (a) => a : n;
   }
-  return e && !B(s) || e ? i(e, s) : i;
+  return e ? ((i, n) => o(i, n)) : ((i) => i);
 }
 const qe = () => {
   var e;
@@ -1403,9 +1404,9 @@ export {
   wi as GetStore,
   Ce as Inject,
   ki as InjectStore,
-  Di as MakeObservable,
+  mi as MakeObservable,
   Ii as Model,
-  bi as PropFromView,
+  vi as PropFromView,
   me as Service,
   yi as SetService,
   Ti as Store,
@@ -1424,8 +1425,8 @@ export {
   Ve as getExecutingFunctionNameByStack,
   K as getOwnMetadata,
   fi as isSerializable,
-  vi as submit,
-  mi as validation,
+  bi as submit,
+  Di as validation,
   Ai as view
 };
 //# sourceMappingURL=index.js.map
