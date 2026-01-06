@@ -19,45 +19,42 @@ const excludeMetadata = new ExcludeMetadata();
  * Класс для управлением состоянием модели.
  */
 export class Model<T = any > implements TModel<any> {
-  @define_prop
-  protected [immerable] = true;
+  // @define_prop
+  protected accessor [immerable] = true;
 
   @observable
-  @define_prop
+  // @define_prop
   protected accessor initData: Partial<T> = null;
 
-  @define_prop
+  // @define_prop
   protected accessor committedData: Partial<T> = {};
 
-  @define_prop
+  // @define_prop
   private accessor modified_: Partial<T> = {};
 
-  @define_prop
-  private draft: Draft<T | Partial<T>> = null;
+  // @define_prop
+  private accessor draft: Draft<T | Partial<T>> = null;
 
-  @define_prop
+  // @define_prop
   protected accessor changes: TPatch[] = [];
 
-  @define_prop
+  // @define_prop
   protected accessor inverseChanges: TPatch[] = [];
 
-  @define_prop
+  // @define_prop
   protected accessor history: THistoryEntry[] = [];
 
-  @define_prop
+  // @define_prop
   protected accessor historyIndex: number = -1;
 
-  @define_prop
-  private initializedFields?: Set<string>;
+  // @define_prop
+  private accessor legacyInitDone = false;
 
-  @define_prop
-  private legacyInitDone = false;
+  // @define_prop
+  private accessor options: ModelOptions<T> = {};
 
-  @define_prop
-  private rawInitData: Partial<T> = null;
-
-  @define_prop
-  private options?: ModelOptions<T>;
+  // @define_prop
+  private accessor historyMuted = false;
 
   /**
    * Создает модель и инициализирует данные.
@@ -87,7 +84,7 @@ export class Model<T = any > implements TModel<any> {
    */
   private initValidation(field?: string) {
     if (field) Reflect.get(this.validation, field);
-    else for (const validation in this.validation) this.validation[validation];
+    else for (let validation in this.validation) this.validation[validation];
   }
 
   /**
@@ -110,13 +107,7 @@ export class Model<T = any > implements TModel<any> {
       const value = fieldInstance?.factory ? fieldInstance.factory(this.initData, this) : Reflect.get(this.initData, fieldInstance.name);
       this.defineFieldValue(field, value, fieldInstance);
       if (!options?.skipValidation) this.initValidation(field);
-      this.getInitializedFields().add(String(field));
     }
-  }
-
-  private getInitializedFields() {
-    if (!this.initializedFields) this.initializedFields = new Set<string>();
-    return this.initializedFields;
   }
 
   private initLegacyFields() {
@@ -124,31 +115,9 @@ export class Model<T = any > implements TModel<any> {
     const fields = fieldMetadata.fields(this);
     if (!fields.some((field) => Object.prototype.hasOwnProperty.call(this, field.name))) return;
     this.legacyInitDone = true;
-    const initialized = this.getInitializedFields();
-    const sourceInit = this.rawInitData ?? this.initData;
-    if (sourceInit && sourceInit !== this.initData) {
-      try {
-        this.initData = (sourceInit);
-      } catch {
-        this.initData = { ...sourceInit };
-      }
-    }
-    for (const field of fields) {
-      const name = String(field.name);
-      if (sourceInit && name in sourceInit) {
-        const fieldInstance = fieldMetadata.fieldInstance(name, this);
-        if (!fieldInstance) continue;
-        if (!initialized.has(name)) {
-          const data = (sourceInit);
-          const nextValue = fieldInstance.factory ? fieldInstance.factory(data, this) : Reflect.get(data, fieldInstance.name);
-          this.defineFieldValue(name, nextValue, fieldInstance);
-          Reflect.set(this, name, nextValue);
-          initialized.add(name);
-        }
-        continue;
-      }
-      if (initialized.has(name)) continue;
-      this.initField(name, { skipValidation: true });
+    for (let field of fields) {
+      if (this.initData && String(field.name) in this.initData || !fieldMetadata.fieldInstance(String(field.name), this)) continue;
+      this.initField(String(field.name), { skipValidation: true });
     }
   }
 
@@ -156,14 +125,15 @@ export class Model<T = any > implements TModel<any> {
    * Создать draft для отслеживания изменений.
    */
   private createDraft(data?: Partial<T>) {
-    const draft: Partial<T> = {};
+    // const draft: Partial<T> = {};
 
-    for(const field in data) {
-      const fieldInstance = fieldMetadata.fieldInstance(field, this);
-      if(fieldInstance) Reflect.set(draft, field, (data[field]));
-    }
+    // TODO - поправить, тут несколько раз проходит по списку вместо одного
+    // for(let field in data) {
+    //   const fieldInstance = fieldMetadata.fieldInstance(field, this);
+    //   if(fieldInstance) draft[field] = data[field];
+    // }
 
-    this.draft = createDraft(draft);
+    this.draft = createDraft(data);
   }
 
   private autoAttachDevtools() {
@@ -189,9 +159,6 @@ export class Model<T = any > implements TModel<any> {
     }
   }
 
-  @define_prop
-  private historyMuted = false;
-
   // @define_prop
   // private readonly serviceToJSON = () => this.dumpData;
 
@@ -210,7 +177,7 @@ export class Model<T = any > implements TModel<any> {
     if (fields.size === 0) return;
 
     this.withHistoryMuted(() => {
-      for (const field of fields) {
+      for (let field of fields) {
         const draftValue = Reflect.get(this.draft as object, field) ?? Reflect.get(this.initData, field);
         Reflect.set(this, field, draftValue);
         this.defineFieldValue(field, Reflect.get(this, field));
@@ -333,18 +300,21 @@ export class Model<T = any > implements TModel<any> {
   /**
    * Определить getter/setter для поля модели.
    */
-  protected defineFieldValue(field: string, value?: any, fieldInstance?: IFieldMetadata<any, any>) {
-    !fieldInstance && (fieldInstance = fieldMetadata.fieldInstance(field, this));
+  protected defineFieldValue(
+    field: string,
+    value?: any,
+    fieldInstance: IFieldMetadata<any, any> = fieldMetadata.fieldInstance(field, this)
+  ) {
 
     if (value && typeof value === "object") {
       // TODO - может убрать...
-      value = this.createObservable(value, field, field);
+      // value = this.createObservable(value, field, field);
     }
 
     value = observable.box(value);
 
     Reflect.defineProperty(this, fieldInstance.name, {
-      get: () =>value.get(),
+      get: () => value.get(),
       set: (v) => {
         runInAction(() => value.set(v));
         this.produceDraft(fieldInstance.name, value.get());
@@ -360,15 +330,8 @@ export class Model<T = any > implements TModel<any> {
   /**
    * Сохранить исходные данные с глубоким клонированием.
    */
-  private cloneForInit(data: Partial<T>) {
-    if (data) {
-      try {
-        this.initData = { ...data };
-        // this.rawInitData = cloned;
-      } catch {}
-    } else {
-      this.rawInitData = null;
-    }
+  private cloneForInit(data: Partial<T> = {}) {
+    this.initData = data;
   }
 
   /**
@@ -396,7 +359,7 @@ export class Model<T = any > implements TModel<any> {
    * Применить данные к полям модели.
    */
   private defineData(data: Partial<T>) {
-    for (const field in this) {
+    for (let field in this) {
       if (!Object.prototype.hasOwnProperty.call(this, field)) continue;
       if (fieldMetadata.fieldInstance(field, this)) {
         Reflect.set(this, field, Reflect.get(data, field));
@@ -416,9 +379,7 @@ export class Model<T = any > implements TModel<any> {
    * Зафиксировать все изменения.
    */
   @action protected commit() {
-    for (const field of fieldMetadata.fields(this)) {
-      this.commitField(field.name);
-    }
+    for (let field of fieldMetadata.fields(this)) this.commitField(field.name);
 
     this.modified_ = {};
   }
@@ -427,7 +388,7 @@ export class Model<T = any > implements TModel<any> {
    * Зафиксировать изменения конкретного поля.
    */
   @action protected commitField<K extends keyof T | string>(field: K) {
-    for (const field in this) {
+    for (let field in this) {
       if (field in this.modified_) {
         Reflect.set(this.committedData, field, this[field])
       }
@@ -441,7 +402,7 @@ export class Model<T = any > implements TModel<any> {
    * Откатить изменения к последнему коммиту.
    */
   @action protected reject() {
-    for (const field in this) {
+    for (let field in this) {
       if (field in this.modified_) {
         this[field] = Reflect.get(this.modified_ as object, field);
         this.commitField(field);
@@ -456,7 +417,7 @@ export class Model<T = any > implements TModel<any> {
    */
   @action protected toInit(): Model<T> {
     this.withHistoryMuted(() => {
-      for (const field in this) {
+      for (let field in this) {
         if (field in this.initData) {
           this[field] = Reflect.get(this.initData as object, field);
           this.initField(field);
@@ -558,13 +519,7 @@ export class Model<T = any > implements TModel<any> {
       }
     });
 
-    try {
-      return (result);
-    } catch {
-      if(result) return { ...(result) };
-
-      return result;
-    }
+    return result;
   }
 
   /**
@@ -592,18 +547,20 @@ export class Model<T = any > implements TModel<any> {
   /**
    * Публичный API модели для вью.
    */
-  private readonly serviceApi: Pick<
+  private get serviceApi(): Pick<
     ModelService<T>,
     "loadData" | "reject" | "commit" | "commitField" | "toInit" | "undo" | "redo" | "goToHistory"
-  > = {
-    loadData   : (data?: Partial<T>): Model<T> => this.loadData(data),
-    reject     : (): void => this.reject(),
-    commit     : (): void => this.commit(),
-    commitField: (field: keyof T): void => this.commitField(field),
-    toInit     : (): Model<T> => this.toInit(),
-    undo       : (): void => this.undo(),
-    redo       : (): void => this.redo(),
-    goToHistory: (index: number): void => this.goToHistory(index),
+  > {
+    return {
+      loadData   : (data?: Partial<T>): Model<T> => this.loadData(data),
+      reject     : (): void => this.reject(),
+      commit     : (): void => this.commit(),
+      commitField: (field: keyof T): void => this.commitField(field),
+      toInit     : (): Model<T> => this.toInit(),
+      undo       : (): void => this.undo(),
+      redo       : (): void => this.redo(),
+      goToHistory: (index: number): void => this.goToHistory(index),
+    }
   };
 
   @computed.struct public get service(): ModelService<T> {

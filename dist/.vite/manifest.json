@@ -1,10 +1,10 @@
 {
-  "_tslib.es6-COgJoJmX.js": {
-    "file": "tslib.es6-COgJoJmX.js",
+  "_tslib.es6--9daFdVU.cjs": {
+    "file": "tslib.es6--9daFdVU.cjs",
     "name": "tslib.es6"
   },
-  "_tslib.es6-DqNExo46.cjs": {
-    "file": "tslib.es6-DqNExo46.cjs",
+  "_tslib.es6-B_Omq7a0.js": {
+    "file": "tslib.es6-B_Omq7a0.js",
     "name": "tslib.es6"
   },
   "src/hooks/index.ts": {
@@ -22,7 +22,7 @@
     "src": "src/hooks/virtual-scroll.ts",
     "isEntry": true,
     "imports": [
-      "_tslib.es6-COgJoJmX.js"
+      "_tslib.es6-B_Omq7a0.js"
     ]
   },
   "src/index.ts": {
@@ -31,7 +31,7 @@
     "src": "src/index.ts",
     "isEntry": true,
     "imports": [
-      "_tslib.es6-COgJoJmX.js"
+      "_tslib.es6-B_Omq7a0.js"
     ]
   },
   "src/vite-plugins/index.ts": {
@@ -49,7 +49,7 @@
     "src": "src/vite-plugins/mvvm-di.ts",
     "isEntry": true,
     "imports": [
-      "_tslib.es6-COgJoJmX.js"
+      "_tslib.es6-B_Omq7a0.js"
     ]
   }
 }

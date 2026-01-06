@@ -1,11 +1,26 @@
 import { isDecoratorContext, isLegacyPropertyDecoratorArgs } from "../utils/decorators";
 
 /** Общий тип контекста для field/accessor декораторов. */
-type DefinePropContext<This, T> = ClassFieldDecoratorContext<This, T> | ClassAccessorDecoratorContext<This, T>;
+export type DefinePropContext<This, T> = ClassFieldDecoratorContext<This, T> | ClassAccessorDecoratorContext<This, T>;
 
 /** Создать декоратор, который определяет свойство с указанными опциями дескриптора. */
 function createDefinePropDecorator(options?: PropertyDescriptor) {
   const descriptor: PropertyDescriptor = { enumerable: false, writable: true, ...options };
+  // “склеиваем” базовые флаги один раз
+  const base: PropertyDescriptor = {
+    configurable: true,
+    enumerable  : false,
+    writable    : true,
+    ...options,
+  };
+
+  // shared-объект дескриптора именно для этой конфигурации (тоже reuse)
+  const shared: PropertyDescriptor = {
+    configurable: base.configurable ?? true,
+    enumerable  : base.enumerable ?? false,
+    writable    : base.writable ?? true,
+    value       : undefined,
+  };
 
   return function <This, T>(valueOrTarget: T, contextOrKey: DefinePropContext<This, T> | string | symbol) {
     if (isLegacyPropertyDecoratorArgs(valueOrTarget, contextOrKey)) {
@@ -16,7 +31,11 @@ function createDefinePropDecorator(options?: PropertyDescriptor) {
           return undefined;
         },
         set(value: T) {
-          Object.defineProperty(this, contextOrKey, { value, ...descriptor });
+          // reuse shared descriptor
+          shared.value = value;
+          Object.defineProperty(this, contextOrKey, shared);
+          shared.value = undefined;
+          // Object.defineProperty(this, contextOrKey, { value, ...descriptor });
         },
       });
       return;
@@ -26,7 +45,11 @@ function createDefinePropDecorator(options?: PropertyDescriptor) {
       const context = contextOrKey as DefinePropContext<This, T>;
       if (context.kind === "field") {
         return function (this: This, initialValue: T) {
-          Object.defineProperty(this, context.name, { value: initialValue, ...descriptor });
+          // Object.defineProperty(this, context.name, { value: initialValue, ...descriptor });
+          // reuse shared descriptor, только меняем value
+          shared.value = initialValue;
+          Object.defineProperty(this, context.name, shared);
+          shared.value = undefined;
           return initialValue;
         };
       }
@@ -38,7 +61,7 @@ function createDefinePropDecorator(options?: PropertyDescriptor) {
         }
       });
 
-      return valueOrTarget as unknown as ClassAccessorDecoratorResult<This, T>;
+      return valueOrTarget;
     }
   };
 }
@@ -64,12 +87,12 @@ export function define_prop(options?: PropertyDescriptor): any;
 /** Реализация декоратора define_prop. */
 export function define_prop(valueOrOptions?: unknown, context?: unknown) {
   if (isLegacyPropertyDecoratorArgs(valueOrOptions, context)) {
-    return createDefinePropDecorator()(valueOrOptions as any, context as any);
+    return createDefinePropDecorator()(valueOrOptions, context);
   }
 
   if (isDecoratorContext(context)) {
-    return createDefinePropDecorator()(valueOrOptions as any, context as any);
+    return createDefinePropDecorator()(valueOrOptions, context);
   }
 
-  return createDefinePropDecorator(valueOrOptions as PropertyDescriptor);
+  return createDefinePropDecorator(valueOrOptions);
 }

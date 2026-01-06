@@ -5,19 +5,18 @@ import { ModelOptions, ModelService, TModel, TPatch, THistoryEntry } from "./typ
  * Класс для управлением состоянием модели.
  */
 export declare class Model<T = any> implements TModel<any> {
-    protected [immerable]: boolean;
+    protected accessor [immerable]: boolean;
     protected accessor initData: Partial<T>;
     protected accessor committedData: Partial<T>;
     private accessor modified_;
-    private draft;
+    private accessor draft;
     protected accessor changes: TPatch[];
     protected accessor inverseChanges: TPatch[];
     protected accessor history: THistoryEntry[];
     protected accessor historyIndex: number;
-    private initializedFields?;
-    private legacyInitDone;
-    private rawInitData;
-    private options?;
+    private accessor legacyInitDone;
+    private accessor options;
+    private accessor historyMuted;
     /**
      * Создает модель и инициализирует данные.
      */
@@ -39,7 +38,6 @@ export declare class Model<T = any> implements TModel<any> {
     protected initField(field: string, options?: {
         skipValidation?: boolean;
     }): void;
-    private getInitializedFields;
     private initLegacyFields;
     /**
      * Создать draft для отслеживания изменений.
@@ -47,7 +45,6 @@ export declare class Model<T = any> implements TModel<any> {
     private createDraft;
     private autoAttachDevtools;
     private withHistoryMuted;
-    private historyMuted;
     private syncChangesFromHistory;
     private applyHistoryPatches;
     /**
@@ -140,7 +137,7 @@ export declare class Model<T = any> implements TModel<any> {
     /**
      * Публичный API модели для вью.
      */
-    private readonly serviceApi;
+    private get serviceApi();
     get service(): ModelService<T>;
 }
 export * from './types';

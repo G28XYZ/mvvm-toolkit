@@ -1,3 +1,5 @@
+/** Общий тип контекста для field/accessor декораторов. */
+export type DefinePropContext<This, T> = ClassFieldDecoratorContext<This, T> | ClassAccessorDecoratorContext<This, T>;
 /**
  * Декоратор для определения свойства с не перечисляемым дескриптором по умолчанию.
  * @example

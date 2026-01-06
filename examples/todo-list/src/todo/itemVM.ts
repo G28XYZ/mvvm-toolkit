@@ -38,6 +38,7 @@ export class ItemVM extends ViewModel {
     this.isEditing = false;
     this.item.service.commit();
     console.log(this.item.service.dumpData);
+    console.log(this.item);
 
   }
 
