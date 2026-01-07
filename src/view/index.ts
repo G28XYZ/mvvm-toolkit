@@ -33,7 +33,7 @@ export function view<U, T extends TInstance = TInstance>(
     const { resolved, instance } = useMemo(() => {
       const service = typeof vm === "string" ? GetService(vm) : GetService(vm);
       const resolved = service || (typeof vm !== "string" ? { instance: new vm() } : undefined);
-      const instance = resolved?.instance as { onInit?: () => void; onDispose?: () => void } | undefined;
+      const instance = resolved?.instance;
       return { resolved, instance };
     }, [vm]);
 
@@ -58,7 +58,7 @@ export function view<U, T extends TInstance = TInstance>(
         }
       }
       defineMetadata(propFromViewMetadata.metadataKey, resolvedPropsFromView, instance);
-      return reactComponent({ viewModel: instance, ...props } as any);
+      return reactComponent({ viewModel: instance, ...props });
     }
 
     return reactComponent({ ...props } as any);

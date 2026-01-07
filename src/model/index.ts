@@ -326,9 +326,7 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
         enumerable: true,
         configurable: true,
       });
-
     }
-
 
     return value;
   }
