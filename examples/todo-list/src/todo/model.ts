@@ -1,4 +1,5 @@
-import { Model, exclude, field, validation } from "rvm-toolkit";
+import { observable } from "mobx";
+import { Model, field, validation } from "rvm-toolkit";
 
 export type TodoDto = {
   id  : number;
@@ -8,7 +9,7 @@ export type TodoDto = {
 
 
 export class TodoModel extends Model<TodoDto> {
-  @field
+  @field.noObserve
 	id: number = 0;
 
   @field

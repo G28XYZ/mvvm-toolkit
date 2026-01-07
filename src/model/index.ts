@@ -2,7 +2,6 @@ import { isObject, isEqual, isEmpty } from "lodash";
 import { immerable, produce, createDraft, Draft, enablePatches, applyPatches } from "immer";
 import { action, computed, isObservable, observable, runInAction } from "mobx";
 import { FieldMetadata, SubmitMetadata, ValidationMetadata, ExcludeMetadata, IFieldMetadata } from "./data";
-import { define_prop } from "../decorators/define_prop";
 import { attachModelDevtools } from "./devtools";
 import { ModelOptions, ModelService, TModel, TPatch, THistoryEntry } from "./types";
 enablePatches();
@@ -18,7 +17,7 @@ const excludeMetadata = new ExcludeMetadata();
 /**
  * Класс для управлением состоянием модели.
  */
-export class Model<T = any > implements TModel<any> {
+export class Model<T extends Record<string, any> = any > implements TModel<any> {
   // @define_prop
   protected accessor [immerable] = true;
 
@@ -63,8 +62,8 @@ export class Model<T = any > implements TModel<any> {
     this.options = options;
     this[immerable] = true;
     this.init(data);
-    this.autoAttachDevtools();
     this.initLegacyFields();
+    this.autoAttachDevtools();
   }
 
   /**
@@ -103,8 +102,8 @@ export class Model<T = any > implements TModel<any> {
   protected initField(field: string, options?: { skipValidation?: boolean }) {
     const fieldInstance = fieldMetadata.fieldInstance(field, this);
     if (fieldInstance) {
-      if(field in this.initData === false) Reflect.set(this.initData, field, (Reflect.get(this, field)));
-      const value = fieldInstance?.factory ? fieldInstance.factory(this.initData, this) : Reflect.get(this.initData, fieldInstance.name);
+      if(field in this.initData === false) Reflect.set(this.initData, field, Reflect.get(this, field));
+      const value = fieldInstance?.factory ? fieldInstance.factory(this.initData, this) : this.initData[fieldInstance.name];
       this.defineFieldValue(field, value, fieldInstance);
       if (!options?.skipValidation) this.initValidation(field);
     }
@@ -311,18 +310,25 @@ export class Model<T = any > implements TModel<any> {
       // value = this.createObservable(value, field, field);
     }
 
-    value = observable.box(value);
+    if(fieldInstance.noObserve) {
+      Reflect.defineProperty(this, fieldInstance.name, { value })
+    } else {
 
-    Reflect.defineProperty(this, fieldInstance.name, {
-      get: () => value.get(),
-      set: (v) => {
-        runInAction(() => value.set(v));
-        this.produceDraft(fieldInstance.name, value.get());
-        this.checkChange(fieldInstance.name, value.get());
-      },
-      enumerable: true,
-      configurable: true,
-    });
+      value = observable.box(value);
+
+      Reflect.defineProperty(this, fieldInstance.name, {
+        get: () => value.get(),
+        set: (v) => {
+          runInAction(() => value.set(v));
+          this.produceDraft(fieldInstance.name, value.get());
+          this.checkChange(fieldInstance.name, value.get());
+        },
+        enumerable: true,
+        configurable: true,
+      });
+
+    }
+
 
     return value;
   }
@@ -331,6 +337,7 @@ export class Model<T = any > implements TModel<any> {
    * Сохранить исходные данные с глубоким клонированием.
    */
   private cloneForInit(data: Partial<T> = {}) {
+    // TODO - clone ?
     this.initData = data;
   }
 

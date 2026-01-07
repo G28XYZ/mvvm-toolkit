@@ -172,6 +172,8 @@ export interface IFieldMetadata<T = any, I = any> extends IMetadataModel {
    * @todo - еще не реализован, доделать
    **/
   mapping?: (data: T, instance: I) => any;
+  /** не наблюдаемое поле */
+  noObserve?: boolean;
   /** имя поля модели */
   name: string;
   /** контекст декоратора поля */
@@ -188,9 +190,10 @@ export interface IFieldMetadata<T = any, I = any> extends IMetadataModel {
 }
 
 export class FieldMetadata extends MetadataModel<IFieldMetadata> implements IFieldMetadata {
-  factory?: IFieldMetadata["factory"] = null;
-  mapping?: IFieldMetadata["mapping"] = null;
-  collectChanges?: boolean = false;
+  factory       ?: IFieldMetadata["factory"]   = null;
+  mapping       ?: IFieldMetadata["mapping"]   = null;
+  noObserve     ?: IFieldMetadata["noObserve"] = null;
+  collectChanges?: boolean                     = false;
 
   name: string = null;
   ctx: ClassFieldDecoratorContext = null;
@@ -201,10 +204,11 @@ export class FieldMetadata extends MetadataModel<IFieldMetadata> implements IFie
    */
   constructor(props: Partial<IFieldMetadata> = {}) {
     super(props);
-    this.factory = props.factory;
-    this.mapping = props.mapping;
-    this.name = props.name;
-    this.ctx = props.ctx;
+    this.factory   = props.factory;
+    this.mapping   = props.mapping;
+    this.noObserve = props.noObserve;
+    this.name      = props.name;
+    this.ctx       = props.ctx;
     this.collectChanges = Boolean(props.collectChanges);
   }
 }

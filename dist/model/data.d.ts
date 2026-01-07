@@ -69,6 +69,8 @@ export interface IFieldMetadata<T = any, I = any> extends IMetadataModel {
      * @todo - еще не реализован, доделать
      **/
     mapping?: (data: T, instance: I) => any;
+    /** не наблюдаемое поле */
+    noObserve?: boolean;
     /** имя поля модели */
     name: string;
     /** контекст декоратора поля */
@@ -86,6 +88,7 @@ export interface IFieldMetadata<T = any, I = any> extends IMetadataModel {
 export declare class FieldMetadata extends MetadataModel<IFieldMetadata> implements IFieldMetadata {
     factory?: IFieldMetadata["factory"];
     mapping?: IFieldMetadata["mapping"];
+    noObserve?: IFieldMetadata["noObserve"];
     collectChanges?: boolean;
     name: string;
     ctx: ClassFieldDecoratorContext;

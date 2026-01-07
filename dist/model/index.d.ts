@@ -4,7 +4,7 @@ import { ModelOptions, ModelService, TModel, TPatch, THistoryEntry } from "./typ
 /**
  * Класс для управлением состоянием модели.
  */
-export declare class Model<T = any> implements TModel<any> {
+export declare class Model<T extends Record<string, any> = any> implements TModel<any> {
     protected accessor [immerable]: boolean;
     protected accessor initData: Partial<T>;
     protected accessor committedData: Partial<T>;

@@ -22,11 +22,13 @@ const isDevtoolsHistoryEnabled = () => {
   return Boolean(globalAny.__MVVM_DEVTOOLS_HISTORY__ ?? globalAny.__MVVM_DEVTOOLS_AUTO__);
 };
 
-const resolveFieldOptions = <TOptions extends object | undefined>(options: TOptions): TOptions | { collectChanges: boolean } => {
+const resolveFieldOptions = <TOptions extends object | undefined>(
+  options: TOptions
+): TOptions | { collectChanges: boolean } => {
   if (!isDevtoolsHistoryEnabled()) return options;
   if (!options || typeof options !== "object") return { collectChanges: true };
   if ("collectChanges" in options) return options;
-  return { ...options, collectChanges: true };
+  return { ...(options as any), collectChanges: true };
 };
 
 /**
@@ -40,7 +42,7 @@ export function field<This, T>(
 
 /**
  * Декоратор поля модели с опциями.
- * @param options опции поля (factory/mapping/collectChanges).
+ * @param options опции поля (factory/mapping/collectChanges/noObserve).
  * @example
  * class VM extends Model<{ count: number }> {
  *   @field({ collectChanges: true })
@@ -48,16 +50,20 @@ export function field<This, T>(
  * }
  */
 export function field<This, T = unknown>(
-  options: Pick<IFieldMetadata<ModelData<This>, This>, "factory" | "mapping" | "collectChanges">
+  options: Pick<IFieldMetadata<ModelData<This>, This>, "factory" | "mapping" | "collectChanges" | "noObserve">
 ): AnyFieldDecorator<This, T>;
+
 export function field<This, T>(
-  options: undefined | Pick<IFieldMetadata<This, T>, "factory" | "mapping" | "collectChanges"> | object,
+  options:
+    | undefined
+    | Pick<IFieldMetadata<ModelData<This>, This>, "factory" | "mapping" | "collectChanges" | "noObserve">
+    | object,
   c?: ClassFieldDecoratorContext<This, T> | string | symbol
 ) {
   const resolvedOptions = resolveFieldOptions(isLegacyPropertyDecoratorArgs(options, c) ? undefined : options);
 
   const defineLegacy = (target: object, name: string | symbol) => {
-    const instance = new FieldMetadata({ ...resolvedOptions, name: String(name), ctx: null });
+    const instance = new FieldMetadata({ ...(resolvedOptions as any), name: String(name), ctx: null });
     const fields = getOwnMetadata(instance.metadataKey, target, new Array<FieldMetadata>());
     defineMetadata(instance.metadataKey, [...fields, instance], target);
 
@@ -90,26 +96,26 @@ export function field<This, T>(
     }
   };
 
-  const define = (c: ClassFieldDecoratorContext<Model<T>, T>) => {
-    c.addInitializer(function (this: Model<T>) {
+  const define = (ctx: ClassFieldDecoratorContext<Model<T>, T>) => {
+    ctx.addInitializer(function (this: Model<T>) {
       if (this instanceof Model && typeof this.initField === "function") {
-        const instance = new FieldMetadata({ ...resolvedOptions, name: String(c.name), ctx: c });
+        const instance = new FieldMetadata({ ...(resolvedOptions as any), name: String(ctx.name), ctx });
         const fields = getOwnMetadata(instance.metadataKey, this, new Array<FieldMetadata>());
         defineMetadata(instance.metadataKey, [...fields, instance], this);
-        this.initField.call(this, String(c.name));
+        this.initField.call(this, String(ctx.name));
       }
     });
   };
 
-  function callback(t: any, c: ClassFieldDecoratorContext<This | Model<T>, T> | string | symbol) {
-    if (isLegacyPropertyDecoratorArgs(t, c)) {
-      defineLegacy(t, c);
+  function callback(t: any, ctxOrKey: ClassFieldDecoratorContext<This | Model<T>, T> | string | symbol) {
+    if (isLegacyPropertyDecoratorArgs(t, ctxOrKey)) {
+      defineLegacy(t, ctxOrKey);
       return;
     }
-    if (isDecoratorContext(c)) {
-      define(c);
-      if (c.kind === "field") return (value: T) => value;
-      return c;
+    if (isDecoratorContext(ctxOrKey)) {
+      define(ctxOrKey as any);
+      if (ctxOrKey.kind === "field") return (value: T) => value;
+      return ctxOrKey;
     }
   }
 
@@ -117,9 +123,52 @@ export function field<This, T>(
     return callback(options, c);
   }
 
-  if (resolvedOptions && !isDecoratorContext(c)) return (t: undefined, c: ClassFieldDecoratorContext<This, T>) => callback(t, c);
+  if (resolvedOptions && !isDecoratorContext(c)) {
+    return (t: undefined, ctx: ClassFieldDecoratorContext<This, T>) => callback(t, ctx);
+  }
 
   if (isDecoratorContext(c)) return callback(undefined, c);
 
-  return (t: undefined, c: ClassFieldDecoratorContext<This, T>) => callback(t, c);
+  return (t: undefined, ctx: ClassFieldDecoratorContext<This, T>) => callback(t, ctx);
+}
+
+/* =========================
+   field.noObserve (typed)
+   ========================= */
+
+type FieldOptions<This> = Pick<
+  IFieldMetadata<ModelData<This>, This>,
+  "factory" | "mapping" | "collectChanges" | "noObserve"
+>;
+
+type FieldNoObserve = {
+  // @field.noObserve prop; (legacy/new decorators)
+  <This, T>(
+    targetOrValue: object | undefined,
+    contextOrKey: ClassFieldDecoratorContext<This, T> | string | symbol
+  ): any;
+
+  // @field.noObserve() / @field.noObserve({ ... })
+  <This, T = unknown>(options?: FieldOptions<This>): AnyFieldDecorator<This, T>;
+};
+
+const forceNoObserve = <TOptions extends object | undefined>(options: TOptions) => {
+  if (!options || typeof options !== "object") return { noObserve: true } as const;
+  return { ...(options as any), noObserve: true };
+};
+
+// ВАЖНО: namespace должен быть ПОСЛЕ реализации функции field()
+export namespace field {
+  export const noObserve: FieldNoObserve = (function noObserve<This, T>(
+    optionsOrTarget?: any,
+    contextOrKey?: any
+  ) {
+    // Использование как декоратор: @field.noObserve
+    if (isLegacyPropertyDecoratorArgs(optionsOrTarget, contextOrKey) || isDecoratorContext(contextOrKey)) {
+      return field({ noObserve: true })(optionsOrTarget, contextOrKey as string | symbol | ClassFieldDecoratorContext<unknown, unknown>);
+    }
+
+    // Использование как фабрика: @field.noObserve() / @field.noObserve({ ... })
+    return field(forceNoObserve(optionsOrTarget));
+  }) as any;
 }
