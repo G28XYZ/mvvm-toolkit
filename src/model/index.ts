@@ -1,9 +1,17 @@
 import { isObject, isEqual, isEmpty } from "lodash";
 import { immerable, produce, createDraft, Draft, enablePatches, applyPatches } from "immer";
 import { action, computed, isObservable, observable, runInAction } from "mobx";
-import { FieldMetadata, SubmitMetadata, ValidationMetadata, ExcludeMetadata, IFieldMetadata } from "./data";
+import {
+  FieldMetadata,
+  SubmitMetadata,
+  ValidationMetadata,
+  ExcludeMetadata,
+  IFieldMetadata,
+  ISubmitMetadata,
+  IExcludeMetadata,
+} from "./data";
 import { attachModelDevtools } from "./devtools";
-import { ModelOptions, ModelService, TModel, TPatch, THistoryEntry } from "./types";
+import { ModelOptions, ModelService, TModel, TPatch, THistoryEntry, IMetadataModel } from "./types";
 enablePatches();
 /** */
 const submitMetadata = new SubmitMetadata();
@@ -55,6 +63,38 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
   // @define_prop
   private accessor historyMuted = false;
 
+  // @define_prop
+  private accessor [fieldMetadata.metadataKey]: {
+    ownRef: unknown;
+    protoRef: unknown;
+    list: IFieldMetadata<any, any>[];
+    map: Map<string, IFieldMetadata<any, any>>;
+  } = null;
+
+  // @define_prop
+  private accessor [submitMetadata.metadataKey]: {
+    ownRef: unknown;
+    protoRef: unknown;
+    list: ISubmitMetadata[];
+    map: Map<string, ISubmitMetadata>;
+  } = null;
+
+  // @define_prop
+  private accessor [excludeMetadata.metadataKey]: {
+    ownRef: unknown;
+    protoRef: unknown;
+    list: IExcludeMetadata[];
+    map: Map<string, IExcludeMetadata>;
+  } = null;
+
+  // @define_prop
+  private accessor [validationMetadata.metadataKey]: {
+    ownRef: unknown;
+    protoRef: unknown;
+    list: IMetadataModel[];
+    map: Map<string, IMetadataModel>;
+  } = null;
+
   /**
    * Создает модель и инициализирует данные.
    */
@@ -64,6 +104,78 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
     this.init(data);
     this.initLegacyFields();
     this.autoAttachDevtools();
+  }
+
+  private getFieldMetaCache() {
+    const ownRef = Reflect.getOwnMetadata(fieldMetadata.metadataKey, this);
+    const proto = Object.getPrototypeOf(this);
+    const protoRef = proto ? Reflect.getOwnMetadata(fieldMetadata.metadataKey, proto) : null;
+    const cached = this[fieldMetadata.metadataKey];
+    if (cached && cached !== true && cached.ownRef === ownRef && cached.protoRef === protoRef) return cached;
+
+    const list = fieldMetadata.fields(this);
+    const map = new Map<string, IFieldMetadata<any, any>>();
+    for (const item of list) {
+      map.set(String(item.name), item);
+    }
+    const next = { ownRef, protoRef, list, map };
+    this[fieldMetadata.metadataKey] = next;
+    return next;
+  }
+
+  private getFieldMeta(name: string) {
+    return this.getFieldMetaCache().map.get(String(name));
+  }
+
+  private getSubmitMetaCache() {
+    const ownRef = Reflect.getOwnMetadata(submitMetadata.metadataKey, this);
+    const proto = Object.getPrototypeOf(this);
+    const protoRef = proto ? Reflect.getOwnMetadata(submitMetadata.metadataKey, proto) : null;
+    const cached = this[submitMetadata.metadataKey];
+    if (cached && cached !== true && cached.ownRef === ownRef && cached.protoRef === protoRef) return cached;
+
+    const list = submitMetadata.fields(this);
+    const map = new Map<string, ISubmitMetadata>();
+    for (const item of list) {
+      map.set(String(item.name), item);
+    }
+    const next = { ownRef, protoRef, list, map };
+    this[submitMetadata.metadataKey] = next;
+    return next;
+  }
+
+  private getExcludeMetaCache() {
+    const ownRef = Reflect.getOwnMetadata(excludeMetadata.metadataKey, this);
+    const proto = Object.getPrototypeOf(this);
+    const protoRef = proto ? Reflect.getOwnMetadata(excludeMetadata.metadataKey, proto) : null;
+    const cached = this[excludeMetadata.metadataKey];
+    if (cached && cached !== true && cached.ownRef === ownRef && cached.protoRef === protoRef) return cached;
+
+    const list = excludeMetadata.fields(this);
+    const map = new Map<string, IExcludeMetadata>();
+    for (const item of list) {
+      map.set(String(item.name), item);
+    }
+    const next = { ownRef, protoRef, list, map };
+    this[excludeMetadata.metadataKey] = next;
+    return next;
+  }
+
+  private getValidationMetaCache() {
+    const ownRef = Reflect.getOwnMetadata(validationMetadata.metadataKey, this);
+    const proto = Object.getPrototypeOf(this);
+    const protoRef = proto ? Reflect.getOwnMetadata(validationMetadata.metadataKey, proto) : null;
+    const cached = this[validationMetadata.metadataKey];
+    if (cached && cached !== true && cached.ownRef === ownRef && cached.protoRef === protoRef) return cached;
+
+    const list = validationMetadata.fields(this);
+    const map = new Map<string, IMetadataModel>();
+    for (const item of list) {
+      map.set(String(item.name), item);
+    }
+    const next = { ownRef, protoRef, list, map };
+    this[validationMetadata.metadataKey] = next;
+    return next;
   }
 
   /**
@@ -82,8 +194,9 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
    * Инициализировать валидацию для поля или всех полей.
    */
   private initValidation(field?: string) {
-    if (field) Reflect.get(this.validation, field);
-    else for (let validation in this.validation) this.validation[validation];
+    const validation = this.validation;
+    if (field) Reflect.get(validation, field);
+    else for (let validationKey in validation) validation[validationKey];
   }
 
   /**
@@ -100,7 +213,7 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
    * Инициализировать отдельное поле модели.
    */
   protected initField(field: string, options?: { skipValidation?: boolean }) {
-    const fieldInstance = fieldMetadata.fieldInstance(field, this);
+    const fieldInstance = this.getFieldMeta(field);
     if (fieldInstance) {
       if(field in this.initData === false) Reflect.set(this.initData, field, Reflect.get(this, field));
       const value = fieldInstance?.factory ? fieldInstance.factory(this.initData, this) : this.initData[fieldInstance.name];
@@ -111,12 +224,13 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
 
   private initLegacyFields() {
     if (this.legacyInitDone) return;
-    const fields = fieldMetadata.fields(this);
+    const fields = this.getFieldMetaCache().list;
     if (!fields.some((field) => Object.prototype.hasOwnProperty.call(this, field.name))) return;
     this.legacyInitDone = true;
     for (let field of fields) {
-      if (this.initData && String(field.name) in this.initData || !fieldMetadata.fieldInstance(String(field.name), this)) continue;
-      this.initField(String(field.name), { skipValidation: true });
+      const fieldName = String(field.name);
+      if (this.initData && fieldName in this.initData) continue;
+      this.initField(fieldName, { skipValidation: true });
     }
   }
 
@@ -201,7 +315,7 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
     let latestPatches: TPatch[] = [];
     if (changePath) {
       originField = changePath.split(".")[0];
-      if (originField && !fieldMetadata.fieldInstance(originField, this).collectChanges) return;
+      if (originField && !this.getFieldMeta(originField)!.collectChanges) return;
     }
 
     produce(
@@ -302,26 +416,27 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
   protected defineFieldValue(
     field: string,
     value?: any,
-    fieldInstance: IFieldMetadata<any, any> = fieldMetadata.fieldInstance(field, this)
+    fieldInstance?: IFieldMetadata<any, any>
   ) {
+    const resolvedFieldInstance = fieldInstance ?? this.getFieldMeta(field);
 
     if (value && typeof value === "object") {
       // TODO - может убрать...
       // value = this.createObservable(value, field, field);
     }
 
-    if(fieldInstance.noObserve) {
-      Reflect.defineProperty(this, fieldInstance.name, { value })
+    if(resolvedFieldInstance.noObserve) {
+      Reflect.defineProperty(this, resolvedFieldInstance.name, { value })
     } else {
 
       value = observable.box(value);
 
-      Reflect.defineProperty(this, fieldInstance.name, {
+      Reflect.defineProperty(this, resolvedFieldInstance.name, {
         get: () => value.get(),
         set: (v) => {
           runInAction(() => value.set(v));
-          this.produceDraft(fieldInstance.name, value.get());
-          this.checkChange(fieldInstance.name, value.get());
+          this.produceDraft(resolvedFieldInstance.name, value.get());
+          this.checkChange(resolvedFieldInstance.name, value.get());
         },
         enumerable: true,
         configurable: true,
@@ -349,11 +464,10 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
     runInAction(() => {
       if (isChanged) {
         Reflect.set(this.modified_, field, originValue);
+        return;
       }
-      for (const modified in this.modified_) {
-        if (field === modified && field in this.modified_ && isEqual(originValue, value)) {
-          delete this.modified_[modified];
-        }
+      if (field in this.modified_ && isEqual(originValue, value)) {
+        delete this.modified_[field as keyof T];
       }
     });
 
@@ -364,9 +478,10 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
    * Применить данные к полям модели.
    */
   private defineData(data: Partial<T>) {
+    const fieldMap = this.getFieldMetaCache().map;
     for (let field in this) {
       if (!Object.prototype.hasOwnProperty.call(this, field)) continue;
-      if (fieldMetadata.fieldInstance(field, this)) {
+      if (fieldMap.has(field)) {
         Reflect.set(this, field, Reflect.get(data, field));
         this.initField(field);
       }
@@ -384,7 +499,7 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
    * Зафиксировать все изменения.
    */
   @action protected commit() {
-    for (let field of fieldMetadata.fields(this)) this.commitField(field.name);
+    for (let field of this.getFieldMetaCache().list) this.commitField(field.name);
 
     this.modified_ = {};
   }
@@ -422,12 +537,6 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
    */
   @action protected toInit(): Model<T> {
     this.withHistoryMuted(() => {
-      for (let field in this) {
-        if (field in this.initData) {
-          this[field] = Reflect.get(this.initData as object, field);
-          this.initField(field);
-        }
-      }
       this.init(this.initData);
     });
     return this;
@@ -481,7 +590,6 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
   protected loadData(data?: Partial<T>): Model<T> {
     this.withHistoryMuted(() => {
       this.init(data);
-      this.defineData(this.initData);
     });
     return this;
   }
@@ -493,16 +601,18 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
     this.initLegacyFields();
     const result: T = Object.create({});
 
+    const submitMap = this.getSubmitMetaCache().map;
+    const excludeMap = this.getExcludeMetaCache().map;
+
     const getValue = (field: string) => {
-      try {
-        return submitMetadata.fieldInstance(field, this).callback(Reflect.get(this, field), this)
-      } catch {
-        return Reflect.get(this, field)
-      }
+      const value = Reflect.get(this, field);
+      const submitInstance = submitMap.get(field);
+      const callback = submitInstance?.callback;
+      return typeof callback === "function" ? callback(value, this) : value;
     };
 
     const isExcludeField = (field: string) => {
-      const excludeInstance = excludeMetadata.fieldInstance(field, this);
+      const excludeInstance = excludeMap.get(field);
       if (excludeInstance) {
         switch (typeof excludeInstance.callback) {
           case "boolean":  return Boolean(excludeInstance.callback);
@@ -513,7 +623,7 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
       return false;
     };
 
-    fieldMetadata.fields(this).forEach((item) => {
+    this.getFieldMetaCache().list.forEach((item) => {
       if (item.name in this) {
         // если в опциях при создании модели передали определенные поля на базе сконфигурированной модели
         // исключить поля которых нет в массиве
@@ -534,9 +644,8 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
     this.initLegacyFields();
     const validation: Partial<T> = {};
 
-    for (const field in this) {
-      const instance = validationMetadata.fieldInstance(field, this);
-      if (instance) Reflect.set(validation, field, instance.callback(this[field], this) || "");
+    for (const item of this.getValidationMetaCache().list) {
+      Reflect.set(validation, item.name, item.callback(this[item.name], this) || "");
     }
 
     return validation;

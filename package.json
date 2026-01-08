@@ -46,6 +46,7 @@
     "build:clear": "npx vite build && rm -rf ./node_modules",
     "watch": "npx vite build --watch --mode develop",
     "test": "vitest --config vitest.config.ts",
+    "test:bench": "npx vitest bench tests/model.bench.ts",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "tsc": "tsc --noEmit -- --watch",

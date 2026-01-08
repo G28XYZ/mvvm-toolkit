@@ -1,10 +1,42 @@
 import { immerable } from "immer";
-import { IFieldMetadata } from "./data";
-import { ModelOptions, ModelService, TModel, TPatch, THistoryEntry } from "./types";
+import { FieldMetadata, SubmitMetadata, ValidationMetadata, ExcludeMetadata, IFieldMetadata, ISubmitMetadata, IExcludeMetadata } from "./data";
+import { ModelOptions, ModelService, TModel, TPatch, THistoryEntry, IMetadataModel } from "./types";
+/** */
+declare const submitMetadata: SubmitMetadata;
+/** */
+declare const fieldMetadata: FieldMetadata;
+/** */
+declare const validationMetadata: ValidationMetadata;
+/** */
+declare const excludeMetadata: ExcludeMetadata;
 /**
  * Класс для управлением состоянием модели.
  */
 export declare class Model<T extends Record<string, any> = any> implements TModel<any> {
+    [fieldMetadata.metadataKey]: {
+        ownRef: unknown;
+        protoRef: unknown;
+        list: IFieldMetadata<any, any>[];
+        map: Map<string, IFieldMetadata<any, any>>;
+    };
+    [submitMetadata.metadataKey]: {
+        ownRef: unknown;
+        protoRef: unknown;
+        list: ISubmitMetadata[];
+        map: Map<string, ISubmitMetadata>;
+    };
+    [excludeMetadata.metadataKey]: {
+        ownRef: unknown;
+        protoRef: unknown;
+        list: IExcludeMetadata[];
+        map: Map<string, IExcludeMetadata>;
+    };
+    [validationMetadata.metadataKey]: {
+        ownRef: unknown;
+        protoRef: unknown;
+        list: IMetadataModel[];
+        map: Map<string, IMetadataModel>;
+    };
     protected accessor [immerable]: boolean;
     protected accessor initData: Partial<T>;
     protected accessor committedData: Partial<T>;
@@ -21,6 +53,11 @@ export declare class Model<T extends Record<string, any> = any> implements TMode
      * Создает модель и инициализирует данные.
      */
     constructor(data?: Partial<T>, options?: ModelOptions<T>);
+    private getFieldMetaCache;
+    private getFieldMeta;
+    private getSubmitMetaCache;
+    private getExcludeMetaCache;
+    private getValidationMetaCache;
     /**
      * Сбросить внутренние стейты изменений.
      */
