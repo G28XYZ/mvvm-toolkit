@@ -1,4 +1,4 @@
-import { action, computed, observable } from "mobx";
+import { action, computed, isObservable, observable } from "mobx";
 import { Inject, InjectStore, type InjectStoreType, type InjectType, MakeObservable, PropFromView, Service, ViewModel } from "rvm-toolkit";
 import { TodoModel } from "./model";
 import type { Todo } from "./types";
@@ -38,7 +38,7 @@ export class ItemVM extends ViewModel {
     this.isEditing = false;
     this.item.service.commit();
     console.log(this.item.service.dumpData);
-    console.log(this.item);
+    console.log(this.item, isObservable(this.item.id));
 
   }
 

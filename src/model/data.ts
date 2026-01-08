@@ -14,6 +14,8 @@ class MetadataModel<T extends IMetadataModel = any> implements IMetadataModel {
   callback?: T["callback"];
   metadataKey: symbol | string = null;
 
+  isInit: boolean = false;
+
   /**
    * Кеш метаданных по prototype.
    * Важно: в библиотеке используются singleton-экземпляры метаданных
@@ -46,7 +48,7 @@ class MetadataModel<T extends IMetadataModel = any> implements IMetadataModel {
       const items = Reflect.getOwnMetadata(this.metadataKey, current) as T[] | undefined;
       if (Array.isArray(items)) {
         for (const item of items) {
-          const name = (item as Partial<IMetadataModel>)?.name;
+          const name = item?.name;
           const key = String(name);
           if (seen.has(key)) continue;
           seen.add(key);
@@ -198,6 +200,8 @@ export class FieldMetadata extends MetadataModel<IFieldMetadata> implements IFie
   name: string = null;
   ctx: ClassFieldDecoratorContext = null;
   metadataKey = FIELD_METADATA_KEY;
+
+  isInit: boolean = false;
 
   /**
    * Создать метаданные поля модели.

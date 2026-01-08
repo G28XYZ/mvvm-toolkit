@@ -8,6 +8,7 @@ type BivariantCallback<T> = {
 export interface IMetadataModel<T extends Record<string, any> = any> {
     name: string;
     callback?: T extends undefined ? DecoratorCallbackType<any, T> : T["callback"];
+    isInit: boolean;
 }
 export type TPatch = Patch & {
     field?: string;

@@ -6,6 +6,7 @@ declare class MetadataModel<T extends IMetadataModel = any> implements IMetadata
     name: string;
     callback?: T["callback"];
     metadataKey: symbol | string;
+    isInit: boolean;
     /**
      * Кеш метаданных по prototype.
      * Важно: в библиотеке используются singleton-экземпляры метаданных
@@ -93,6 +94,7 @@ export declare class FieldMetadata extends MetadataModel<IFieldMetadata> impleme
     name: string;
     ctx: ClassFieldDecoratorContext;
     metadataKey: symbol;
+    isInit: boolean;
     /**
      * Создать метаданные поля модели.
      */

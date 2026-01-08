@@ -28,44 +28,56 @@ const resolveFieldOptions = <TOptions extends object | undefined>(
   if (!isDevtoolsHistoryEnabled()) return options;
   if (!options || typeof options !== "object") return { collectChanges: true };
   if ("collectChanges" in options) return options;
-  return { ...(options as any), collectChanges: true };
+  return { ...options, collectChanges: true };
+};
+
+type FieldOptions<This> = Pick<
+  IFieldMetadata<ModelData<This>, This>,
+  "factory" | "mapping" | "collectChanges" | "noObserve"
+>;
+
+type FieldDecorator = {
+  // Декоратор без опций: @field prop;
+  <This, T>(
+    targetOrValue: object | undefined,
+    contextOrKey: ClassFieldDecoratorContext<This, T> | string | symbol
+  ): any;
+  
+  // Фабрика декоратора с опциями: @field({ ... }) prop;
+  <This, T = unknown>(options: FieldOptions<This>): AnyFieldDecorator<This, T>;
+  
+  // Свойство noObserve
+  noObserve: {
+    // @field.noObserve prop;
+    <This, T>(
+      targetOrValue: object | undefined,
+      contextOrKey: ClassFieldDecoratorContext<This, T> | string | symbol
+    ): any;
+    
+    // @field.noObserve() / @field.noObserve({ ... })
+    <This, T = unknown>(options?: FieldOptions<This>): AnyFieldDecorator<This, T>;
+  };
 };
 
 /**
  * Декоратор для поля класса (автоматом вешает observable на поле)
  * обозначает свойство как поле модели, которое обрабатывается/валидируется/исключается при изменении/отправке
  */
-export function field<This, T>(
-  targetOrValue: object | undefined,
-  contextOrKey: ClassFieldDecoratorContext<This, T> | string | symbol
-): any;
-
-/**
- * Декоратор поля модели с опциями.
- * @param options опции поля (factory/mapping/collectChanges/noObserve).
- * @example
- * class VM extends Model<{ count: number }> {
- *   @field({ collectChanges: true })
- *   count = 0;
- * }
- */
-export function field<This, T = unknown>(
-  options: Pick<IFieldMetadata<ModelData<This>, This>, "factory" | "mapping" | "collectChanges" | "noObserve">
-): AnyFieldDecorator<This, T>;
-
-export function field<This, T>(
-  options:
-    | undefined
-    | Pick<IFieldMetadata<ModelData<This>, This>, "factory" | "mapping" | "collectChanges" | "noObserve">
-    | object,
-  c?: ClassFieldDecoratorContext<This, T> | string | symbol
+export const field: FieldDecorator = function field<This, T>(
+  optionsOrTarget?: object,
+  contextOrKey?: ClassFieldDecoratorContext<This, T> | string | symbol
 ) {
-  const resolvedOptions = resolveFieldOptions(isLegacyPropertyDecoratorArgs(options, c) ? undefined : options);
+  const resolvedOptions = resolveFieldOptions(
+    isLegacyPropertyDecoratorArgs(optionsOrTarget, contextOrKey) ? undefined : optionsOrTarget
+  );
 
   const defineLegacy = (target: object, name: string | symbol) => {
-    const instance = new FieldMetadata({ ...(resolvedOptions as any), name: String(name), ctx: null });
-    const fields = getOwnMetadata(instance.metadataKey, target, new Array<FieldMetadata>());
-    defineMetadata(instance.metadataKey, [...fields, instance], target);
+    const instance = new FieldMetadata({ ...resolvedOptions, name: String(name), ctx: null });
+    defineMetadata(
+      instance.metadataKey,
+      [...getOwnMetadata(instance.metadataKey, target, new Array<FieldMetadata>()), instance],
+      target
+    );
 
     const descriptor = Object.getOwnPropertyDescriptor(target, name);
     if (!descriptor) {
@@ -73,9 +85,7 @@ export function field<This, T>(
         configurable: true,
         enumerable: true,
         get(this: Model<T>) {
-          if (Object.prototype.hasOwnProperty.call(this, name)) {
-            return Reflect.get(this, name);
-          }
+          if (Object.prototype.hasOwnProperty.call(this, name)) return Reflect.get(this, name);
           if (this.initData && name in this.initData && typeof this.initField === "function") {
             this.initField.call(this, String(name), { skipValidation: true });
             return Reflect.get(this, name);
@@ -83,14 +93,17 @@ export function field<This, T>(
           return undefined;
         },
         set(this: Model<T>, value: T) {
-          if (this.initData && !(name in this.initData)) {
-            Reflect.set(this.initData, name, value);
-          }
+          if (this.initData && !(name in this.initData)) Reflect.set(this.initData, name, value);
           if (typeof this.initField === "function") {
             this.initField.call(this, String(name), { skipValidation: true });
             return;
           }
-          Object.defineProperty(this, name, { value, writable: true, configurable: true, enumerable: true });
+          Object.defineProperty(this, name, {
+            value,
+            writable: true,
+            configurable: true,
+            enumerable: true,
+          });
         },
       });
     }
@@ -99,76 +112,62 @@ export function field<This, T>(
   const define = (ctx: ClassFieldDecoratorContext<Model<T>, T>) => {
     ctx.addInitializer(function (this: Model<T>) {
       if (this instanceof Model && typeof this.initField === "function") {
-        const instance = new FieldMetadata({ ...(resolvedOptions as any), name: String(ctx.name), ctx });
-        const fields = getOwnMetadata(instance.metadataKey, this, new Array<FieldMetadata>());
-        defineMetadata(instance.metadataKey, [...fields, instance], this);
+        const instance = new FieldMetadata({
+          ...resolvedOptions,
+          name: String(ctx.name),
+          ctx,
+        });
+        defineMetadata(
+          instance.metadataKey,
+          [...getOwnMetadata(instance.metadataKey, this, new Array<FieldMetadata>()), instance],
+          this
+        );
         this.initField.call(this, String(ctx.name));
       }
     });
   };
 
-  function callback(t: any, ctxOrKey: ClassFieldDecoratorContext<This | Model<T>, T> | string | symbol) {
+  function callback(
+    t: object,
+    ctxOrKey: ClassFieldDecoratorContext<This | Model<T>, T> | string | symbol
+  ) {
     if (isLegacyPropertyDecoratorArgs(t, ctxOrKey)) {
       defineLegacy(t, ctxOrKey);
       return;
     }
     if (isDecoratorContext(ctxOrKey)) {
-      define(ctxOrKey as any);
+      define(ctxOrKey);
       if (ctxOrKey.kind === "field") return (value: T) => value;
       return ctxOrKey;
     }
   }
 
-  if (isLegacyPropertyDecoratorArgs(options, c)) {
-    return callback(options, c);
+  if (isLegacyPropertyDecoratorArgs(optionsOrTarget, contextOrKey)) {
+    return callback(optionsOrTarget, contextOrKey);
   }
 
-  if (resolvedOptions && !isDecoratorContext(c)) {
+  if (resolvedOptions && !isDecoratorContext(contextOrKey)) {
     return (t: undefined, ctx: ClassFieldDecoratorContext<This, T>) => callback(t, ctx);
   }
 
-  if (isDecoratorContext(c)) return callback(undefined, c);
+  if (isDecoratorContext(contextOrKey)) return callback(undefined, contextOrKey);
 
   return (t: undefined, ctx: ClassFieldDecoratorContext<This, T>) => callback(t, ctx);
-}
-
-/* =========================
-   field.noObserve (typed)
-   ========================= */
-
-type FieldOptions<This> = Pick<
-  IFieldMetadata<ModelData<This>, This>,
-  "factory" | "mapping" | "collectChanges" | "noObserve"
->;
-
-type FieldNoObserve = {
-  // @field.noObserve prop; (legacy/new decorators)
-  <This, T>(
-    targetOrValue: object | undefined,
-    contextOrKey: ClassFieldDecoratorContext<This, T> | string | symbol
-  ): any;
-
-  // @field.noObserve() / @field.noObserve({ ... })
-  <This, T = unknown>(options?: FieldOptions<This>): AnyFieldDecorator<This, T>;
-};
+} as FieldDecorator;
 
 const forceNoObserve = <TOptions extends object | undefined>(options: TOptions) => {
-  if (!options || typeof options !== "object") return { noObserve: true } as const;
-  return { ...(options as any), noObserve: true };
+  if (!options || typeof options !== "object") return { noObserve: true };
+  return { ...options, noObserve: true };
 };
 
-// ВАЖНО: namespace должен быть ПОСЛЕ реализации функции field()
-export namespace field {
-  export const noObserve: FieldNoObserve = (function noObserve<This, T>(
-    optionsOrTarget?: any,
-    contextOrKey?: any
-  ) {
-    // Использование как декоратор: @field.noObserve
-    if (isLegacyPropertyDecoratorArgs(optionsOrTarget, contextOrKey) || isDecoratorContext(contextOrKey)) {
-      return field({ noObserve: true })(optionsOrTarget, contextOrKey as string | symbol | ClassFieldDecoratorContext<unknown, unknown>);
-    }
+const noObserveImplementation = function noObserve<This, T>(
+  optionsOrTarget?: object,
+  contextOrKey?: string | symbol | ClassFieldDecoratorContext<unknown, unknown>
+) {
+  if (isLegacyPropertyDecoratorArgs(optionsOrTarget, contextOrKey) || isDecoratorContext(contextOrKey)) {
+    return field({ noObserve: true })(optionsOrTarget, contextOrKey);
+  }
+  return field(forceNoObserve(optionsOrTarget));
+};
 
-    // Использование как фабрика: @field.noObserve() / @field.noObserve({ ... })
-    return field(forceNoObserve(optionsOrTarget));
-  }) as any;
-}
+field.noObserve = noObserveImplementation;

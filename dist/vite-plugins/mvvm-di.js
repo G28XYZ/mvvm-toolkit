@@ -317,3 +317,4 @@ ${c}` + s.slice(o.endIndex);
 export {
   re as mvvmServiceDiPlugin
 };
+//# sourceMappingURL=mvvm-di.js.map
