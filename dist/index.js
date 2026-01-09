@@ -1,88 +1,88 @@
 import "reflect-metadata";
-import { d as vt, _ as R, a as j, b as G, c as S } from "./tslib.es6-B_Omq7a0.js";
-import Bt, { isObject as Ct, isEqual as Vt, isEmpty as Gt } from "lodash";
-import { makeObservable as gt, reaction as qt, runInAction as B, observable as rt, isObservable as Ft, computed as J, action as x, flow as Ut, isFlowCancellationError as $t, makeAutoObservable as Qt } from "mobx";
-import { enablePatches as Jt, immerable as xt, createDraft as Xt, applyPatches as Lt, produce as Zt } from "immer";
-import { observer as te } from "mobx-react";
-import { useMemo as ee, useEffect as ie } from "react";
-const K = (t, i, a) => Reflect.getOwnMetadata(t, i) || a || {}, L = (t, i, a) => Reflect.defineMetadata(t, i, a);
-function xe(...t) {
+import { d as mt, _ as T, a as j, b as G, c as S } from "./tslib.es6-B_Omq7a0.js";
+import Qt, { isObject as Vt, isEqual as Ct, isEmpty as Jt } from "lodash";
+import { makeObservable as vt, reaction as Gt, runInAction as B, observable as ot, isObservable as Ft, computed as X, action as x, flow as Xt, isFlowCancellationError as Zt, makeAutoObservable as te } from "mobx";
+import { enablePatches as ee, immerable as xt, createDraft as ie, applyPatches as Lt, produce as se } from "immer";
+import { observer as ne } from "mobx-react";
+import { useMemo as ae, useEffect as re } from "react";
+const H = (t, e, n) => Reflect.getOwnMetadata(t, e) || n || {}, L = (t, e, n) => Reflect.defineMetadata(t, e, n);
+function Ye(...t) {
   try {
     return JSON.stringify(t), !0;
   } catch {
     return !1;
   }
 }
-function se(t) {
+function oe(t) {
   if (t && typeof t == "string") {
-    let [i] = t.split(`
+    let [e] = t.split(`
 `)[2].replace(/at (get)?/, "").match(/.*/g) || [];
-    return i && (i = i.trim()), i;
+    return e && (e = e.trim()), e;
   }
 }
-const Kt = {}, _t = [];
-let Ht = !1;
-const Le = (t, ...i) => {
-  const a = new Error().stack;
-  if (!Ht)
-    console.log("%c TODO", "background: #222; color: #bada55", Kt), Ht = !0;
+const Ht = {}, _t = [];
+let Kt = !1;
+const Be = (t, ...e) => {
+  const n = new Error().stack;
+  if (!Kt)
+    console.log("%c TODO", "background: #222; color: #bada55", Ht), Kt = !0;
   else {
-    const s = se(a);
-    _t.includes(s) === !1 && (_t.push(s), Reflect.set(Kt, `${_t.length}) ${t}`, { msg: i, get path() {
-      return console.info(i, s), s;
+    const s = oe(n);
+    _t.includes(s) === !1 && (_t.push(s), Reflect.set(Ht, `${_t.length}) ${t}`, { msg: e, get path() {
+      return console.info(e, s), s;
     } }));
   }
   function r(...s) {
   }
   return r;
-}, Y = (t, i) => !!t && (typeof i == "string" || typeof i == "symbol"), W = (t) => !!t && typeof t == "object" && "kind" in t, ne = (t) => ({
+}, q = (t, e) => !!t && (typeof e == "string" || typeof e == "symbol"), W = (t) => !!t && typeof t == "object" && "kind" in t, le = (t) => ({
   kind: "class",
   name: t,
   addInitializer: () => {
   },
   metadata: {}
-}), Q = /* @__PURE__ */ Symbol("service-key"), pt = new Proxy({}, Reflect);
-function ae(t) {
-  const i = (r, s) => {
+}), J = /* @__PURE__ */ Symbol("service-key"), bt = new Proxy({}, Reflect);
+function ce(t) {
+  const e = (r, s) => {
     Object.defineProperty(r, s, {
       configurable: !0,
       enumerable: !0,
       get() {
         if (Object.prototype.hasOwnProperty.call(this, s))
           return Reflect.get(this, s);
-        const n = X(t, "instance");
-        if (n)
-          return Object.defineProperty(this, s, { value: n, writable: !0, configurable: !0, enumerable: !0 }), n;
+        const a = Z(t, "instance");
+        if (a)
+          return Object.defineProperty(this, s, { value: a, writable: !0, configurable: !0, enumerable: !0 }), a;
       },
-      set(n) {
-        const o = X(t, "instance");
-        Object.defineProperty(this, s, { value: o ?? n, writable: !0, configurable: !0, enumerable: !0 });
+      set(a) {
+        const o = Z(t, "instance");
+        Object.defineProperty(this, s, { value: o ?? a, writable: !0, configurable: !0, enumerable: !0 });
       }
     });
   };
-  function a(r, s) {
-    if (Y(r, s)) {
-      i(r, s);
+  function n(r, s) {
+    if (q(r, s)) {
+      e(r, s);
       return;
     }
     return s.addInitializer(function() {
-      return vt(this, void 0, void 0, function* () {
-        const n = X(t, "instance");
-        n && Object.hasOwn(this, s.name) && Reflect.set(this, s.name, n);
+      return mt(this, void 0, void 0, function* () {
+        const a = Z(t, "instance");
+        a && Object.hasOwn(this, s.name) && Reflect.set(this, s.name, a);
       });
-    }), (n) => n;
+    }), (a) => a;
   }
-  return a;
+  return n;
 }
-function X(t, i) {
-  var a;
-  const r = K(Q, pt);
+function Z(t, e) {
+  var n;
+  const r = H(J, bt);
   if (typeof t != "string") {
-    const s = K(Q, t);
+    const s = H(J, t);
     if (s)
-      return i && i in s ? s[i] : s;
-    for (const n in r) {
-      const o = r[n];
+      return e && e in s ? s[e] : s;
+    for (const a in r) {
+      const o = r[a];
       if (o.target === t) {
         t = o.context.name;
         break;
@@ -90,59 +90,59 @@ function X(t, i) {
     }
   }
   if (typeof t == "string")
-    return i ? (a = r[t]) === null || a === void 0 ? void 0 : a[i] : r[t];
+    return e ? (n = r[t]) === null || n === void 0 ? void 0 : n[e] : r[t];
 }
-function Yt(t, i) {
-  const a = (s, n) => {
-    const o = String(typeof t == "string" && t || typeof t == "object" && t?.id || n?.name || s?.name), l = K(Q, pt), c = new Proxy({
+function Ut(t, e) {
+  const n = (s, a) => {
+    const o = String(typeof t == "string" && t || typeof t == "object" && t?.id || a?.name || s?.name), l = H(J, bt), c = new Proxy({
       target: s,
       instance: typeof t == "object" && Reflect.get(t, "transient") || typeof t == "object" && Reflect.get(t, "lazy") ? s : new s(),
-      context: n,
+      context: a,
       options: t
     }, {
-      get(u, y, m) {
+      get(u, g, m) {
         var O, b;
-        if (y === "instance" && (!((O = u?.options) === null || O === void 0) && O.transient))
+        if (g === "instance" && (!((O = u?.options) === null || O === void 0) && O.transient))
           return new s();
-        if (y === "instance" && (!((b = u?.options) === null || b === void 0) && b.lazy) && u.instance === s) {
-          const k = new s();
-          return Reflect.set(u, y, k, m), k;
+        if (g === "instance" && (!((b = u?.options) === null || b === void 0) && b.lazy) && u.instance === s) {
+          const I = new s();
+          return Reflect.set(u, g, I, m), I;
         }
-        return Reflect.get(u, y, m);
+        return Reflect.get(u, g, m);
       },
-      set(u, y, m, O) {
-        return Reflect.set(u, y, m, O);
+      set(u, g, m, O) {
+        return Reflect.set(u, g, m, O);
       }
     });
-    l[o] = c, L(Q, l, pt), L(Q, l[o], s);
+    l[o] = c, L(J, l, bt), L(J, l[o], s);
   };
-  function r(s, n) {
+  function r(s, a) {
     var o, l;
-    const c = s.__legacy_source__, u = W(n) ? n : ne((l = (o = c?.name) !== null && o !== void 0 ? o : s?.name) !== null && l !== void 0 ? l : "");
-    a(s, u), c && c !== s && L(Q, K(Q, s), c);
+    const c = s.__legacy_source__, u = W(a) ? a : le((l = (o = c?.name) !== null && o !== void 0 ? o : s?.name) !== null && l !== void 0 ? l : "");
+    n(s, u), c && c !== s && L(J, H(J, s), c);
   }
-  return Bt.isFunction(t) ? r(t, i) : t ? (s, n) => r(s, n) : r;
+  return Qt.isFunction(t) ? r(t, e) : t ? (s, a) => r(s, a) : r;
 }
-const Ke = (t, i) => {
-  const { kind: a = "class", name: r = "", addInitializer: s = () => {
-  }, metadata: n } = i?.ctx || {};
-  return Yt(i)(t, {
-    kind: a,
+const Ge = (t, e) => {
+  const { kind: n = "class", name: r = "", addInitializer: s = () => {
+  }, metadata: a } = e?.ctx || {};
+  return Ut(e)(t, {
+    kind: n,
     name: r,
     addInitializer: s,
-    metadata: n
-  }), X(t).instance;
+    metadata: a
+  }), Z(t).instance;
 };
 function yt(t) {
-  var i, a, r;
-  const s = Object.assign({ enumerable: !1, writable: !0 }, t), n = Object.assign({ configurable: !0, enumerable: !1, writable: !0 }, t), o = {
-    configurable: (i = n.configurable) !== null && i !== void 0 ? i : !0,
-    enumerable: (a = n.enumerable) !== null && a !== void 0 ? a : !1,
-    writable: (r = n.writable) !== null && r !== void 0 ? r : !0,
+  var e, n, r;
+  const s = Object.assign({ enumerable: !1, writable: !0 }, t), a = Object.assign({ configurable: !0, enumerable: !1, writable: !0 }, t), o = {
+    configurable: (e = a.configurable) !== null && e !== void 0 ? e : !0,
+    enumerable: (n = a.enumerable) !== null && n !== void 0 ? n : !1,
+    writable: (r = a.writable) !== null && r !== void 0 ? r : !0,
     value: void 0
   };
   return function(l, c) {
-    if (Y(l, c)) {
+    if (q(l, c)) {
       Object.defineProperty(l, c, {
         configurable: !0,
         enumerable: s.enumerable,
@@ -156,109 +156,109 @@ function yt(t) {
     }
     if (W(c)) {
       const u = c;
-      return u.kind === "field" ? function(y) {
-        return o.value = y, Object.defineProperty(this, u.name, o), o.value = void 0, y;
+      return u.kind === "field" ? function(g) {
+        return o.value = g, Object.defineProperty(this, u.name, o), o.value = void 0, g;
       } : (u.addInitializer(function() {
-        const y = Object.getOwnPropertyDescriptor(this, u.name);
-        y && Object.defineProperty(this, u.name, Object.assign(Object.assign({}, y), { enumerable: s.enumerable }));
+        const g = Object.getOwnPropertyDescriptor(this, u.name);
+        g && Object.defineProperty(this, u.name, Object.assign(Object.assign({}, g), { enumerable: s.enumerable }));
       }), l);
     }
   };
 }
-function He(t, i) {
-  return Y(t, i) || W(i) ? yt()(t, i) : yt(t);
+function Ue(t, e) {
+  return q(t, e) || W(e) ? yt()(t, e) : yt(t);
 }
-function ze(t, i) {
-  const a = (n) => class extends n {
+function $e(t, e) {
+  const n = (a) => class extends a {
     constructor(...o) {
-      super(...o), gt(this);
+      super(...o), vt(this);
     }
-  }, r = (n, o) => {
+  }, r = (a, o) => {
     if (typeof Reflect?.getOwnMetadataKeys == "function")
-      for (const l of Reflect.getOwnMetadataKeys(n)) {
-        const c = Reflect.getOwnMetadata(l, n);
+      for (const l of Reflect.getOwnMetadataKeys(a)) {
+        const c = Reflect.getOwnMetadata(l, a);
         Reflect.defineMetadata(l, c, o);
       }
   };
-  function s(n, o) {
+  function s(a, o) {
     if (!W(o)) {
-      const l = n, c = a(l);
+      const l = a, c = n(l);
       return Object.defineProperty(c, "__legacy_source__", { value: l, configurable: !0 }), r(l, c), c;
     }
     o.addInitializer(function() {
-      gt(this);
+      vt(this);
     });
   }
-  return t && !W(i) || t ? s(t, i) : s;
+  return t && !W(e) || t ? s(t, e) : s;
 }
-const oe = /* @__PURE__ */ Symbol("field-key"), re = /* @__PURE__ */ Symbol("validation-key"), le = /* @__PURE__ */ Symbol("submit-key"), ce = /* @__PURE__ */ Symbol("exclude-key"), de = /* @__PURE__ */ Symbol("prop-from-view-key");
-class Z {
-  isPrototypeObject(i) {
-    const a = i?.constructor;
-    return !!(a && a.prototype === i);
+const Q = /* @__PURE__ */ Symbol("field-key"), it = /* @__PURE__ */ Symbol("validation-key"), st = /* @__PURE__ */ Symbol("submit-key"), nt = /* @__PURE__ */ Symbol("exclude-key"), de = /* @__PURE__ */ Symbol("prop-from-view-key");
+class tt {
+  isPrototypeObject(e) {
+    const n = e?.constructor;
+    return !!(n && n.prototype === e);
   }
   /**
    * Получить объект, по которому кешируются метаданные.
    * Для инстанса — это его prototype, для prototype — он сам.
    */
-  getCacheTarget(i) {
-    return !i || typeof i != "object" ? null : this.isPrototypeObject(i) ? i : Object.getPrototypeOf(i);
+  getCacheTarget(e) {
+    return !e || typeof e != "object" ? null : this.isPrototypeObject(e) ? e : Object.getPrototypeOf(e);
   }
-  computeFromPrototype(i) {
-    const a = [], r = /* @__PURE__ */ new Map(), s = /* @__PURE__ */ new Set();
-    let n = i;
-    for (; n; ) {
-      const l = Reflect.getOwnMetadata(this.metadataKey, n);
+  computeFromPrototype(e) {
+    const n = [], r = /* @__PURE__ */ new Map(), s = /* @__PURE__ */ new Set();
+    let a = e;
+    for (; a; ) {
+      const l = Reflect.getOwnMetadata(this.metadataKey, a);
       if (Array.isArray(l))
         for (const c of l) {
-          const u = c?.name, y = String(u);
-          s.has(y) || (s.add(y), a.push(c), r.set(y, c));
+          const u = c?.name, g = String(u);
+          s.has(g) || (s.add(g), n.push(c), r.set(g, c));
         }
-      n = Object.getPrototypeOf(n);
+      a = Object.getPrototypeOf(a);
     }
-    return { ownRef: Reflect.getOwnMetadata(this.metadataKey, i), list: a, map: r };
+    return { ownRef: Reflect.getOwnMetadata(this.metadataKey, e), list: n, map: r };
   }
   /**
    * Создать базовые метаданные.
    */
-  constructor(i = {}) {
-    this.metadataKey = null, this.isInit = !1, this.cache = /* @__PURE__ */ new WeakMap(), this.name = i?.name, this.callback = i?.callback;
+  constructor(e = {}) {
+    this.metadataKey = null, this.isInit = !1, this.cache = /* @__PURE__ */ new WeakMap(), this.name = e?.name, this.callback = e?.callback;
   }
   /**
    * Проверить, что данные соответствуют экземпляру метаданных.
    */
-  isInstance(i = {}) {
-    return i instanceof Z || Object.getOwnPropertyNames(this).some((a) => Object.keys(i).includes(a));
+  isInstance(e = {}) {
+    return e instanceof tt || Object.getOwnPropertyNames(this).some((n) => Object.keys(e).includes(n));
   }
   /**
    * Получить метаданные конкретного поля модели.
    */
-  fieldInstance(i, a) {
-    const r = a && typeof a == "object" ? Reflect.getOwnMetadata(this.metadataKey, a) : void 0;
+  fieldInstance(e, n) {
+    const r = n && typeof n == "object" ? Reflect.getOwnMetadata(this.metadataKey, n) : void 0;
     if (Array.isArray(r))
-      return r.find((l) => l.name === i);
-    const s = this.getCacheTarget(a);
+      return r.find((l) => l.name === e);
+    const s = this.getCacheTarget(n);
     if (!s)
       return;
-    const n = Reflect.getOwnMetadata(this.metadataKey, s), o = this.cache.get(s);
-    if (!o || o.ownRef !== n) {
+    const a = Reflect.getOwnMetadata(this.metadataKey, s), o = this.cache.get(s);
+    if (!o || o.ownRef !== a) {
       const l = this.computeFromPrototype(s);
-      return this.cache.set(s, l), l.map.get(String(i));
+      return this.cache.set(s, l), l.map.get(String(e));
     }
-    return o.map.get(String(i));
+    return o.map.get(String(e));
   }
   /**
    * Получить массив метаданных полей модели.
    */
-  fields(i) {
-    const a = i && typeof i == "object" ? Reflect.getOwnMetadata(this.metadataKey, i) : void 0;
-    if (Array.isArray(a)) {
+  fields(e) {
+    const n = e && typeof e == "object" ? Reflect.getOwnMetadata(this.metadataKey, e) : void 0;
+    if (Array.isArray(n)) {
       const l = [], c = /* @__PURE__ */ new Set();
-      let u = i;
+      let u = e;
       for (; u; ) {
-        const y = Reflect.getOwnMetadata(this.metadataKey, u);
-        if (Array.isArray(y))
-          for (const m of y) {
+        const g = Reflect.getOwnMetadata(this.metadataKey, u);
+        if (Array.isArray(g))
+          for (const m of g) {
             const O = m?.name, b = String(O);
             c.has(b) || (c.add(b), l.push(m));
           }
@@ -266,128 +266,139 @@ class Z {
       }
       return l;
     }
-    const r = this.getCacheTarget(i);
+    const r = this.getCacheTarget(e);
     if (!r)
       return [];
-    const s = Reflect.getOwnMetadata(this.metadataKey, r), n = this.cache.get(r);
-    if (n && n.ownRef === s)
-      return n.list;
+    const s = Reflect.getOwnMetadata(this.metadataKey, r), a = this.cache.get(r);
+    if (a && a.ownRef === s)
+      return a.list;
     const o = this.computeFromPrototype(r);
     return this.cache.set(r, o), o.list;
   }
 }
-class bt extends Z {
+class pt extends tt {
   constructor() {
-    super(...arguments), this.metadataKey = re;
+    super(...arguments), this.metadataKey = it;
   }
 }
-class Mt extends Z {
+class Mt extends tt {
   constructor() {
-    super(...arguments), this.metadataKey = le;
+    super(...arguments), this.metadataKey = st;
   }
 }
-class Ot extends Z {
+class Ot extends tt {
   constructor() {
-    super(...arguments), this.metadataKey = ce;
+    super(...arguments), this.metadataKey = nt;
   }
 }
-class wt extends Z {
+class wt extends tt {
   /**
    * Создать метаданные поля модели.
    */
-  constructor(i = {}) {
-    super(i), this.factory = null, this.mapping = null, this.noObserve = null, this.collectChanges = !1, this.name = null, this.ctx = null, this.metadataKey = oe, this.isInit = !1, this.factory = i.factory, this.mapping = i.mapping, this.noObserve = i.noObserve, this.name = i.name, this.ctx = i.ctx, this.collectChanges = !!i.collectChanges;
+  constructor(e = {}) {
+    super(e), this.factory = null, this.mapping = null, this.noObserve = null, this.collectChanges = !1, this.name = null, this.ctx = null, this.metadataKey = Q, this.isInit = !1, this.factory = e.factory, this.mapping = e.mapping, this.noObserve = e.noObserve, this.name = e.name, this.ctx = e.ctx, this.collectChanges = !!e.collectChanges;
   }
 }
-class Dt extends Z {
+class Dt extends tt {
   /**
    * Создать метаданные для PropFromView.
    */
-  constructor(i = {}) {
-    super(i), this.metadataKey = de;
-    for (const a in this)
-      i && a in i && (this[a] = Reflect.get(i, a));
+  constructor(e = {}) {
+    super(e), this.metadataKey = de;
+    for (const n in this)
+      e && n in e && (this[n] = Reflect.get(e, n));
   }
 }
-function We(t) {
-  const i = (s, n) => {
-    const o = new Dt({ name: t, originName: String(n) });
-    o.name = t, o.originName = String(n);
-    const l = K(o.metadataKey, s, new Array());
+function Qe(t) {
+  const e = (s, a) => {
+    const o = new Dt({ name: t, originName: String(a) });
+    o.name = t, o.originName = String(a);
+    const l = H(o.metadataKey, s, new Array());
     L(o.metadataKey, [...l, o], s);
-  }, a = (s) => {
+  }, n = (s) => {
     s.addInitializer(function() {
-      const n = new Dt(), o = n.fields(this);
+      const a = new Dt(), o = a.fields(this);
       for (const l in this)
-        o instanceof Array && s.name === l && (n.name = t, n.originName = l, n.value = this[l], o.push(n));
-      L(n.metadataKey, o, this);
+        o instanceof Array && s.name === l && (a.name = t, a.originName = l, a.value = this[l], o.push(a));
+      L(a.metadataKey, o, this);
     });
   };
-  function r(s, n) {
-    if (Y(s, n)) {
-      i(s, n);
+  function r(s, a) {
+    if (q(s, a)) {
+      e(s, a);
       return;
     }
-    if (W(n))
-      return a(n), n.kind === "field" ? (o) => o : n;
+    if (W(a))
+      return n(a), a.kind === "field" ? (o) => o : a;
   }
-  return t ? ((s, n) => r(s, n)) : ((s) => s);
+  return t ? ((s, a) => r(s, a)) : ((s) => s);
 }
-function qe(t) {
-  const i = (s, n) => {
-    const o = new Ot({ callback: t, name: String(n) }), l = K(o.metadataKey, s, new Array());
+const zt = /* @__PURE__ */ new WeakMap(), ue = (t, e) => {
+  if (!t)
+    return;
+  let n = zt.get(t);
+  n || (n = /* @__PURE__ */ new Set(), zt.set(t, n));
+  const r = String(e.name);
+  if (n.has(r))
+    return;
+  const s = H(e.metadataKey, t, new Array());
+  s.some((a) => a.name === r) || L(e.metadataKey, [...s, e], t), n.add(r);
+};
+function Je(t) {
+  const e = (s, a) => {
+    const o = new Ot({ callback: t, name: String(a) }), l = H(o.metadataKey, s, new Array());
     L(o.metadataKey, [...l, o], s);
-  }, a = (s) => {
+  }, n = (s) => {
     s.addInitializer(function() {
-      const n = new Ot({ callback: t, name: String(s.name) }), o = K(n.metadataKey, this, new Array());
-      L(n.metadataKey, [...o, n], this);
+      const a = new Ot({ callback: t, name: String(s.name) });
+      ue(Object.getPrototypeOf(this), a);
     });
   };
-  function r(s, n) {
-    if (Y(s, n)) {
-      i(s, n);
+  function r(s, a) {
+    if (q(s, a)) {
+      e(s, a);
       return;
     }
-    if (W(n))
-      return a(n), n.kind === "field" ? void 0 : n;
+    if (W(a))
+      return n(a), a.kind === "field" ? void 0 : a;
   }
   if (t)
-    return ((s, n) => r(s, n));
+    return ((s, a) => r(s, a));
 }
-const ue = () => {
+const he = () => {
   var t;
   return (t = globalThis.__REDUX_DEVTOOLS_EXTENSION__) !== null && t !== void 0 ? t : null;
-}, he = () => {
+}, fe = () => {
   var t;
   return (t = globalThis.__MVVM_DEVTOOLS_APPLYING__) !== null && t !== void 0 ? t : 0;
 }, ct = (t) => {
-  var i, a;
+  var e, n;
   const r = globalThis;
-  r.__MVVM_DEVTOOLS_APPLYING__ = ((i = r.__MVVM_DEVTOOLS_APPLYING__) !== null && i !== void 0 ? i : 0) + 1;
+  r.__MVVM_DEVTOOLS_APPLYING__ = ((e = r.__MVVM_DEVTOOLS_APPLYING__) !== null && e !== void 0 ? e : 0) + 1;
   try {
     return t();
   } finally {
-    r.__MVVM_DEVTOOLS_APPLYING__ = Math.max(0, ((a = r.__MVVM_DEVTOOLS_APPLYING__) !== null && a !== void 0 ? a : 1) - 1);
+    r.__MVVM_DEVTOOLS_APPLYING__ = Math.max(0, ((n = r.__MVVM_DEVTOOLS_APPLYING__) !== null && n !== void 0 ? n : 1) - 1);
   }
-}, fe = () => he() > 0, zt = (t) => ({
+}, _e = () => fe() > 0, Wt = (t) => ({
   data: t.service.dumpData,
   historyIndex: t.service.historyIndex
-}), _e = (t, i = {}) => {
-  const a = ue();
-  if (!a)
+}), ye = (t, e = {}) => {
+  const n = he();
+  if (!n)
     return () => {
     };
-  const r = a.connect({ name: i.name, instanceId: i.instanceId });
+  const r = n.connect({ name: e.name, instanceId: e.instanceId });
   let s = !1;
   try {
-    r.init(zt(t));
+    r.init(Wt(t));
   } catch {
   }
-  const n = qt(() => zt(t), (l) => {
+  const a = Gt(() => Wt(t), (l) => {
     var c;
-    if (!(s || fe()))
+    if (!(s || _e()))
       try {
-        r.send({ type: (c = i.actionType) !== null && c !== void 0 ? c : "model:update" }, l);
+        r.send({ type: (c = e.actionType) !== null && c !== void 0 ? c : "model:update" }, l);
       } catch {
       }
   }), o = r.subscribe((l) => {
@@ -429,15 +440,15 @@ const ue = () => {
       if (!l.state)
         return;
       try {
-        const y = JSON.parse(l.state), m = y.historyIndex, O = t.service.history, b = Array.isArray(O) && O.length > 0, k = typeof m == "number" && (m === -1 && b || m >= 0 && b && m < O.length);
+        const g = JSON.parse(l.state), m = g.historyIndex, O = t.service.history, b = Array.isArray(O) && O.length > 0, I = typeof m == "number" && (m === -1 && b || m >= 0 && b && m < O.length);
         s = !0, ct(() => {
-          var T;
+          var R;
           try {
-            if (k) {
+            if (I) {
               t.service.goToHistory(m);
               return;
             }
-            const A = (T = y.data) !== null && T !== void 0 ? T : y;
+            const A = (R = g.data) !== null && R !== void 0 ? R : g;
             B(() => {
               t.service.loadData(A);
             });
@@ -450,174 +461,169 @@ const ue = () => {
     }
   });
   return () => {
-    n(), typeof o == "function" && o(), typeof r.unsubscribe == "function" && r.unsubscribe(), typeof r.disconnect == "function" && r.disconnect();
+    a(), typeof o == "function" && o(), typeof r.unsubscribe == "function" && r.unsubscribe(), typeof r.disconnect == "function" && r.disconnect();
   };
 };
-Jt();
-const et = new Mt(), it = new wt(), st = new bt(), nt = new Ot();
-let ye = (() => {
-  var t, i, a, r, s, n, o, l, c, u, y, m, O, b, k, T, A, H, N, P, I, d, D;
-  let M = [], C, E = [], F = [], z, U, $, tt, at, ot, lt, kt, At, Et, Tt, Rt;
+ee();
+const ge = new Mt(), me = new wt(), ve = new pt(), be = new Ot();
+let pe = (() => {
+  var t, e, n, r, s, a, o, l, c, u, g, m, O, b, I, R, A, K, Y, P, k, d, D;
+  let M = [], V, E = [], F = [], z, U, $, et, at, rt, lt, It, At, Et, Rt, Tt;
   return t = class {
     // @define_prop
-    get [(i = /* @__PURE__ */ new WeakMap(), a = /* @__PURE__ */ new WeakMap(), r = /* @__PURE__ */ new WeakMap(), s = /* @__PURE__ */ new WeakMap(), n = /* @__PURE__ */ new WeakMap(), o = /* @__PURE__ */ new WeakMap(), l = /* @__PURE__ */ new WeakMap(), c = /* @__PURE__ */ new WeakMap(), u = /* @__PURE__ */ new WeakMap(), y = /* @__PURE__ */ new WeakMap(), m = /* @__PURE__ */ new WeakMap(), O = /* @__PURE__ */ new WeakMap(), b = /* @__PURE__ */ new WeakMap(), k = /* @__PURE__ */ new WeakMap(), T = /* @__PURE__ */ new WeakMap(), A = /* @__PURE__ */ new WeakMap(), H = xt)]() {
-      return R(this, i, "f");
+    get [(e = /* @__PURE__ */ new WeakMap(), n = /* @__PURE__ */ new WeakMap(), r = /* @__PURE__ */ new WeakMap(), s = /* @__PURE__ */ new WeakMap(), a = /* @__PURE__ */ new WeakMap(), o = /* @__PURE__ */ new WeakMap(), l = /* @__PURE__ */ new WeakMap(), c = /* @__PURE__ */ new WeakMap(), u = /* @__PURE__ */ new WeakMap(), g = /* @__PURE__ */ new WeakMap(), m = /* @__PURE__ */ new WeakMap(), O = /* @__PURE__ */ new WeakMap(), b = /* @__PURE__ */ new WeakMap(), I = /* @__PURE__ */ new WeakMap(), R = /* @__PURE__ */ new WeakMap(), A = /* @__PURE__ */ new WeakMap(), K = xt)]() {
+      return T(this, e, "f");
     }
-    set [H](e) {
-      j(this, i, e, "f");
+    set [K](i) {
+      j(this, e, i, "f");
     }
     get initData() {
-      return R(this, a, "f");
+      return T(this, n, "f");
     }
-    set initData(e) {
-      j(this, a, e, "f");
+    set initData(i) {
+      j(this, n, i, "f");
     }
     // @define_prop
     get committedData() {
-      return R(this, r, "f");
+      return T(this, r, "f");
     }
-    set committedData(e) {
-      j(this, r, e, "f");
+    set committedData(i) {
+      j(this, r, i, "f");
     }
     // @define_prop
     get modified_() {
-      return R(this, s, "f");
+      return T(this, s, "f");
     }
-    set modified_(e) {
-      j(this, s, e, "f");
+    set modified_(i) {
+      j(this, s, i, "f");
     }
     // @define_prop
     get draft() {
-      return R(this, n, "f");
+      return T(this, a, "f");
     }
-    set draft(e) {
-      j(this, n, e, "f");
+    set draft(i) {
+      j(this, a, i, "f");
     }
     // @define_prop
     get changes() {
-      return R(this, o, "f");
+      return T(this, o, "f");
     }
-    set changes(e) {
-      j(this, o, e, "f");
+    set changes(i) {
+      j(this, o, i, "f");
     }
     // @define_prop
     get inverseChanges() {
-      return R(this, l, "f");
+      return T(this, l, "f");
     }
-    set inverseChanges(e) {
-      j(this, l, e, "f");
+    set inverseChanges(i) {
+      j(this, l, i, "f");
     }
     // @define_prop
     get history() {
-      return R(this, c, "f");
+      return T(this, c, "f");
     }
-    set history(e) {
-      j(this, c, e, "f");
+    set history(i) {
+      j(this, c, i, "f");
     }
     // @define_prop
     get historyIndex() {
-      return R(this, u, "f");
+      return T(this, u, "f");
     }
-    set historyIndex(e) {
-      j(this, u, e, "f");
+    set historyIndex(i) {
+      j(this, u, i, "f");
     }
     // @define_prop
     get legacyInitDone() {
-      return R(this, y, "f");
+      return T(this, g, "f");
     }
-    set legacyInitDone(e) {
-      j(this, y, e, "f");
+    set legacyInitDone(i) {
+      j(this, g, i, "f");
     }
     // @define_prop
     get options() {
-      return R(this, m, "f");
+      return T(this, m, "f");
     }
-    set options(e) {
-      j(this, m, e, "f");
+    set options(i) {
+      j(this, m, i, "f");
     }
     // @define_prop
     get historyMuted() {
-      return R(this, O, "f");
+      return T(this, O, "f");
     }
-    set historyMuted(e) {
-      j(this, O, e, "f");
+    set historyMuted(i) {
+      j(this, O, i, "f");
     }
-    // @define_prop
-    get [N = (C = [rt], it.metadataKey)]() {
-      return R(this, b, "f");
+    get [Y = (V = [ot], Q)]() {
+      return T(this, b, "f");
     }
-    set [N](e) {
-      j(this, b, e, "f");
+    set [Y](i) {
+      j(this, b, i, "f");
     }
-    // @define_prop
-    get [P = et.metadataKey]() {
-      return R(this, k, "f");
+    get [P = st]() {
+      return T(this, I, "f");
     }
-    set [P](e) {
-      j(this, k, e, "f");
+    set [P](i) {
+      j(this, I, i, "f");
     }
-    // @define_prop
-    get [I = nt.metadataKey]() {
-      return R(this, T, "f");
+    get [k = nt]() {
+      return T(this, R, "f");
     }
-    set [I](e) {
-      j(this, T, e, "f");
+    set [k](i) {
+      j(this, R, i, "f");
     }
-    // @define_prop
-    get [d = st.metadataKey]() {
-      return R(this, A, "f");
+    get [d = it]() {
+      return T(this, A, "f");
     }
-    set [d](e) {
-      j(this, A, e, "f");
+    set [d](i) {
+      j(this, A, i, "f");
     }
     /**
      * Создает модель и инициализирует данные.
      */
-    constructor(e = {}, h) {
-      i.set(this, (G(this, M), !0)), a.set(this, G(this, E, null)), r.set(this, (G(this, F), {})), s.set(this, {}), n.set(this, null), o.set(this, []), l.set(this, []), c.set(this, []), u.set(this, -1), y.set(this, !1), m.set(this, {}), O.set(this, !1), b.set(this, null), k.set(this, null), T.set(this, null), A.set(this, null), this.options = h, this[xt] = !0, this.init(e), this.initLegacyFields(), this.autoAttachDevtools();
+    constructor(i = {}, h) {
+      e.set(this, (G(this, M), !0)), n.set(this, G(this, E, null)), r.set(this, (G(this, F), {})), s.set(this, {}), a.set(this, null), o.set(this, []), l.set(this, []), c.set(this, []), u.set(this, -1), g.set(this, !1), m.set(this, {}), O.set(this, !1), b.set(this, void 0), I.set(this, void 0), R.set(this, void 0), A.set(this, void 0), this.options = h, this[xt] = !0, this.init(i), this.initLegacyFields(), this.autoAttachDevtools();
     }
     getFieldMetaCache() {
-      const e = Reflect.getOwnMetadata(it.metadataKey, this), h = Object.getPrototypeOf(this), f = h ? Reflect.getOwnMetadata(it.metadataKey, h) : null, _ = this[it.metadataKey];
-      if (_ && _ !== !0 && _.ownRef === e && _.protoRef === f)
+      const i = Reflect.getOwnMetadata(Q, this), h = Object.getPrototypeOf(this), f = h ? Reflect.getOwnMetadata(Q, h) : null, _ = this[Q];
+      if (_ && _ !== !0 && _.ownRef === i && _.protoRef === f)
         return _;
-      const w = it.fields(this), g = /* @__PURE__ */ new Map();
-      for (const p of w)
-        g.set(String(p.name), p);
-      const v = { ownRef: e, protoRef: f, list: w, map: g };
-      return this[it.metadataKey] = v, v;
+      const w = me.fields(this), v = /* @__PURE__ */ new Map();
+      for (const y of w)
+        v.set(String(y.name), y);
+      return this[Q] = { ownRef: i, protoRef: f, list: w, map: v }, this[Q];
     }
-    getFieldMeta(e) {
-      return this.getFieldMetaCache().map.get(String(e));
+    getFieldMeta(i) {
+      return this.getFieldMetaCache().map.get(String(i));
     }
     getSubmitMetaCache() {
-      const e = Reflect.getOwnMetadata(et.metadataKey, this), h = Object.getPrototypeOf(this), f = h ? Reflect.getOwnMetadata(et.metadataKey, h) : null, _ = this[et.metadataKey];
-      if (_ && _ !== !0 && _.ownRef === e && _.protoRef === f)
+      const i = Reflect.getOwnMetadata(st, this), h = Object.getPrototypeOf(this), f = h ? Reflect.getOwnMetadata(st, h) : null, _ = this[st];
+      if (_ && _ !== !0 && _.ownRef === i && _.protoRef === f)
         return _;
-      const w = et.fields(this), g = /* @__PURE__ */ new Map();
+      const w = ge.fields(this), v = /* @__PURE__ */ new Map();
       for (const p of w)
-        g.set(String(p.name), p);
-      const v = { ownRef: e, protoRef: f, list: w, map: g };
-      return this[et.metadataKey] = v, v;
+        v.set(String(p.name), p);
+      const y = { ownRef: i, protoRef: f, list: w, map: v };
+      return this[st] = y, y;
     }
     getExcludeMetaCache() {
-      const e = Reflect.getOwnMetadata(nt.metadataKey, this), h = Object.getPrototypeOf(this), f = h ? Reflect.getOwnMetadata(nt.metadataKey, h) : null, _ = this[nt.metadataKey];
-      if (_ && _ !== !0 && _.ownRef === e && _.protoRef === f)
+      const i = Reflect.getOwnMetadata(nt, this), h = Object.getPrototypeOf(this), f = h ? Reflect.getOwnMetadata(nt, h) : null, _ = this[nt];
+      if (_ && _ !== !0 && _.ownRef === i && _.protoRef === f)
         return _;
-      const w = nt.fields(this), g = /* @__PURE__ */ new Map();
+      const w = be.fields(this), v = /* @__PURE__ */ new Map();
       for (const p of w)
-        g.set(String(p.name), p);
-      const v = { ownRef: e, protoRef: f, list: w, map: g };
-      return this[nt.metadataKey] = v, v;
+        v.set(String(p.name), p);
+      const y = { ownRef: i, protoRef: f, list: w, map: v };
+      return this[nt] = y, y;
     }
     getValidationMetaCache() {
-      const e = Reflect.getOwnMetadata(st.metadataKey, this), h = Object.getPrototypeOf(this), f = h ? Reflect.getOwnMetadata(st.metadataKey, h) : null, _ = this[st.metadataKey];
-      if (_ && _ !== !0 && _.ownRef === e && _.protoRef === f)
+      const i = Reflect.getOwnMetadata(it, this), h = Object.getPrototypeOf(this), f = h ? Reflect.getOwnMetadata(it, h) : null, _ = this[it];
+      if (_ && _ !== !0 && _.ownRef === i && _.protoRef === f)
         return _;
-      const w = st.fields(this), g = /* @__PURE__ */ new Map();
+      const w = ve.fields(this), v = /* @__PURE__ */ new Map();
       for (const p of w)
-        g.set(String(p.name), p);
-      const v = { ownRef: e, protoRef: f, list: w, map: g };
-      return this[st.metadataKey] = v, v;
+        v.set(String(p.name), p);
+      const y = { ownRef: i, protoRef: f, list: w, map: v };
+      return this[it] = y, y;
     }
     /**
      * Сбросить внутренние стейты изменений.
@@ -633,10 +639,10 @@ let ye = (() => {
     /**
      * Инициализировать валидацию для поля или всех полей.
      */
-    initValidation(e) {
+    initValidation(i) {
       const h = this.validation;
-      if (e)
-        Reflect.get(h, e);
+      if (i)
+        Reflect.get(h, i);
       else
         for (let f in h)
           h[f];
@@ -644,27 +650,32 @@ let ye = (() => {
     /**
      * Полная инициализация модели и полей.
      */
-    init(e = {}) {
-      this.cloneForInit(e), this.createDraft(e), this.defineData(this.initData);
+    init(i = {}) {
+      this.cloneForInit(i), this.createDraft(i), this.defineData(this.initData);
     }
     /**
      * Инициализировать отдельное поле модели.
      */
-    initField(e, h) {
-      const f = this.getFieldMeta(e);
+    initField(i, h) {
+      const f = this.getFieldMeta(i);
       if (f) {
-        e in this.initData || Reflect.set(this.initData, e, Reflect.get(this, e));
-        const _ = f?.factory ? f.factory(this.initData, this) : this.initData[f.name];
-        this.defineFieldValue(e, _, f), h?.skipValidation || this.initValidation(e);
+        const _ = String(f.name);
+        Object.prototype.hasOwnProperty.call(this.initData, _) || Reflect.set(this.initData, _, Reflect.get(this, _));
+        let v = f?.factory ? f.factory(this.initData, this) : Reflect.get(this.initData, _);
+        if (v === void 0 && !f?.factory) {
+          const y = Reflect.get(this, _);
+          y !== void 0 && (v = y, Reflect.set(this.initData, _, y));
+        }
+        this.defineFieldValue(i, v, f), h?.skipValidation || this.initValidation(i);
       }
     }
     initLegacyFields() {
       if (this.legacyInitDone)
         return;
-      const e = this.getFieldMetaCache().list;
-      if (e.some((h) => Object.prototype.hasOwnProperty.call(this, h.name))) {
+      const i = this.getFieldMetaCache().list;
+      if (i.some((h) => Object.prototype.hasOwnProperty.call(this, h.name))) {
         this.legacyInitDone = !0;
-        for (let h of e) {
+        for (let h of i) {
           const f = String(h.name);
           this.initData && f in this.initData || this.initField(f, { skipValidation: !0 });
         }
@@ -673,21 +684,21 @@ let ye = (() => {
     /**
      * Создать draft для отслеживания изменений.
      */
-    createDraft(e) {
-      this.draft = Xt(e);
+    createDraft(i) {
+      this.draft = ie(i);
     }
     autoAttachDevtools() {
-      var e, h, f, _, w, g, v, p, q, ut, ht;
+      var i, h, f, _, w, v, y, p, N, ut, ht;
       const ft = globalThis;
-      if (!ft.__MVVM_DEVTOOLS_AUTO__ || ((h = (e = this.options) === null || e === void 0 ? void 0 : e.devtools) === null || h === void 0 ? void 0 : h.enabled) === !1)
+      if (!ft.__MVVM_DEVTOOLS_AUTO__ || ((h = (i = this.options) === null || i === void 0 ? void 0 : i.devtools) === null || h === void 0 ? void 0 : h.enabled) === !1)
         return;
-      const jt = (v = (w = (_ = (f = this.options) === null || f === void 0 ? void 0 : f.devtools) === null || _ === void 0 ? void 0 : _.name) !== null && w !== void 0 ? w : (g = this.constructor) === null || g === void 0 ? void 0 : g.name) !== null && v !== void 0 ? v : "Model", Pt = ((p = ft.__MVVM_DEVTOOLS_SEQ__) !== null && p !== void 0 ? p : 0) + 1;
-      ft.__MVVM_DEVTOOLS_SEQ__ = Pt, _e(this, { name: jt, instanceId: (ht = (ut = (q = this.options) === null || q === void 0 ? void 0 : q.devtools) === null || ut === void 0 ? void 0 : ut.instanceId) !== null && ht !== void 0 ? ht : `${jt}#${Pt}` });
+      const jt = (y = (w = (_ = (f = this.options) === null || f === void 0 ? void 0 : f.devtools) === null || _ === void 0 ? void 0 : _.name) !== null && w !== void 0 ? w : (v = this.constructor) === null || v === void 0 ? void 0 : v.name) !== null && y !== void 0 ? y : "Model", Pt = ((p = ft.__MVVM_DEVTOOLS_SEQ__) !== null && p !== void 0 ? p : 0) + 1;
+      ft.__MVVM_DEVTOOLS_SEQ__ = Pt, ye(this, { name: jt, instanceId: (ht = (ut = (N = this.options) === null || N === void 0 ? void 0 : N.devtools) === null || ut === void 0 ? void 0 : ut.instanceId) !== null && ht !== void 0 ? ht : `${jt}#${Pt}` });
     }
-    withHistoryMuted(e) {
+    withHistoryMuted(i) {
       this.historyMuted = !0;
       try {
-        e();
+        i();
       } finally {
         this.historyMuted = !1;
       }
@@ -695,14 +706,14 @@ let ye = (() => {
     // @define_prop
     // private readonly serviceToJSON = () => this.dumpData;
     syncChangesFromHistory() {
-      const e = this.historyIndex >= 0 ? this.history.slice(0, this.historyIndex + 1) : [];
-      this.changes = e.flatMap((h) => h.patches), this.inverseChanges = e.flatMap((h) => h.inversePatches);
+      const i = this.historyIndex >= 0 ? this.history.slice(0, this.historyIndex + 1) : [];
+      this.changes = i.flatMap((h) => h.patches), this.inverseChanges = i.flatMap((h) => h.inversePatches);
     }
-    applyHistoryPatches(e) {
-      if (!e.length)
+    applyHistoryPatches(i) {
+      if (!i.length)
         return;
-      Lt(this.draft, e);
-      const h = new Set(e.map((f) => f.field).filter(Boolean));
+      Lt(this.draft, i);
+      const h = new Set(i.map((f) => f.field).filter(Boolean));
       h.size !== 0 && this.withHistoryMuted(() => {
         var f;
         for (let _ of h) {
@@ -721,23 +732,23 @@ let ye = (() => {
     /**
      * Зафиксировать изменение в draft и собрать патчи.
      */
-    produceDraft(e, h, f) {
+    produceDraft(i, h, f) {
       if (this.historyMuted)
         return;
       let _, w = [];
-      e && (_ = e.split(".")[0], _ && !this.getFieldMeta(_).collectChanges) || (Zt(this.draft, (g) => {
-        if (e) {
-          let v = g;
-          const p = e.split(".");
+      i && (_ = i.split(".")[0], _ && !this.getFieldMeta(_).collectChanges) || (se(this.draft, (v) => {
+        if (i) {
+          let y = v;
+          const p = i.split(".");
           if (p.length > 1)
-            for (let q = 0; q < p.length && !(q != p.length - 1 && !Ct(v)); q++)
-              Ct(v) && (v = v[p[q]]);
+            for (let N = 0; N < p.length && !(N != p.length - 1 && !Vt(y)); N++)
+              Vt(y) && (y = y[p[N]]);
           else
-            f = e;
-          v && (v[f] = h);
+            f = i;
+          y && (y[f] = h);
         }
-      }, (g, v) => {
-        _ && (g = g.map((p) => Object.assign(Object.assign({}, p), { field: _ })), v = v.map((p) => Object.assign(Object.assign({}, p), { field: _ }))), w = g, !(!g.length && !v.length) && (this.historyIndex < this.history.length - 1 && (this.history = this.history.slice(0, this.historyIndex + 1), this.syncChangesFromHistory()), this.changes.push(...g), this.inverseChanges.push(...v), this.history.push({ patches: g, inversePatches: v }), this.historyIndex = this.history.length - 1);
+      }, (v, y) => {
+        _ && (v = v.map((p) => Object.assign(Object.assign({}, p), { field: _ })), y = y.map((p) => Object.assign(Object.assign({}, p), { field: _ }))), w = v, !(!v.length && !y.length) && (this.historyIndex < this.history.length - 1 && (this.history = this.history.slice(0, this.historyIndex + 1), this.syncChangesFromHistory()), this.changes.push(...v), this.inverseChanges.push(...y), this.history.push({ patches: v, inversePatches: y }), this.historyIndex = this.history.length - 1);
       }), w.length && Lt(this.draft, w));
     }
     /**
@@ -751,21 +762,21 @@ let ye = (() => {
     /**
      * Сделать значение наблюдаемым с отслеживанием вложенных изменений.
      */
-    createObservable(e, h, f, _ = f) {
-      return e = Ft(e) ? e : rt.box(e), new Proxy(e, {
-        get: (w, g, v) => {
-          const p = Reflect.get(w, g, v);
-          return p && typeof p == "object" && !(p instanceof t) && !Ft(e) ? this.createObservable(p, String(g), h, `${_}.${String(g)}`) : p;
+    createObservable(i, h, f, _ = f) {
+      return i = Ft(i) ? i : ot.box(i), new Proxy(i, {
+        get: (w, v, y) => {
+          const p = Reflect.get(w, v, y);
+          return p && typeof p == "object" && !(p instanceof t) && !Ft(i) ? this.createObservable(p, String(v), h, `${_}.${String(v)}`) : p;
         },
-        set: (w, g, v, p) => (e = v, this.produceDraft(_, e, String(g)), this.checkChange(f, Reflect.get(this, f)), Reflect.set(w, g, v, p))
+        set: (w, v, y, p) => (i = y, this.produceDraft(_, i, String(v)), this.checkChange(f, Reflect.get(this, f)), Reflect.set(w, v, y, p))
       });
     }
     /**
      * Определить getter/setter для поля модели.
      */
-    defineFieldValue(e, h, f) {
-      const _ = f ?? this.getFieldMeta(e);
-      return _.noObserve ? Reflect.defineProperty(this, _.name, { value: h }) : (h = rt.box(h), Reflect.defineProperty(this, _.name, {
+    defineFieldValue(i, h, f) {
+      const _ = f ?? this.getFieldMeta(i);
+      return _.noObserve ? Reflect.defineProperty(this, _.name, { value: h }) : (h = ot.box(h), Reflect.defineProperty(this, _.name, {
         get: () => h.get(),
         set: (w) => {
           B(() => h.set(w)), this.produceDraft(_.name, h.get()), this.checkChange(_.name, h.get());
@@ -777,58 +788,58 @@ let ye = (() => {
     /**
      * Сохранить исходные данные с глубоким клонированием.
      */
-    cloneForInit(e = {}) {
-      this.initData = e;
+    cloneForInit(i = {}) {
+      this.initData = i;
     }
     /**
      * Проверить изменение поля и обновить modified_.
      */
-    checkChange(e, h) {
-      const f = Reflect.get(this.committedData, e) || Reflect.get(this.initData, e), _ = e && e in this.initData && !Vt(f, h);
+    checkChange(i, h) {
+      const f = Reflect.get(this.committedData, i) || Reflect.get(this.initData, i), _ = i && i in this.initData && !Ct(f, h);
       return B(() => {
         if (_) {
-          Reflect.set(this.modified_, e, f);
+          Reflect.set(this.modified_, i, f);
           return;
         }
-        e in this.modified_ && Vt(f, h) && delete this.modified_[e];
+        i in this.modified_ && Ct(f, h) && delete this.modified_[i];
       }), _;
     }
     /**
      * Применить данные к полям модели.
      */
-    defineData(e) {
+    defineData(i) {
       const h = this.getFieldMetaCache().map;
       for (let f in this)
-        Object.prototype.hasOwnProperty.call(this, f) && h.has(f) && (Reflect.set(this, f, Reflect.get(e, f)), this.initField(f));
+        Object.prototype.hasOwnProperty.call(this, f) && h.has(f) && (Reflect.set(this, f, Reflect.get(i, f)), this.initField(f));
     }
     /**
      * Признак наличия изменений.
      */
     get dirty() {
-      return !Gt(this.modified_);
+      return !Jt(this.modified_);
     }
     /**
      * Зафиксировать все изменения.
      */
     commit() {
-      for (let e of this.getFieldMetaCache().list)
-        this.commitField(e.name);
+      for (let i of this.getFieldMetaCache().list)
+        this.commitField(i.name);
       this.modified_ = {};
     }
     /**
      * Зафиксировать изменения конкретного поля.
      */
-    commitField(e) {
+    commitField(i) {
       for (let h in this)
         h in this.modified_ && Reflect.set(this.committedData, h, this[h]);
-      delete this.modified_[e], this.modified_ = Object.assign({}, this.modified_);
+      delete this.modified_[i], this.modified_ = Object.assign({}, this.modified_);
     }
     /**
      * Откатить изменения к последнему коммиту.
      */
     reject() {
-      for (let e in this)
-        e in this.modified_ && (this[e] = Reflect.get(this.modified_, e), this.commitField(e), this.defineFieldValue(e, this[e]));
+      for (let i in this)
+        i in this.modified_ && (this[i] = Reflect.get(this.modified_, i), this.commitField(i), this.defineFieldValue(i, this[i]));
       this.commit();
     }
     /**
@@ -854,11 +865,11 @@ let ye = (() => {
     /**
      * Перейти к конкретному шагу истории.
      */
-    goToHistory(e) {
-      if (!(e < -1 || e >= this.history.length) && e !== this.historyIndex) {
-        for (; this.historyIndex < e; )
+    goToHistory(i) {
+      if (!(i < -1 || i >= this.history.length) && i !== this.historyIndex) {
+        for (; this.historyIndex < i; )
           this.historyIndex = this.historyIndex + 1, this.applyHistoryPatches(this.history[this.historyIndex].patches);
-        for (; this.historyIndex > e; )
+        for (; this.historyIndex > i; )
           this.applyHistoryPatches(this.history[this.historyIndex].inversePatches), this.historyIndex -= 1;
         this.syncChangesFromHistory();
       }
@@ -866,9 +877,9 @@ let ye = (() => {
     /**
      * Перезагрузить данные модели.
      */
-    loadData(e) {
+    loadData(i) {
       return this.withHistoryMuted(() => {
-        this.init(e);
+        this.init(i);
       }), this;
     }
     /**
@@ -876,35 +887,37 @@ let ye = (() => {
      */
     get dumpData() {
       this.initLegacyFields();
-      const e = /* @__PURE__ */ Object.create({}), h = this.getSubmitMetaCache().map, f = this.getExcludeMetaCache().map, _ = (g) => {
-        const v = Reflect.get(this, g), p = h.get(g), q = p?.callback;
-        return typeof q == "function" ? q(v, this) : v;
-      }, w = (g) => {
-        const v = f.get(g);
-        if (v)
-          switch (typeof v.callback) {
+      const i = /* @__PURE__ */ Object.create({}), h = this.getSubmitMetaCache().map, f = this.getExcludeMetaCache().map, _ = (v) => {
+        const y = Reflect.get(this, v), p = h.get(v), N = p?.callback;
+        return typeof N == "function" ? N(y, this) : y;
+      }, w = (v) => {
+        const y = f.get(v);
+        if (y)
+          switch (typeof y.callback) {
             case "boolean":
-              return !!v.callback;
+              return !!y.callback;
             case "function":
-              return v.callback(Reflect.get(this, g), this);
+              return y.callback(Reflect.get(this, v), this);
           }
         return !1;
       };
-      return this.getFieldMetaCache().list.forEach((g) => {
-        var v;
-        if (g.name in this)
-          return !((v = this.options) === null || v === void 0) && v.byFields && !this.options.byFields.includes(g.name) || w(g.name) ? void 0 : Reflect.set(e, g.name, _(g.name));
-      }), e;
+      return this.getFieldMetaCache().list.forEach((v) => {
+        var y;
+        if (v.name in this)
+          return !((y = this.options) === null || y === void 0) && y.byFields && !this.options.byFields.includes(v.name) || w(v.name) ? void 0 : Reflect.set(i, v.name, _(v.name));
+      }), i;
     }
     /**
      * Получить объект результатов валидации.
      */
     get validation() {
       this.initLegacyFields();
-      const e = {};
-      for (const h of this.getValidationMetaCache().list)
-        Reflect.set(e, h.name, h.callback(this[h.name], this) || "");
-      return e;
+      const i = {};
+      for (const h of this.getValidationMetaCache().list) {
+        const f = String(h.name);
+        Reflect.set(i, f, h.callback(Reflect.get(this, f), this) || "");
+      }
+      return i;
     }
     /**
      * Признак валидности и наличия изменений.
@@ -917,14 +930,14 @@ let ye = (() => {
      */
     get serviceApi() {
       return {
-        loadData: (e) => this.loadData(e),
+        loadData: (i) => this.loadData(i),
         reject: () => this.reject(),
         commit: () => this.commit(),
-        commitField: (e) => this.commitField(e),
+        commitField: (i) => this.commitField(i),
         toInit: () => this.toInit(),
         undo: () => this.undo(),
         redo: () => this.redo(),
-        goToHistory: (e) => this.goToHistory(e)
+        goToHistory: (i) => this.goToHistory(i)
       };
     }
     get service() {
@@ -940,20 +953,30 @@ let ye = (() => {
       }, this.serviceApi);
     }
   }, (() => {
-    const V = typeof Symbol == "function" && Symbol.metadata ? /* @__PURE__ */ Object.create(null) : void 0;
-    z = [x], U = [J], $ = [x], tt = [x], at = [x], ot = [x], lt = [x], kt = [x], At = [x], Et = [J], Tt = [J], Rt = [(D = J).struct.bind(D)], S(t, null, C, { kind: "accessor", name: "initData", static: !1, private: !1, access: { has: (e) => "initData" in e, get: (e) => e.initData, set: (e, h) => {
-      e.initData = h;
-    } }, metadata: V }, E, F), S(t, null, z, { kind: "method", name: "produceDraft", static: !1, private: !1, access: { has: (e) => "produceDraft" in e, get: (e) => e.produceDraft }, metadata: V }, null, M), S(t, null, U, { kind: "getter", name: "dirty", static: !1, private: !1, access: { has: (e) => "dirty" in e, get: (e) => e.dirty }, metadata: V }, null, M), S(t, null, $, { kind: "method", name: "commit", static: !1, private: !1, access: { has: (e) => "commit" in e, get: (e) => e.commit }, metadata: V }, null, M), S(t, null, tt, { kind: "method", name: "commitField", static: !1, private: !1, access: { has: (e) => "commitField" in e, get: (e) => e.commitField }, metadata: V }, null, M), S(t, null, at, { kind: "method", name: "reject", static: !1, private: !1, access: { has: (e) => "reject" in e, get: (e) => e.reject }, metadata: V }, null, M), S(t, null, ot, { kind: "method", name: "toInit", static: !1, private: !1, access: { has: (e) => "toInit" in e, get: (e) => e.toInit }, metadata: V }, null, M), S(t, null, lt, { kind: "method", name: "undo", static: !1, private: !1, access: { has: (e) => "undo" in e, get: (e) => e.undo }, metadata: V }, null, M), S(t, null, kt, { kind: "method", name: "redo", static: !1, private: !1, access: { has: (e) => "redo" in e, get: (e) => e.redo }, metadata: V }, null, M), S(t, null, At, { kind: "method", name: "goToHistory", static: !1, private: !1, access: { has: (e) => "goToHistory" in e, get: (e) => e.goToHistory }, metadata: V }, null, M), S(t, null, Et, { kind: "getter", name: "validation", static: !1, private: !1, access: { has: (e) => "validation" in e, get: (e) => e.validation }, metadata: V }, null, M), S(t, null, Tt, { kind: "getter", name: "validAndDirty", static: !1, private: !1, access: { has: (e) => "validAndDirty" in e, get: (e) => e.validAndDirty }, metadata: V }, null, M), S(t, null, Rt, { kind: "getter", name: "service", static: !1, private: !1, access: { has: (e) => "service" in e, get: (e) => e.service }, metadata: V }, null, M), V && Object.defineProperty(t, Symbol.metadata, { enumerable: !0, configurable: !0, writable: !0, value: V });
+    const C = typeof Symbol == "function" && Symbol.metadata ? /* @__PURE__ */ Object.create(null) : void 0;
+    z = [x], U = [X], $ = [x], et = [x], at = [x], rt = [x], lt = [x], It = [x], At = [x], Et = [X], Rt = [X], Tt = [(D = X).struct.bind(D)], S(t, null, V, { kind: "accessor", name: "initData", static: !1, private: !1, access: { has: (i) => "initData" in i, get: (i) => i.initData, set: (i, h) => {
+      i.initData = h;
+    } }, metadata: C }, E, F), S(t, null, z, { kind: "method", name: "produceDraft", static: !1, private: !1, access: { has: (i) => "produceDraft" in i, get: (i) => i.produceDraft }, metadata: C }, null, M), S(t, null, U, { kind: "getter", name: "dirty", static: !1, private: !1, access: { has: (i) => "dirty" in i, get: (i) => i.dirty }, metadata: C }, null, M), S(t, null, $, { kind: "method", name: "commit", static: !1, private: !1, access: { has: (i) => "commit" in i, get: (i) => i.commit }, metadata: C }, null, M), S(t, null, et, { kind: "method", name: "commitField", static: !1, private: !1, access: { has: (i) => "commitField" in i, get: (i) => i.commitField }, metadata: C }, null, M), S(t, null, at, { kind: "method", name: "reject", static: !1, private: !1, access: { has: (i) => "reject" in i, get: (i) => i.reject }, metadata: C }, null, M), S(t, null, rt, { kind: "method", name: "toInit", static: !1, private: !1, access: { has: (i) => "toInit" in i, get: (i) => i.toInit }, metadata: C }, null, M), S(t, null, lt, { kind: "method", name: "undo", static: !1, private: !1, access: { has: (i) => "undo" in i, get: (i) => i.undo }, metadata: C }, null, M), S(t, null, It, { kind: "method", name: "redo", static: !1, private: !1, access: { has: (i) => "redo" in i, get: (i) => i.redo }, metadata: C }, null, M), S(t, null, At, { kind: "method", name: "goToHistory", static: !1, private: !1, access: { has: (i) => "goToHistory" in i, get: (i) => i.goToHistory }, metadata: C }, null, M), S(t, null, Et, { kind: "getter", name: "validation", static: !1, private: !1, access: { has: (i) => "validation" in i, get: (i) => i.validation }, metadata: C }, null, M), S(t, null, Rt, { kind: "getter", name: "validAndDirty", static: !1, private: !1, access: { has: (i) => "validAndDirty" in i, get: (i) => i.validAndDirty }, metadata: C }, null, M), S(t, null, Tt, { kind: "getter", name: "service", static: !1, private: !1, access: { has: (i) => "service" in i, get: (i) => i.service }, metadata: C }, null, M), C && Object.defineProperty(t, Symbol.metadata, { enumerable: !0, configurable: !0, writable: !0, value: C });
   })(), t;
 })();
-const me = () => {
+const Me = () => {
   var t;
-  const i = globalThis;
-  return !!((t = i.__MVVM_DEVTOOLS_HISTORY__) !== null && t !== void 0 ? t : i.__MVVM_DEVTOOLS_AUTO__);
-}, ve = (t) => me() ? !t || typeof t != "object" ? { collectChanges: !0 } : "collectChanges" in t ? t : Object.assign(Object.assign({}, t), { collectChanges: !0 }) : t, St = function(i, a) {
-  const r = ve(Y(i, a) ? void 0 : i), s = (l, c) => {
+  const e = globalThis;
+  return !!((t = e.__MVVM_DEVTOOLS_HISTORY__) !== null && t !== void 0 ? t : e.__MVVM_DEVTOOLS_AUTO__);
+}, Oe = (t) => Me() ? !t || typeof t != "object" ? { collectChanges: !0 } : "collectChanges" in t ? t : Object.assign(Object.assign({}, t), { collectChanges: !0 }) : t, Nt = /* @__PURE__ */ new WeakMap(), we = (t, e) => {
+  if (!t)
+    return;
+  let n = Nt.get(t);
+  n || (n = /* @__PURE__ */ new Set(), Nt.set(t, n));
+  const r = String(e.name);
+  if (n.has(r))
+    return;
+  const s = H(e.metadataKey, t, new Array());
+  s.some((a) => a.name === r) || L(e.metadataKey, [...s, e], t), n.add(r);
+}, St = function(e, n) {
+  const r = Oe(q(e, n) ? void 0 : e), s = (l, c) => {
     const u = new wt(Object.assign(Object.assign({}, r), { name: String(c), ctx: null }));
-    L(u.metadataKey, [...K(u.metadataKey, l, new Array()), u], l), Object.getOwnPropertyDescriptor(l, c) || Object.defineProperty(l, c, {
+    L(u.metadataKey, [...H(u.metadataKey, l, new Array()), u], l), Object.getOwnPropertyDescriptor(l, c) || Object.defineProperty(l, c, {
       configurable: !0,
       enumerable: !0,
       get() {
@@ -975,131 +998,151 @@ const me = () => {
         });
       }
     });
-  }, n = (l) => {
+  }, a = (l) => {
     l.addInitializer(function() {
-      if (this instanceof ye && typeof this.initField == "function") {
+      if (this instanceof pe && typeof this.initField == "function") {
         const c = new wt(Object.assign(Object.assign({}, r), { name: String(l.name), ctx: l }));
-        L(c.metadataKey, [...K(c.metadataKey, this, new Array()), c], this), this.initField.call(this, String(l.name));
+        we(Object.getPrototypeOf(this), c), this.initField.call(this, String(l.name));
       }
     });
   };
   function o(l, c) {
-    if (Y(l, c)) {
+    if (q(l, c)) {
       s(l, c);
       return;
     }
     if (W(c))
-      return n(c), c.kind === "field" ? (u) => u : c;
+      return a(c), c.kind === "field" ? (u) => u : c;
   }
-  return Y(i, a) ? o(i, a) : r && !W(a) ? (l, c) => o(l, c) : W(a) ? o(void 0, a) : (l, c) => o(l, c);
-}, ge = (t) => !t || typeof t != "object" ? { noObserve: !0 } : Object.assign(Object.assign({}, t), { noObserve: !0 }), pe = function(i, a) {
-  return Y(i, a) || W(a) ? St({ noObserve: !0 })(i, a) : St(ge(i));
+  return q(e, n) ? o(e, n) : r && !W(n) ? (l, c) => o(l, c) : W(n) ? o(void 0, n) : (l, c) => o(l, c);
+}, De = (t) => !t || typeof t != "object" ? { noObserve: !0 } : Object.assign(Object.assign({}, t), { noObserve: !0 }), Se = function(e, n) {
+  return q(e, n) || W(n) ? St({ noObserve: !0 })(e, n) : St(De(e));
 };
-St.noObserve = pe;
-function Ne(t) {
-  const i = (s, n) => {
-    const o = new Mt({ callback: t, name: String(n) }), l = K(o.metadataKey, s, new Array());
+St.noObserve = Se;
+const qt = /* @__PURE__ */ new WeakMap(), ke = (t, e) => {
+  if (!t)
+    return;
+  let n = qt.get(t);
+  n || (n = /* @__PURE__ */ new Set(), qt.set(t, n));
+  const r = String(e.name);
+  if (n.has(r))
+    return;
+  const s = H(e.metadataKey, t, new Array());
+  s.some((a) => a.name === r) || L(e.metadataKey, [...s, e], t), n.add(r);
+};
+function Ze(t) {
+  const e = (s, a) => {
+    const o = new Mt({ callback: t, name: String(a) }), l = H(o.metadataKey, s, new Array());
     L(o.metadataKey, [...l, o], s);
-  }, a = (s) => {
-    const n = new Mt({ callback: t, name: String(s.name) });
+  }, n = (s) => {
+    const a = new Mt({ callback: t, name: String(s.name) });
     s.addInitializer(function() {
-      const o = K(n.metadataKey, this, new Array());
-      L(n.metadataKey, [...o, n], this);
+      ke(Object.getPrototypeOf(this), a);
     });
   };
-  function r(s, n) {
-    if (Y(s, n)) {
-      i(s, n);
+  function r(s, a) {
+    if (q(s, a)) {
+      e(s, a);
       return;
     }
-    if (W(n))
-      return a(n), n.kind === "field" ? (o) => o : n;
+    if (W(a))
+      return n(a), a.kind === "field" ? (o) => o : a;
   }
-  return t ? ((s, n) => r(s, n)) : ((s) => s);
+  return t ? ((s, a) => r(s, a)) : ((s) => s);
 }
-function Be(t) {
-  const i = (s, n) => {
-    const o = new bt({ callback: t, name: String(n) }), l = K(o.metadataKey, s, new Array());
+const Yt = /* @__PURE__ */ new WeakMap(), Ie = (t, e) => {
+  if (!t)
+    return;
+  let n = Yt.get(t);
+  n || (n = /* @__PURE__ */ new Set(), Yt.set(t, n));
+  const r = String(e.name);
+  if (n.has(r))
+    return;
+  const s = H(e.metadataKey, t, new Array());
+  s.some((a) => a.name === r) || L(e.metadataKey, [...s, e], t), n.add(r);
+};
+function ti(t) {
+  const e = (s, a) => {
+    const o = new pt({ callback: t, name: String(a) }), l = H(o.metadataKey, s, new Array());
     L(o.metadataKey, [...l, o], s);
-  }, a = (s) => {
-    const n = new bt({ callback: t, name: String(s.name) });
+  }, n = (s) => {
+    const a = new pt({ callback: t, name: String(s.name) });
     s.addInitializer(function() {
-      const o = K(n.metadataKey, this, new Array());
-      L(n.metadataKey, [...o, n], this);
+      Ie(Object.getPrototypeOf(this), a);
     });
   };
-  function r(s, n) {
-    if (Y(s, n)) {
-      i(s, n);
+  function r(s, a) {
+    if (q(s, a)) {
+      e(s, a);
       return;
     }
-    if (W(n))
-      return a(n), n.kind === "field" ? (o) => o : n;
+    if (W(a))
+      return n(a), a.kind === "field" ? (o) => o : a;
   }
-  return t ? ((s, n) => r(s, n)) : ((s) => s);
+  return t ? ((s, a) => r(s, a)) : ((s) => s);
 }
-const Nt = /* @__PURE__ */ Symbol("store-key"), be = () => {
+const $t = /* @__PURE__ */ Symbol("store-key"), Ae = () => {
   var t;
   return (t = globalThis.__REDUX_DEVTOOLS_EXTENSION__) !== null && t !== void 0 ? t : null;
-}, Me = () => {
+}, Ee = () => {
   var t;
   return (t = globalThis.__MVVM_DEVTOOLS_APPLYING__) !== null && t !== void 0 ? t : 0;
-}, Oe = (t) => {
-  var i, a;
+}, Re = (t) => {
+  var e, n;
   const r = globalThis;
-  r.__MVVM_DEVTOOLS_APPLYING__ = ((i = r.__MVVM_DEVTOOLS_APPLYING__) !== null && i !== void 0 ? i : 0) + 1;
+  r.__MVVM_DEVTOOLS_APPLYING__ = ((e = r.__MVVM_DEVTOOLS_APPLYING__) !== null && e !== void 0 ? e : 0) + 1;
   try {
     return t();
   } finally {
-    r.__MVVM_DEVTOOLS_APPLYING__ = Math.max(0, ((a = r.__MVVM_DEVTOOLS_APPLYING__) !== null && a !== void 0 ? a : 1) - 1);
+    r.__MVVM_DEVTOOLS_APPLYING__ = Math.max(0, ((n = r.__MVVM_DEVTOOLS_APPLYING__) !== null && n !== void 0 ? n : 1) - 1);
   }
-}, we = () => Me() > 0, It = (t) => ({
-  items: t.items.map((i) => {
-    var a, r;
+}, Te = () => Ee() > 0, kt = (t) => ({
+  items: t.items.map((e) => {
+    var n, r;
     return {
-      name: (r = (a = i.constructor) === null || a === void 0 ? void 0 : a.name) !== null && r !== void 0 ? r : "Model",
-      data: i.service.dumpData,
-      historyIndex: i.service.historyIndex
+      name: (r = (n = e.constructor) === null || n === void 0 ? void 0 : n.name) !== null && r !== void 0 ? r : "Model",
+      data: e.service.dumpData,
+      historyIndex: e.service.historyIndex
     };
   })
-}), De = (t) => !!(t && typeof t == "object" && Array.isArray(t.items)), Se = (t) => {
+}), je = (t) => !!(t && typeof t == "object" && Array.isArray(t.items)), Pe = (t) => {
   if (!t)
     return null;
   try {
-    const i = JSON.parse(t);
-    return De(i) ? i : null;
+    const e = JSON.parse(t);
+    return je(e) ? e : null;
   } catch {
     return null;
   }
-}, Ie = (t, i = {}) => {
-  var a, r;
-  const s = be();
+}, Ve = (t, e = {}) => {
+  var n, r;
+  const s = Ae();
   if (!s)
     return () => {
     };
-  const n = s.connect({ name: i.name, instanceId: i.instanceId });
-  let o = !1, l = (r = (a = t.items[0]) === null || a === void 0 ? void 0 : a.constructor) !== null && r !== void 0 ? r : null;
+  const a = s.connect({ name: e.name, instanceId: e.instanceId });
+  let o = !1, l = (r = (n = t.items[0]) === null || n === void 0 ? void 0 : n.constructor) !== null && r !== void 0 ? r : null;
   try {
-    n.init(It(t));
+    a.init(kt(t));
   } catch {
   }
-  const c = qt(() => It(t), (m) => {
+  const c = Gt(() => kt(t), (m) => {
     var O;
-    if (o || we())
+    if (o || Te())
       return;
     const b = (O = t.items[0]) === null || O === void 0 ? void 0 : O.constructor;
     b && (l = b);
     try {
-      n.send({ type: "store:update" }, m);
+      a.send({ type: "store:update" }, m);
     } catch {
     }
-  }), u = (m) => (o = !0, Oe(() => {
+  }), u = (m) => (o = !0, Re(() => {
     try {
       return m();
     } finally {
       o = !1;
     }
-  })), y = n.subscribe((m) => {
+  })), g = a.subscribe((m) => {
     var O;
     if (m.type !== "DISPATCH")
       return;
@@ -1109,19 +1152,19 @@ const Nt = /* @__PURE__ */ Symbol("store-key"), be = () => {
       return;
     }
     if (b === "JUMP_TO_ACTION" || b === "JUMP_TO_STATE") {
-      const k = Se(m.state);
-      if (!k)
+      const I = Pe(m.state);
+      if (!I)
         return;
       u(() => {
-        var T, A, H;
-        if (k.items.length === t.items.length && t.items.every((D) => {
-          var M, C;
-          return typeof ((M = D?.service) === null || M === void 0 ? void 0 : M.goToHistory) == "function" || typeof ((C = D?.service) === null || C === void 0 ? void 0 : C.loadData) == "function";
+        var R, A, K;
+        if (I.items.length === t.items.length && t.items.every((D) => {
+          var M, V;
+          return typeof ((M = D?.service) === null || M === void 0 ? void 0 : M.goToHistory) == "function" || typeof ((V = D?.service) === null || V === void 0 ? void 0 : V.loadData) == "function";
         })) {
           B(() => {
-            k.items.forEach((D, M) => {
-              var C;
-              const E = (C = t.items[M]) === null || C === void 0 ? void 0 : C.service, F = D.historyIndex, z = E?.history;
+            I.items.forEach((D, M) => {
+              var V;
+              const E = (V = t.items[M]) === null || V === void 0 ? void 0 : V.service, F = D.historyIndex, z = E?.history;
               if (Array.isArray(z) && z.length > 0 && typeof F == "number" && typeof E?.goToHistory == "function" && (F === -1 && z.length > 0 || F < z.length)) {
                 E.goToHistory(F);
                 return;
@@ -1131,39 +1174,39 @@ const Nt = /* @__PURE__ */ Symbol("store-key"), be = () => {
           });
           return;
         }
-        const P = (A = (T = t.items[0]) === null || T === void 0 ? void 0 : T.constructor) !== null && A !== void 0 ? A : l, I = k.items.map((D) => D.data);
+        const P = (A = (R = t.items[0]) === null || R === void 0 ? void 0 : R.constructor) !== null && A !== void 0 ? A : l, k = I.items.map((D) => D.data);
         if (P) {
-          t.applyLoaded(I, { model: P, cash: !1 }), l = P;
+          t.applyLoaded(k, { model: P, cash: !1 }), l = P;
           return;
         }
-        t.applyLoaded(I, { cash: !1 });
-        const d = (H = t.items[0]) === null || H === void 0 ? void 0 : H.constructor;
+        t.applyLoaded(k, { cash: !1 });
+        const d = (K = t.items[0]) === null || K === void 0 ? void 0 : K.constructor;
         d && (l = d);
       });
     }
   });
   return () => {
-    c(), typeof y == "function" && y(), typeof n.unsubscribe == "function" && n.unsubscribe(), typeof n.disconnect == "function" && n.disconnect();
+    c(), typeof g == "function" && g(), typeof a.unsubscribe == "function" && a.unsubscribe(), typeof a.disconnect == "function" && a.disconnect();
   };
 };
-let Ge = (() => {
-  var t, i, a;
-  let r = [], s, n = [], o = [], l, c = [], u = [], y, m, O, b, k, T, A, H, N, P;
+let ei = (() => {
+  var t, e, n;
+  let r = [], s, a = [], o = [], l, c = [], u = [], g, m, O, b, I, R, A, K, Y, P;
   return t = class {
     get items() {
-      return R(this, i, "f");
+      return T(this, e, "f");
     }
     set items(d) {
-      j(this, i, d, "f");
+      j(this, e, d, "f");
     }
     get _cash() {
-      return R(this, a, "f");
+      return T(this, n, "f");
     }
     set _cash(d) {
-      j(this, a, d, "f");
+      j(this, n, d, "f");
     }
     constructor() {
-      i.set(this, (G(this, r), G(this, n, []))), a.set(this, (G(this, o), G(this, c, []))), G(this, u), gt(this), this.autoAttachDevtools();
+      e.set(this, (G(this, r), G(this, a, []))), n.set(this, (G(this, o), G(this, c, []))), G(this, u), vt(this), this.autoAttachDevtools();
     }
     add(d) {
       this.items.push(d);
@@ -1199,7 +1242,7 @@ let Ge = (() => {
       return this.items.length;
     }
     get snapshot() {
-      return It(this);
+      return kt(this);
     }
     /**
      * Оригинальные данные (до маппинга в модели).
@@ -1214,8 +1257,8 @@ let Ge = (() => {
      * Применить загруженные данные к items.
      */
     applyLoaded(d, D = {}) {
-      const { model: M, mode: C = "replace", cash: E = !0 } = D;
-      if (E && this.setCash(d), C === "append") {
+      const { model: M, mode: V = "replace", cash: E = !0 } = D;
+      if (E && this.setCash(d), V === "append") {
         const F = M ? d.map((z) => new M(z)) : d;
         this.addMany(F);
         return;
@@ -1229,74 +1272,74 @@ let Ge = (() => {
       this._cash = d ?? [];
     }
     autoAttachDevtools() {
-      var d, D, M, C, E, F, z, U;
+      var d, D, M, V, E, F, z, U;
       const $ = globalThis;
       if (!$.__MVVM_DEVTOOLS_AUTO__)
         return;
-      const tt = K(Nt, this.constructor, {}) || {};
-      if (((d = tt.devtools) === null || d === void 0 ? void 0 : d.enabled) === !1)
+      const et = H($t, this.constructor, {}) || {};
+      if (((d = et.devtools) === null || d === void 0 ? void 0 : d.enabled) === !1)
         return;
-      const at = (E = (M = (D = tt.devtools) === null || D === void 0 ? void 0 : D.name) !== null && M !== void 0 ? M : (C = this.constructor) === null || C === void 0 ? void 0 : C.name) !== null && E !== void 0 ? E : "Store", ot = ((F = $.__MVVM_DEVTOOLS_STORE_SEQ__) !== null && F !== void 0 ? F : 0) + 1;
-      $.__MVVM_DEVTOOLS_STORE_SEQ__ = ot;
-      const lt = (U = (z = tt.devtools) === null || z === void 0 ? void 0 : z.instanceId) !== null && U !== void 0 ? U : `${at}#${ot}`;
-      Ie(this, { name: at, instanceId: lt });
+      const at = (E = (M = (D = et.devtools) === null || D === void 0 ? void 0 : D.name) !== null && M !== void 0 ? M : (V = this.constructor) === null || V === void 0 ? void 0 : V.name) !== null && E !== void 0 ? E : "Store", rt = ((F = $.__MVVM_DEVTOOLS_STORE_SEQ__) !== null && F !== void 0 ? F : 0) + 1;
+      $.__MVVM_DEVTOOLS_STORE_SEQ__ = rt;
+      const lt = (U = (z = et.devtools) === null || z === void 0 ? void 0 : z.instanceId) !== null && U !== void 0 ? U : `${at}#${rt}`;
+      Ve(this, { name: at, instanceId: lt });
     }
-  }, i = /* @__PURE__ */ new WeakMap(), a = /* @__PURE__ */ new WeakMap(), (() => {
-    const I = typeof Symbol == "function" && Symbol.metadata ? /* @__PURE__ */ Object.create(null) : void 0;
-    s = [rt], l = [rt], y = [x], m = [x], O = [x], b = [x], k = [J], T = [J], A = [J], H = [x], N = [x], P = [x], S(t, null, s, { kind: "accessor", name: "items", static: !1, private: !1, access: { has: (d) => "items" in d, get: (d) => d.items, set: (d, D) => {
+  }, e = /* @__PURE__ */ new WeakMap(), n = /* @__PURE__ */ new WeakMap(), (() => {
+    const k = typeof Symbol == "function" && Symbol.metadata ? /* @__PURE__ */ Object.create(null) : void 0;
+    s = [ot], l = [ot], g = [x], m = [x], O = [x], b = [x], I = [X], R = [X], A = [X], K = [x], Y = [x], P = [x], S(t, null, s, { kind: "accessor", name: "items", static: !1, private: !1, access: { has: (d) => "items" in d, get: (d) => d.items, set: (d, D) => {
       d.items = D;
-    } }, metadata: I }, n, o), S(t, null, l, { kind: "accessor", name: "_cash", static: !1, private: !1, access: { has: (d) => "_cash" in d, get: (d) => d._cash, set: (d, D) => {
+    } }, metadata: k }, a, o), S(t, null, l, { kind: "accessor", name: "_cash", static: !1, private: !1, access: { has: (d) => "_cash" in d, get: (d) => d._cash, set: (d, D) => {
       d._cash = D;
-    } }, metadata: I }, c, u), S(t, null, y, { kind: "method", name: "add", static: !1, private: !1, access: { has: (d) => "add" in d, get: (d) => d.add }, metadata: I }, null, r), S(t, null, m, { kind: "method", name: "addMany", static: !1, private: !1, access: { has: (d) => "addMany" in d, get: (d) => d.addMany }, metadata: I }, null, r), S(t, null, O, { kind: "method", name: "remove", static: !1, private: !1, access: { has: (d) => "remove" in d, get: (d) => d.remove }, metadata: I }, null, r), S(t, null, b, { kind: "method", name: "clear", static: !1, private: !1, access: { has: (d) => "clear" in d, get: (d) => d.clear }, metadata: I }, null, r), S(t, null, k, { kind: "getter", name: "size", static: !1, private: !1, access: { has: (d) => "size" in d, get: (d) => d.size }, metadata: I }, null, r), S(t, null, T, { kind: "getter", name: "snapshot", static: !1, private: !1, access: { has: (d) => "snapshot" in d, get: (d) => d.snapshot }, metadata: I }, null, r), S(t, null, A, { kind: "getter", name: "cash", static: !1, private: !1, access: { has: (d) => "cash" in d, get: (d) => d.cash }, metadata: I }, null, r), S(t, null, H, { kind: "method", name: "reset", static: !1, private: !1, access: { has: (d) => "reset" in d, get: (d) => d.reset }, metadata: I }, null, r), S(t, null, N, { kind: "method", name: "applyLoaded", static: !1, private: !1, access: { has: (d) => "applyLoaded" in d, get: (d) => d.applyLoaded }, metadata: I }, null, r), S(t, null, P, { kind: "method", name: "setCash", static: !1, private: !1, access: { has: (d) => "setCash" in d, get: (d) => d.setCash }, metadata: I }, null, r), I && Object.defineProperty(t, Symbol.metadata, { enumerable: !0, configurable: !0, writable: !0, value: I });
+    } }, metadata: k }, c, u), S(t, null, g, { kind: "method", name: "add", static: !1, private: !1, access: { has: (d) => "add" in d, get: (d) => d.add }, metadata: k }, null, r), S(t, null, m, { kind: "method", name: "addMany", static: !1, private: !1, access: { has: (d) => "addMany" in d, get: (d) => d.addMany }, metadata: k }, null, r), S(t, null, O, { kind: "method", name: "remove", static: !1, private: !1, access: { has: (d) => "remove" in d, get: (d) => d.remove }, metadata: k }, null, r), S(t, null, b, { kind: "method", name: "clear", static: !1, private: !1, access: { has: (d) => "clear" in d, get: (d) => d.clear }, metadata: k }, null, r), S(t, null, I, { kind: "getter", name: "size", static: !1, private: !1, access: { has: (d) => "size" in d, get: (d) => d.size }, metadata: k }, null, r), S(t, null, R, { kind: "getter", name: "snapshot", static: !1, private: !1, access: { has: (d) => "snapshot" in d, get: (d) => d.snapshot }, metadata: k }, null, r), S(t, null, A, { kind: "getter", name: "cash", static: !1, private: !1, access: { has: (d) => "cash" in d, get: (d) => d.cash }, metadata: k }, null, r), S(t, null, K, { kind: "method", name: "reset", static: !1, private: !1, access: { has: (d) => "reset" in d, get: (d) => d.reset }, metadata: k }, null, r), S(t, null, Y, { kind: "method", name: "applyLoaded", static: !1, private: !1, access: { has: (d) => "applyLoaded" in d, get: (d) => d.applyLoaded }, metadata: k }, null, r), S(t, null, P, { kind: "method", name: "setCash", static: !1, private: !1, access: { has: (d) => "setCash" in d, get: (d) => d.setCash }, metadata: k }, null, r), k && Object.defineProperty(t, Symbol.metadata, { enumerable: !0, configurable: !0, writable: !0, value: k });
   })(), t;
 })();
-function $e(t) {
-  return X(t, "instance");
+function si(t) {
+  return Z(t, "instance");
 }
-function Qe(t) {
-  return ((i, a) => ae(t)(i, a));
+function ni(t) {
+  return ((e, n) => ce(t)(e, n));
 }
-function Je(t, i) {
-  const a = (r, s) => {
-    var n;
-    const o = typeof t == "string" ? { id: t } : typeof t == "object" ? t : { id: (n = s?.name) !== null && n !== void 0 ? n : r?.name };
-    L(Nt, o, r), Yt(o)(r, s);
+function ai(t, e) {
+  const n = (r, s) => {
+    var a;
+    const o = typeof t == "string" ? { id: t } : typeof t == "object" ? t : { id: (a = s?.name) !== null && a !== void 0 ? a : r?.name };
+    L($t, o, r), Ut(o)(r, s);
   };
-  return typeof t == "function" ? a(t, i) : (r, s) => a(r, s);
+  return typeof t == "function" ? n(t, e) : (r, s) => n(r, s);
 }
-class Xe {
+class ri {
 }
-const mt = new Dt();
-function Ze(t, i) {
-  return te((a = {}) => {
-    const { resolved: r, instance: s } = ee(() => {
-      const o = X(t) || (typeof t != "string" ? { instance: new t() } : void 0), l = o?.instance;
+const gt = new Dt();
+function oi(t, e) {
+  return ne((n = {}) => {
+    const { resolved: r, instance: s } = ae(() => {
+      const o = Z(t) || (typeof t != "string" ? { instance: new t() } : void 0), l = o?.instance;
       return { resolved: o, instance: l };
     }, [t]);
-    if (ie(() => {
+    if (re(() => {
       if (s)
         return typeof s.onInit == "function" && s.onInit(), () => {
           typeof s.onDispose == "function" && s.onDispose();
         };
     }, [s]), r) {
-      const n = mt.fields(s), o = n.length > 0 ? n : mt.fields(Object.getPrototypeOf(s));
-      for (const l in a)
+      const a = gt.fields(s), o = a.length > 0 ? a : gt.fields(Object.getPrototypeOf(s));
+      for (const l in n)
         if (o instanceof Array) {
           const c = o.find((u) => u.name === l);
-          c && Reflect.set(s, c.originName, Reflect.get(a, l));
+          c && Reflect.set(s, c.originName, Reflect.get(n, l));
         }
-      return L(mt.metadataKey, o, s), i(Object.assign({ viewModel: s }, a));
+      return L(gt.metadataKey, o, s), e(Object.assign({ viewModel: s }, n));
     }
-    return i(Object.assign({}, a));
+    return e(Object.assign({}, n));
   });
 }
-const Wt = {
+const Bt = {
   load: "load",
   failure: "failure",
   ready: "ready",
   canceled: "canceled",
   disposed: "disposed"
-}, ke = {
+}, Ce = {
   load: "load",
   failure: "failure",
   ready: "ready",
@@ -1304,10 +1347,10 @@ const Wt = {
   disposed: "disposed"
 }, dt = () => {
 };
-class Ae {
-  constructor(i, a) {
-    var r, s, n, o, l, c, u;
-    this.isExecuting = !1, this.activeCount = 0, this.isCanceled = !1, this.isDisposed = !1, this.error = null, this.controllers = /* @__PURE__ */ new Set(), this.queue = [], this.runningPromise = null, this.queueTail = Promise.resolve(), this.cancelToken = 0, this.fn = i, this.opt = Object.assign({ concurrency: (r = a?.concurrency) !== null && r !== void 0 ? r : "ignore", trackError: (s = a?.trackError) !== null && s !== void 0 ? s : !0, resetErrorOnExecute: (n = a?.resetErrorOnExecute) !== null && n !== void 0 ? n : !0, swallowError: (o = a?.swallowError) !== null && o !== void 0 ? o : !0, abortable: (l = a?.abortable) !== null && l !== void 0 ? l : !1 }, a), this.states = Object.assign(Object.assign({}, Wt), (c = a?.states) !== null && c !== void 0 ? c : {}), this.stateKeys = Object.assign(Object.assign({}, ke), (u = a?.stateKeys) !== null && u !== void 0 ? u : {}), Qt(this, {
+class Fe {
+  constructor(e, n) {
+    var r, s, a, o, l, c, u;
+    this.isExecuting = !1, this.activeCount = 0, this.isCanceled = !1, this.isDisposed = !1, this.error = null, this.controllers = /* @__PURE__ */ new Set(), this.queue = [], this.runningPromise = null, this.queueTail = Promise.resolve(), this.cancelToken = 0, this.fn = e, this.opt = Object.assign({ concurrency: (r = n?.concurrency) !== null && r !== void 0 ? r : "ignore", trackError: (s = n?.trackError) !== null && s !== void 0 ? s : !0, resetErrorOnExecute: (a = n?.resetErrorOnExecute) !== null && a !== void 0 ? a : !0, swallowError: (o = n?.swallowError) !== null && o !== void 0 ? o : !0, abortable: (l = n?.abortable) !== null && l !== void 0 ? l : !1 }, n), this.states = Object.assign(Object.assign({}, Bt), (c = n?.states) !== null && c !== void 0 ? c : {}), this.stateKeys = Object.assign(Object.assign({}, Ce), (u = n?.stateKeys) !== null && u !== void 0 ? u : {}), te(this, {
       fn: !1,
       opt: !1,
       states: !1,
@@ -1324,10 +1367,10 @@ class Ae {
   get canExecute() {
     return this.isDisposed || !(this.opt.canExecute ? this.opt.canExecute(this.getScope()) : !0) ? !1 : this.opt.concurrency === "ignore" ? !this.isExecuting : !0;
   }
-  resolveState(i) {
-    var a, r;
-    const s = (a = this.stateKeys[i]) !== null && a !== void 0 ? a : i;
-    return (r = this.states[s]) !== null && r !== void 0 ? r : Wt[i];
+  resolveState(e) {
+    var n, r;
+    const s = (n = this.stateKeys[e]) !== null && n !== void 0 ? n : e;
+    return (r = this.states[s]) !== null && r !== void 0 ? r : Bt[e];
   }
   getScope() {
     return {
@@ -1347,8 +1390,8 @@ class Ae {
     this.error = null;
   }
   cancel() {
-    var i, a;
-    this.cancelToken += 1, this.isCanceled = !0, (a = (i = this.opt).onCancel) === null || a === void 0 || a.call(i), this.opt.cancelQueued && this.clearQueue();
+    var e, n;
+    this.cancelToken += 1, this.isCanceled = !0, (n = (e = this.opt).onCancel) === null || n === void 0 || n.call(e), this.opt.cancelQueued && this.clearQueue();
     for (const r of this.controllers)
       r.abort();
   }
@@ -1358,54 +1401,54 @@ class Ae {
   clearQueue() {
     if (this.queue.length === 0)
       return;
-    const i = this.queue.splice(0, this.queue.length);
-    for (const a of i)
-      a.canceled = !0, a.settled || (a.settled = !0, a.resolve(void 0));
+    const e = this.queue.splice(0, this.queue.length);
+    for (const n of e)
+      n.canceled = !0, n.settled || (n.settled = !0, n.resolve(void 0));
   }
-  execute(...i) {
-    var a;
+  execute(...e) {
+    var n;
     if (this.isDisposed)
       return Promise.resolve(void 0);
     if (!this.canExecute)
-      return (a = this.runningPromise) !== null && a !== void 0 ? a : Promise.resolve(void 0);
-    const r = (n) => {
-      this.runningPromise = n;
+      return (n = this.runningPromise) !== null && n !== void 0 ? n : Promise.resolve(void 0);
+    const r = (a) => {
+      this.runningPromise = a;
       const o = () => {
-        this.runningPromise === n && (this.runningPromise = null);
+        this.runningPromise === a && (this.runningPromise = null);
       };
-      return n.then(o, o), n;
-    }, s = () => vt(this, void 0, void 0, function* () {
-      var n, o, l, c, u, y, m, O;
+      return a.then(o, o), a;
+    }, s = () => mt(this, void 0, void 0, function* () {
+      var a, o, l, c, u, g, m, O;
       if (this.isDisposed)
         return;
       const b = this.opt.abortable ? new AbortController() : null;
       b && this.controllers.add(b), B(() => {
         this.activeCount += 1, this.isExecuting = this.activeCount > 0, this.isCanceled = !1, this.opt.trackError && this.opt.resetErrorOnExecute && (this.error = null);
       });
-      const k = this.cancelToken;
-      let T = !1, A = !1, H = null, N = null;
+      const I = this.cancelToken;
+      let R = !1, A = !1, K = null, Y = null;
       try {
-        (o = (n = this.opt).onStart) === null || o === void 0 || o.call(n, ...i);
+        (o = (a = this.opt).onStart) === null || o === void 0 || o.call(a, ...e);
         const P = this.opt.abortable ? b.signal : void 0;
-        N = this.fn(...i, P);
-        const I = yield N;
-        return A = this.cancelToken !== k, A ? void 0 : ((c = (l = this.opt).onSuccess) === null || c === void 0 || c.call(l, I, ...i), T = !0, I);
+        Y = this.fn(...e, P);
+        const k = yield Y;
+        return A = this.cancelToken !== I, A ? void 0 : ((c = (l = this.opt).onSuccess) === null || c === void 0 || c.call(l, k, ...e), R = !0, k);
       } catch (P) {
         if (this.opt.abortable && b?.signal.aborted) {
           B(() => {
             this.isCanceled = !0;
-          }), A = !0, H = null;
+          }), A = !0, K = null;
           return;
         }
-        if (H = P, A = this.cancelToken !== k, this.opt.trackError && B(() => {
+        if (K = P, A = this.cancelToken !== I, this.opt.trackError && B(() => {
           this.error = P;
-        }), (y = (u = this.opt).onError) === null || y === void 0 || y.call(u, P), !this.opt.swallowError)
+        }), (g = (u = this.opt).onError) === null || g === void 0 || g.call(u, P), !this.opt.swallowError)
           throw P;
         return;
       } finally {
         B(() => {
           this.activeCount = Math.max(0, this.activeCount - 1), this.isExecuting = this.activeCount > 0;
-        }), b && this.controllers.delete(b), !A && this.cancelToken !== k && (A = !0), (O = (m = this.opt).onFinally) === null || O === void 0 || O.call(m, { ok: T, canceled: A, error: H }, ...i);
+        }), b && this.controllers.delete(b), !A && this.cancelToken !== I && (A = !0), (O = (m = this.opt).onFinally) === null || O === void 0 || O.call(m, { ok: R, canceled: A, error: K }, ...e);
       }
     });
     switch (this.opt.concurrency) {
@@ -1414,8 +1457,8 @@ class Ae {
       case "restart":
         return this.cancel(), r(s());
       case "queue": {
-        const n = this.opt.queueLimit;
-        if (typeof n == "number" && n > 0 && this.queue.length >= n)
+        const a = this.opt.queueLimit;
+        if (typeof a == "number" && a > 0 && this.queue.length >= a)
           return Promise.resolve(void 0);
         const o = {
           promise: Promise.resolve(void 0),
@@ -1424,18 +1467,18 @@ class Ae {
           canceled: !1,
           settled: !1
         }, l = this.activeCount === 0 && this.queue.length === 0;
-        o.promise = new Promise((y, m) => {
-          o.resolve = y, o.reject = m;
+        o.promise = new Promise((g, m) => {
+          o.resolve = g, o.reject = m;
         }), this.queue.push(o);
-        const c = () => vt(this, void 0, void 0, function* () {
+        const c = () => mt(this, void 0, void 0, function* () {
           if (o.settled)
             return;
           if (o.canceled || this.isDisposed) {
             o.settled = !0, o.resolve(void 0);
             return;
           }
-          const y = this.queue.indexOf(o);
-          y >= 0 && this.queue.splice(y, 1);
+          const g = this.queue.indexOf(o);
+          g >= 0 && this.queue.splice(g, 1);
           try {
             const m = yield s();
             o.settled || (o.settled = !0, o.resolve(m));
@@ -1450,66 +1493,66 @@ class Ae {
     }
   }
 }
-function Ee(t, i) {
-  return new Ae(t, i);
+function xe(t, e) {
+  return new Fe(t, e);
 }
-function ti(t, i) {
-  const a = Ut(t), r = /* @__PURE__ */ new Set(), s = i?.onCancel;
-  return Ee((...o) => {
-    const l = a(...o);
+function li(t, e) {
+  const n = Xt(t), r = /* @__PURE__ */ new Set(), s = e?.onCancel;
+  return xe((...o) => {
+    const l = n(...o);
     r.add(l);
     const c = () => {
       r.delete(l);
     };
-    return l.then(c, c), new Promise((u, y) => {
+    return l.then(c, c), new Promise((u, g) => {
       l.then(u, (m) => {
-        if ($t(m)) {
+        if (Zt(m)) {
           u(void 0);
           return;
         }
-        y(m);
+        g(m);
       });
     });
-  }, Object.assign(Object.assign({}, i), { onCancel: () => {
+  }, Object.assign(Object.assign({}, e), { onCancel: () => {
     var o;
     for (const l of r)
       (o = l.cancel) === null || o === void 0 || o.call(l);
     s?.();
   } }));
 }
-function ei(t) {
-  return function(...i) {
-    return B(() => t.apply(this, i));
+function ci(t) {
+  return function(...e) {
+    return B(() => t.apply(this, e));
   };
 }
 export {
-  X as GetService,
-  $e as GetStore,
-  ae as Inject,
-  Qe as InjectStore,
-  ze as MakeObservable,
-  ye as Model,
-  We as PropFromView,
-  Yt as Service,
-  Ke as SetService,
-  Je as Store,
-  Ge as StoreBase,
-  Le as TODO,
-  Xe as ViewModel,
-  Ee as asyncCommand,
-  _e as attachModelDevtools,
-  Ie as attachStoreDevtools,
-  ei as commandAction,
+  Z as GetService,
+  si as GetStore,
+  ce as Inject,
+  ni as InjectStore,
+  $e as MakeObservable,
+  pe as Model,
+  Qe as PropFromView,
+  Ut as Service,
+  Ge as SetService,
+  ai as Store,
+  ei as StoreBase,
+  Be as TODO,
+  ri as ViewModel,
+  xe as asyncCommand,
+  ye as attachModelDevtools,
+  Ve as attachStoreDevtools,
+  ci as commandAction,
   L as defineMetadata,
-  He as define_prop,
-  qe as exclude,
+  Ue as define_prop,
+  Je as exclude,
   St as field,
-  ti as flowCommand,
-  se as getExecutingFunctionNameByStack,
-  K as getOwnMetadata,
-  xe as isSerializable,
-  Ne as submit,
-  Be as validation,
-  Ze as view
+  li as flowCommand,
+  oe as getExecutingFunctionNameByStack,
+  H as getOwnMetadata,
+  Ye as isSerializable,
+  Ze as submit,
+  ti as validation,
+  oi as view
 };
 //# sourceMappingURL=index.js.map

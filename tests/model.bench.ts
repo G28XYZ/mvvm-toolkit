@@ -22,6 +22,39 @@ for (let i = 0; i < FIELD_COUNT; i++) {
   BASE_DATA[`f${i}`] = i;
 }
 
+const plainSubmit = (value: number) => value;
+
+class PlainModel {
+  private data: Record<string, number>;
+
+  constructor(data: Record<string, number>) {
+    const next: Record<string, number> = {};
+    for (let i = 0; i < FIELD_NAMES.length; i++) {
+      const name = FIELD_NAMES[i];
+      next[name] = data[name];
+    }
+    this.data = next;
+  }
+
+  dumpData() {
+    const result: Record<string, number> = {};
+    for (let i = 0; i < FIELD_NAMES.length; i++) {
+      const name = FIELD_NAMES[i];
+      result[name] = this.data[name];
+    }
+    return result;
+  }
+
+  dumpDataWithSubmit(submitFn: (value: number) => number) {
+    const result: Record<string, number> = {};
+    for (let i = 0; i < FIELD_NAMES.length; i++) {
+      const name = FIELD_NAMES[i];
+      result[name] = submitFn(this.data[name]);
+    }
+    return result;
+  }
+}
+
 class BulkModel extends Model<Record<string, number>> {}
 class SubmitModel extends Model<Record<string, number>> {}
 class ExcludeModel extends Model<Record<string, number>> {}
@@ -36,10 +69,58 @@ applyFieldDecorators(SubmitModel.prototype, [submitDecorator]);
 applyFieldDecorators(ExcludeModel.prototype, [excludeDecorator]);
 applyFieldDecorators(ValidationModel.prototype, [validationDecorator]);
 
+const createPlainModel = () => new PlainModel(BASE_DATA);
 const createModel = () => new BulkModel(BASE_DATA);
 const createSubmitModel = () => new SubmitModel(BASE_DATA);
 const createExcludeModel = () => new ExcludeModel(BASE_DATA);
 const createValidationModel = () => new ValidationModel(BASE_DATA);
+
+describe(`Plain benchmark (${FIELD_COUNT} fields)`, () => {
+  bench("init only (plain)", () => {
+    const model = createPlainModel();
+    void model;
+  });
+
+  bench("init + dumpData (plain)", () => {
+    const model = createPlainModel();
+    void model.dumpData();
+  });
+
+  bench("init + dumpData (plain, submit)", () => {
+    const model = createPlainModel();
+    void model.dumpDataWithSubmit(plainSubmit);
+  });
+});
+
+describe(`Plain benchmark (${MODEL_COUNT} models, ${FIELD_COUNT} fields)`, () => {
+  bench(`init ${MODEL_COUNT}k models (plain)`, () => {
+    const models = new Array(MODEL_COUNT);
+    for (let i = 0; i < MODEL_COUNT; i++) {
+      models[i] = createPlainModel();
+    }
+    void models.length;
+  });
+
+  bench(`init ${MODEL_COUNT} models + dumpData (plain)`, () => {
+    const models = new Array(MODEL_COUNT);
+    for (let i = 0; i < MODEL_COUNT; i++) {
+      models[i] = createPlainModel();
+    }
+    for (let i = 0; i < MODEL_COUNT; i++) {
+      void models[i].dumpData();
+    }
+  });
+
+  bench(`init ${MODEL_COUNT} models + dumpData (plain, submit)`, () => {
+    const models = new Array(MODEL_COUNT);
+    for (let i = 0; i < MODEL_COUNT; i++) {
+      models[i] = createPlainModel();
+    }
+    for (let i = 0; i < MODEL_COUNT; i++) {
+      void models[i].dumpDataWithSubmit(plainSubmit);
+    }
+  });
+});
 
 describe(`Model benchmark (${FIELD_COUNT} fields)`, () => {
   bench("init only", () => {

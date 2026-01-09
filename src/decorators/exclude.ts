@@ -4,6 +4,24 @@ import { getOwnMetadata, defineMetadata } from "../utils";
 import { isLegacyPropertyDecoratorArgs, isDecoratorContext } from "../utils/decorators";
 import { AnyFieldDecorator } from "./types";
 
+const protoExcludeRegistry = new WeakMap<object, Set<string>>();
+
+const registerExcludeMetadata = (proto: object, instance: ExcludeMetadata) => {
+  if (!proto) return;
+  let registry = protoExcludeRegistry.get(proto);
+  if (!registry) {
+    registry = new Set<string>();
+    protoExcludeRegistry.set(proto, registry);
+  }
+  const name = String(instance.name);
+  if (registry.has(name)) return;
+  const list = getOwnMetadata(instance.metadataKey, proto, new Array<ExcludeMetadata>());
+  if (!list.some((item) => item.name === name)) {
+    defineMetadata(instance.metadataKey, [...list, instance], proto);
+  }
+  registry.add(name);
+};
+
 /**
  * Декоратор исключения поля из {@link Model.dumpData}.
  * @param fn функция или boolean. true — исключить поле.
@@ -27,8 +45,7 @@ export function exclude<This, T>(fn: DecoratorCallbackType<T, This> | boolean) {
   const define = (c: ClassFieldDecoratorContext<This, T>) => {
     c.addInitializer(function (this: This) {
       const instance = new ExcludeMetadata({ callback: fn, name: String(c.name) });
-      const fields = getOwnMetadata(instance.metadataKey, this, new Array<ExcludeMetadata>());
-      defineMetadata(instance.metadataKey, [...fields, instance], this);
+      registerExcludeMetadata(Object.getPrototypeOf(this as object), instance);
     });
   };
 

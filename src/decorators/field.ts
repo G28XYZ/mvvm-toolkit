@@ -31,6 +31,24 @@ const resolveFieldOptions = <TOptions extends object | undefined>(
   return { ...options, collectChanges: true };
 };
 
+const protoFieldRegistry = new WeakMap<object, Set<string>>();
+
+const registerFieldMetadata = (proto: object, instance: FieldMetadata) => {
+  if (!proto) return;
+  let registry = protoFieldRegistry.get(proto);
+  if (!registry) {
+    registry = new Set<string>();
+    protoFieldRegistry.set(proto, registry);
+  }
+  const name = String(instance.name);
+  if (registry.has(name)) return;
+  const list = getOwnMetadata(instance.metadataKey, proto, new Array<FieldMetadata>());
+  if (!list.some((item) => item.name === name)) {
+    defineMetadata(instance.metadataKey, [...list, instance], proto);
+  }
+  registry.add(name);
+};
+
 type FieldOptions<This> = Pick<
   IFieldMetadata<ModelData<This>, This>,
   "factory" | "mapping" | "collectChanges" | "noObserve"
@@ -117,11 +135,7 @@ export const field: FieldDecorator = function field<This, T>(
           name: String(ctx.name),
           ctx,
         });
-        defineMetadata(
-          instance.metadataKey,
-          [...getOwnMetadata(instance.metadataKey, this, new Array<FieldMetadata>()), instance],
-          this
-        );
+        registerFieldMetadata(Object.getPrototypeOf(this), instance);
         this.initField.call(this, String(ctx.name));
       }
     });

@@ -1,42 +1,11 @@
 import { immerable } from "immer";
-import { FieldMetadata, SubmitMetadata, ValidationMetadata, ExcludeMetadata, IFieldMetadata, ISubmitMetadata, IExcludeMetadata } from "./data";
-import { ModelOptions, ModelService, TModel, TPatch, THistoryEntry, IMetadataModel } from "./types";
-/** */
-declare const submitMetadata: SubmitMetadata;
-/** */
-declare const fieldMetadata: FieldMetadata;
-/** */
-declare const validationMetadata: ValidationMetadata;
-/** */
-declare const excludeMetadata: ExcludeMetadata;
+import { IFieldMetadata } from "./data";
+import { ModelOptions, ModelService, TModel, TPatch, THistoryEntry } from "./types";
+import { EXCLUDE_METADATA_KEY, FIELD_METADATA_KEY, SUBMIT_METADATA_KEY, VALIDATION_METADATA_KEY } from "./meta";
 /**
  * Класс для управлением состоянием модели.
  */
 export declare class Model<T extends Record<string, any> = any> implements TModel<any> {
-    [fieldMetadata.metadataKey]: {
-        ownRef: unknown;
-        protoRef: unknown;
-        list: IFieldMetadata<any, any>[];
-        map: Map<string, IFieldMetadata<any, any>>;
-    };
-    [submitMetadata.metadataKey]: {
-        ownRef: unknown;
-        protoRef: unknown;
-        list: ISubmitMetadata[];
-        map: Map<string, ISubmitMetadata>;
-    };
-    [excludeMetadata.metadataKey]: {
-        ownRef: unknown;
-        protoRef: unknown;
-        list: IExcludeMetadata[];
-        map: Map<string, IExcludeMetadata>;
-    };
-    [validationMetadata.metadataKey]: {
-        ownRef: unknown;
-        protoRef: unknown;
-        list: IMetadataModel[];
-        map: Map<string, IMetadataModel>;
-    };
     protected accessor [immerable]: boolean;
     protected accessor initData: Partial<T>;
     protected accessor committedData: Partial<T>;
@@ -49,6 +18,10 @@ export declare class Model<T extends Record<string, any> = any> implements TMode
     private accessor legacyInitDone;
     private accessor options;
     private accessor historyMuted;
+    private accessor [FIELD_METADATA_KEY];
+    private accessor [SUBMIT_METADATA_KEY];
+    private accessor [EXCLUDE_METADATA_KEY];
+    private accessor [VALIDATION_METADATA_KEY];
     /**
      * Создает модель и инициализирует данные.
      */

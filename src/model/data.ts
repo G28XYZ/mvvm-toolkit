@@ -1,10 +1,6 @@
+import { VALIDATION_METADATA_KEY, SUBMIT_METADATA_KEY, EXCLUDE_METADATA_KEY, FIELD_METADATA_KEY, PROP_FROM_VIEW_METADATA_KEY } from "./meta";
 import { IMetadataModel } from "./types";
 
-const FIELD_METADATA_KEY = Symbol("field-key");
-const VALIDATION_METADATA_KEY = Symbol("validation-key");
-const SUBMIT_METADATA_KEY = Symbol("submit-key");
-const EXCLUDE_METADATA_KEY = Symbol("exclude-key");
-const PROP_FROM_VIEW_METADATA_KEY = Symbol("prop-from-view-key");
 
 /**
  * Базовая модель метаданных для декораторов.
