@@ -3,9 +3,32 @@ import { GetService } from "../typedi";
 import type { DiServices, InjectType } from "../typedi";
 import { defineMetadata, TInstance } from "../utils";
 import { PropFromViewMetadata } from "../model/data";
-import { ReactElement, useEffect, useMemo } from "react";
+import { ReactElement, isValidElement, useEffect, useMemo } from "react";
 
 const propFromViewMetadata = new PropFromViewMetadata();
+
+const isDomNode = (value: unknown): boolean => {
+  return typeof Node !== "undefined" && value instanceof Node;
+};
+
+const isPropFromViewValueAllowed = (value: unknown): boolean => {
+  if (value == null) return true;
+
+  const valueType = typeof value;
+  if (valueType === "function") return false;
+  if (valueType !== "object") return true;
+
+  if (isValidElement(value)) return false;
+  return !isDomNode(value);
+};
+
+const assertPropFromViewValue = (prop: string, value: unknown) => {
+  if (!isPropFromViewValueAllowed(value)) {
+    throw new TypeError(
+      `PropFromView only accepts object or primitive values; functions, React elements, and DOM nodes are not allowed for prop "${prop}".`
+    );
+  }
+};
 
 /** Тип пропсов для view-обертки. */
 type Props<T extends TInstance, U, P extends "Partial" = undefined> = U &
@@ -53,7 +76,9 @@ export function view<U, T extends TInstance = TInstance>(
         if (resolvedPropsFromView instanceof Array) {
           const propMetadata = resolvedPropsFromView.find((item) => item.name === prop);
           if (propMetadata) {
-            Reflect.set(instance, propMetadata.originName, Reflect.get(props, prop));
+            const propValue = Reflect.get(props, prop);
+            assertPropFromViewValue(prop, propValue);
+            Reflect.set(instance, propMetadata.originName, propValue);
           }
         }
       }

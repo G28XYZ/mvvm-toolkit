@@ -46,6 +46,39 @@ describe("view", () => {
     expect(captured?.title).toBe("Hello");
   });
 
+  it("не принимает React element через PropFromView", () => {
+    @Service
+    class ViewModel {
+      @PropFromView("content")
+      content: unknown = null;
+    }
+
+    const Component = view<{ content: React.ReactElement }, typeof ViewModel>(ViewModel, () => {
+      return React.createElement("div");
+    });
+
+    const Wrapped = Component as React.FC<any>;
+    expect(() =>
+      renderToString(React.createElement(Wrapped, { content: React.createElement("span") }))
+    ).toThrow(TypeError);
+  });
+
+  it("не принимает DOM node через PropFromView", () => {
+    @Service
+    class ViewModel {
+      @PropFromView("node")
+      node: unknown = null;
+    }
+
+    const Component = view<{ node: Node }, typeof ViewModel>(ViewModel, () => {
+      return React.createElement("div");
+    });
+
+    const Wrapped = Component as React.FC<any>;
+    const node = document.createElement("div");
+    expect(() => renderToString(React.createElement(Wrapped, { node }))).toThrow(TypeError);
+  });
+
   it("поддерживает legacy PropFromView", () => {
     class LegacyViewModel {
       title: string = "";
