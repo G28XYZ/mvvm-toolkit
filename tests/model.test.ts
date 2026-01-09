@@ -70,14 +70,6 @@ class ExcludeByCallbackModel extends Model<ExampleData> implements TModel<Exampl
   count: number = 0;
 }
 
-class NestedModel extends Model<Pick<ExampleData, "id" | "meta">> implements TModel<Pick<ExampleData, "id" | "meta">> {
-  @field
-  id: number = 0;
-
-  @field({ collectChanges: true })
-  meta: { label: string } = { label: "init" };
-}
-
 describe("Model", () => {
   it("поддерживает legacy декораторы модели", () => {
     class LegacyModel extends Model<{ name: string; count: number; tags: string[] }> {
@@ -103,8 +95,6 @@ describe("Model", () => {
 
     model.count = 2;
     expect(model.service.validation.count).toBe("too high");
-    expect(model.service.changes.length).toBeGreaterThan(0);
-    expect(model.service.changes[0]?.field).toBe("count");
   });
 
   it("отслеживает dirty и поддерживает commit/reject", () => {
@@ -135,18 +125,6 @@ describe("Model", () => {
       count: 1,
       meta: null,
     });
-  });
-
-  it("собирает патчи только для полей с collectChanges", () => {
-    const model = new ExampleModel({ id: 1, name: "alpha", views: 1, tags: [], count: 0 });
-
-    model.count = 1;
-    const withChanges = model.service.changes.length;
-    expect(withChanges).toBeGreaterThan(0);
-    expect(model.service.changes[0]?.field).toBe("count");
-
-    model.views = 2;
-    expect(model.service.changes.length).toBe(withChanges);
   });
 
   it("возвращает результаты validation", () => {
@@ -254,41 +232,10 @@ describe("Model", () => {
     });
   });
 
-  it.todo("отслеживает вложенные изменения для collectChanges", () => {
-    const model = new NestedModel({ id: 1, meta: { label: "init" } });
-
-    model.meta.label = "next";
-
-    expect(model.service.dirty).toBe(true);
-    expect(model.service.changes.length).toBeGreaterThan(0);
-    expect(model.service.changes[0]?.field).toBe("meta");
-  });
-
   it("оставляет validation пустой для undefined", () => {
     const model = new ExampleModel({ id: 1, name: "alpha", views: undefined, tags: [], count: 0 });
 
     expect(model.service.validation.views).toBe("");
   });
 
-  it("поддерживает историю и перемещение по шагам", () => {
-    const model = new ExampleModel({ id: 1, name: "alpha", views: 1, tags: [], count: 0 });
-
-    model.count = 1;
-    model.count = 2;
-
-    expect(model.service.history.length).toBe(2);
-    expect(model.service.historyIndex).toBe(1);
-
-    model.service.undo();
-    expect(model.count).toBe(1);
-    expect(model.service.historyIndex).toBe(0);
-
-    model.service.redo();
-    expect(model.count).toBe(2);
-    expect(model.service.historyIndex).toBe(1);
-
-    model.service.goToHistory(-1);
-    expect(model.count).toBe(0);
-    expect(model.service.historyIndex).toBe(-1);
-  });
 });

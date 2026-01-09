@@ -58,7 +58,6 @@
     "mvvm"
   ],
   "peerDependencies": {
-    "immer": "^11.1.0",
     "lodash": "^4.17.21",
     "mobx": "^6.15.0",
     "mobx-react": "^9.2.1",

@@ -14,23 +14,6 @@ import { getOwnMetadata, defineMetadata } from "../utils";
 import { isLegacyPropertyDecoratorArgs, isDecoratorContext } from "../utils/decorators";
 import { AnyFieldDecorator } from "./types";
 
-const isDevtoolsHistoryEnabled = () => {
-  const globalAny = globalThis as unknown as {
-    __MVVM_DEVTOOLS_AUTO__?: boolean;
-    __MVVM_DEVTOOLS_HISTORY__?: boolean;
-  };
-  return Boolean(globalAny.__MVVM_DEVTOOLS_HISTORY__ ?? globalAny.__MVVM_DEVTOOLS_AUTO__);
-};
-
-const resolveFieldOptions = <TOptions extends object | undefined>(
-  options: TOptions
-): TOptions | { collectChanges: boolean } => {
-  if (!isDevtoolsHistoryEnabled()) return options;
-  if (!options || typeof options !== "object") return { collectChanges: true };
-  if ("collectChanges" in options) return options;
-  return { ...options, collectChanges: true };
-};
-
 const protoFieldRegistry = new WeakMap<object, Set<string>>();
 
 const registerFieldMetadata = (proto: object, instance: FieldMetadata) => {
@@ -85,9 +68,7 @@ export const field: FieldDecorator = function field<This, T>(
   optionsOrTarget?: object,
   contextOrKey?: ClassFieldDecoratorContext<This, T> | string | symbol
 ) {
-  const resolvedOptions = resolveFieldOptions(
-    isLegacyPropertyDecoratorArgs(optionsOrTarget, contextOrKey) ? undefined : optionsOrTarget
-  );
+  const resolvedOptions = isLegacyPropertyDecoratorArgs(optionsOrTarget, contextOrKey) ? undefined : optionsOrTarget;
 
   const defineLegacy = (target: object, name: string | symbol) => {
     const instance = new FieldMetadata({ ...resolvedOptions, name: String(name), ctx: null });

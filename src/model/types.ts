@@ -1,4 +1,3 @@
-import { Patch } from "immer";
 import { Model } from ".";
 
 export type ModelData<T> = Omit<T, keyof Model>;
@@ -15,24 +14,9 @@ export interface IMetadataModel<T extends Record<string, any> = any> {
   isInit: boolean;
 }
 
-export type TPatch = Patch & { field?: string };
-
-export type THistoryEntry = {
-  patches: TPatch[];
-  inversePatches: TPatch[];
-};
-
 export type ModelService<T> = {
   /** признак измененных данных в модели */
   dirty: boolean;
-  /** массив хранит текущие значения в момент изменения */
-  changes: TPatch[];
-  /** массив хранит исходные значения в момент изменения */
-  inverseChanges: TPatch[];
-  /** история изменений для перемещения по состояниям */
-  history: THistoryEntry[];
-  /** текущая позиция в истории, -1 означает начальное состояние */
-  historyIndex: number;
   /** дамп сериализованных данных (для отправки на сервер сервера) */
   dumpData: Partial<T>;
   /** */
@@ -48,12 +32,6 @@ export type ModelService<T> = {
   commitField: BivariantCallback<keyof T>;
   /** сбросить все значения полей модели к исходным */
   toInit(): Model<T>;
-  /** откатиться на шаг назад */
-  undo(): void;
-  /** перейти на шаг вперед */
-  redo(): void;
-  /** перейти к конкретному шагу истории */
-  goToHistory(index: number): void;
 };
 
 export type TModel<T> = T & {
@@ -62,9 +40,4 @@ export type TModel<T> = T & {
 
 export interface ModelOptions<T> {
   byFields?: (keyof T)[];
-  devtools?: {
-    name?: string;
-    enabled?: boolean;
-    instanceId?: string;
-  };
 }

@@ -1,27 +1,19 @@
 import { type IServiceOptions } from "../typedi";
 import type { Model } from "../model";
-export type StoreDevtoolsOptions = {
-    name?: string;
-    enabled?: boolean;
-    instanceId?: string;
-};
 export type ApplyLoadedOptions<T> = {
     model?: new (...args: any) => T;
     mode?: "replace" | "append";
     cash?: boolean;
 };
 export interface IStoreOptions extends IServiceOptions {
-    devtools?: StoreDevtoolsOptions;
 }
 type StoreItemSnapshot = {
     name: string;
     data: any;
-    historyIndex: number;
 };
 type StoreStateSnapshot = {
     items: StoreItemSnapshot[];
 };
-export declare const attachStoreDevtools: (store: StoreBase<any>, options?: StoreDevtoolsOptions) => () => void;
 export declare class StoreBase<T extends Model = Model> {
     accessor items: T[];
     protected accessor _cash: unknown[];
@@ -57,7 +49,6 @@ export declare class StoreBase<T extends Model = Model> {
      * Сохранить оригинальные данные стора.
      */
     setCash(data: unknown[]): void;
-    private autoAttachDevtools;
 }
 /**
  * Получить только Store-сервис по имени или классу.

@@ -1,23 +1,15 @@
-import { immerable } from "immer";
 import { IFieldMetadata } from "./data";
-import { ModelOptions, ModelService, TModel, TPatch, THistoryEntry } from "./types";
+import { ModelOptions, ModelService, TModel } from "./types";
 import { EXCLUDE_METADATA_KEY, FIELD_METADATA_KEY, SUBMIT_METADATA_KEY, VALIDATION_METADATA_KEY } from "./meta";
 /**
  * Класс для управлением состоянием модели.
  */
 export declare class Model<T extends Record<string, any> = any> implements TModel<any> {
-    protected accessor [immerable]: boolean;
     protected accessor initData: Partial<T>;
     protected accessor committedData: Partial<T>;
     private accessor modified_;
-    private accessor draft;
-    protected accessor changes: TPatch[];
-    protected accessor inverseChanges: TPatch[];
-    protected accessor history: THistoryEntry[];
-    protected accessor historyIndex: number;
     private accessor legacyInitDone;
     private accessor options;
-    private accessor historyMuted;
     private accessor [FIELD_METADATA_KEY];
     private accessor [SUBMIT_METADATA_KEY];
     private accessor [EXCLUDE_METADATA_KEY];
@@ -31,9 +23,6 @@ export declare class Model<T extends Record<string, any> = any> implements TMode
     private getSubmitMetaCache;
     private getExcludeMetaCache;
     private getValidationMetaCache;
-    /**
-     * Сбросить внутренние стейты изменений.
-     */
     /**
      * Инициализировать валидацию для поля или всех полей.
      */
@@ -49,25 +38,6 @@ export declare class Model<T extends Record<string, any> = any> implements TMode
         skipValidation?: boolean;
     }): void;
     private initLegacyFields;
-    /**
-     * Создать draft для отслеживания изменений.
-     */
-    private createDraft;
-    private autoAttachDevtools;
-    private withHistoryMuted;
-    private syncChangesFromHistory;
-    private applyHistoryPatches;
-    /**
-     * зафиксировать изменение значения
-     * @param changePath
-     * @param newValue
-     * @param endField
-     * @returns
-     */
-    /**
-     * Зафиксировать изменение в draft и собрать патчи.
-     */
-    private produceDraft;
     /**
      * сделать значение наблюдаемым, повесить observable в глубину
      * @param value
@@ -117,18 +87,6 @@ export declare class Model<T extends Record<string, any> = any> implements TMode
      */
     protected toInit(): Model<T>;
     /**
-     * Откатить изменения на один шаг истории.
-     */
-    protected undo(): void;
-    /**
-     * Повторить ранее откатанные изменения.
-     */
-    protected redo(): void;
-    /**
-     * Перейти к конкретному шагу истории.
-     */
-    protected goToHistory(index: number): void;
-    /**
      * Перезагрузить данные модели.
      */
     protected loadData(data?: Partial<T>): Model<T>;
@@ -151,4 +109,3 @@ export declare class Model<T extends Record<string, any> = any> implements TMode
     get service(): ModelService<T>;
 }
 export * from './types';
-export * from './devtools';

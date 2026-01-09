@@ -40,7 +40,6 @@ export default defineConfig((env) => ({
         "react",
         "mobx",
         "react-dom",
-        "immer",
         "mobx-react",
         "lodash",
         "reflect-metadata",

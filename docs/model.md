@@ -44,7 +44,7 @@ console.log(model.service.dumpData); // { id: 1, name: "", trimmedName: "" }
 
 ## Декораторы
 
-- `@field` — помечает свойство как поле модели и подключает его к `dumpData`, `validation` и механизму изменений.
+- `@field` — помечает свойство как поле модели и подключает его к `dumpData` и `validation`.
 - `@validation(fn)` — запускает валидацию при изменении поля, результат хранится в `model.service.validation`.
 - `@submit(fn)` — трансформирует значение при `dumpData`.
 - `@exclude(fn|true)` — исключает поле из `dumpData` (условно или всегда).
@@ -61,7 +61,6 @@ console.log(model.service.dumpData); // { id: 1, name: "", trimmedName: "" }
 - `dirty` — есть ли изменения.
 - `dumpData` — сериализованные данные.
 - `validation` — результаты валидации.
-- `changes` / `inverseChanges` — патчи изменений.
 
 **Методы:**
 

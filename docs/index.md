@@ -14,7 +14,6 @@ title: rvm-toolkit docs
 - [Command и asyncCommand](command/)
 - [DI сервисы](di/)
 - [View и ViewModel](view/)
-- [DevTools](devtools/)
 - [Vite-плагин mvvm-di](vite-plugin-mvvm-di/)
 
 ## Примеры

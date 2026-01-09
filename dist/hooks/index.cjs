@@ -1,2 +1,1 @@
 "use strict";Object.defineProperty(exports,Symbol.toStringTag,{value:"Module"});const l=require("./virtual-scroll.cjs");exports.VirtualScroll=l.VirtualScroll;exports.useVirtualScroller=l.useVirtualScroller;
-//# sourceMappingURL=index.cjs.map

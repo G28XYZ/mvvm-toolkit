@@ -1,5 +1,4 @@
-import { isObject, isEqual, isEmpty } from "lodash";
-import { immerable, produce, createDraft, Draft, enablePatches, applyPatches } from "immer";
+import { isEqual, isEmpty } from "lodash";
 import { action, computed, isObservable, observable, runInAction } from "mobx";
 import {
   FieldMetadata,
@@ -10,10 +9,8 @@ import {
   ISubmitMetadata,
   IExcludeMetadata,
 } from "./data";
-import { attachModelDevtools } from "./devtools";
-import { ModelOptions, ModelService, TModel, TPatch, THistoryEntry, IMetadataModel } from "./types";
+import { ModelOptions, ModelService, TModel, IMetadataModel } from "./types";
 import { EXCLUDE_METADATA_KEY, FIELD_METADATA_KEY, SUBMIT_METADATA_KEY, VALIDATION_METADATA_KEY } from "./meta";
-enablePatches();
 /** */
 const submitMetadata = new SubmitMetadata();
 /** */
@@ -29,9 +26,6 @@ type MetaCacheSlot<T> = MetaCache<T> | true | null;
  * Класс для управлением состоянием модели.
  */
 export class Model<T extends Record<string, any> = any > implements TModel<any> {
-  // @define_prop
-  protected accessor [immerable] = true;
-
   @observable
   // @define_prop
   protected accessor initData: Partial<T> = null;
@@ -43,28 +37,10 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
   private accessor modified_: Partial<T> = {};
 
   // @define_prop
-  private accessor draft: Draft<T | Partial<T>> = null;
-
-  // @define_prop
-  protected accessor changes: TPatch[] = [];
-
-  // @define_prop
-  protected accessor inverseChanges: TPatch[] = [];
-
-  // @define_prop
-  protected accessor history: THistoryEntry[] = [];
-
-  // @define_prop
-  protected accessor historyIndex: number = -1;
-
-  // @define_prop
   private accessor legacyInitDone = false;
 
   // @define_prop
   private accessor options: ModelOptions<T> = {};
-
-  // @define_prop
-  private accessor historyMuted = false;
 
   private accessor [FIELD_METADATA_KEY]: MetaCacheSlot<IFieldMetadata<any, any>>;
   private accessor [SUBMIT_METADATA_KEY]: MetaCacheSlot<ISubmitMetadata>;
@@ -76,10 +52,8 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
    */
   constructor(data: Partial<T> = {}, options?: ModelOptions<T> ) {
     this.options = options;
-    this[immerable] = true;
     this.init(data);
     this.initLegacyFields();
-    this.autoAttachDevtools();
   }
 
   private getFieldMetaCache() {
@@ -154,18 +128,6 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
   }
 
   /**
-   * Сбросить внутренние стейты изменений.
-   */
-  // @action private resetToDefault() {
-  //   this.modified_ = {};
-  //   this.committedData = {};
-  //   this.changes = [];
-  //   this.inverseChanges = [];
-  //   this.history = [];
-  //   this.historyIndex = -1;
-  // }
-
-  /**
    * Инициализировать валидацию для поля или всех полей.
    */
   private initValidation(field?: string) {
@@ -179,8 +141,6 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
    */
   protected init(data: Partial<T> = {}) {
     this.cloneForInit(data);
-    // this.resetToDefault();
-    this.createDraft(data);
     this.defineData(this.initData);
   }
 
@@ -220,136 +180,8 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
     }
   }
 
-  /**
-   * Создать draft для отслеживания изменений.
-   */
-  private createDraft(data?: Partial<T>) {
-    // const draft: Partial<T> = {};
-
-    // TODO - поправить, тут несколько раз проходит по списку вместо одного
-    // for(let field in data) {
-    //   const fieldInstance = fieldMetadata.fieldInstance(field, this);
-    //   if(fieldInstance) draft[field] = data[field];
-    // }
-
-    this.draft = createDraft(data);
-  }
-
-  private autoAttachDevtools() {
-    const globalAny = globalThis as unknown as {
-      __MVVM_DEVTOOLS_AUTO__?: boolean;
-      __MVVM_DEVTOOLS_SEQ__?: number;
-    };
-    if (!globalAny.__MVVM_DEVTOOLS_AUTO__) return;
-    if (this.options?.devtools?.enabled === false) return;
-
-    const name = this.options?.devtools?.name ?? this.constructor?.name ?? "Model";
-    const seq = (globalAny.__MVVM_DEVTOOLS_SEQ__ ?? 0) + 1;
-    globalAny.__MVVM_DEVTOOLS_SEQ__ = seq;
-    attachModelDevtools(this, { name, instanceId: this.options?.devtools?.instanceId ?? `${name}#${seq}` });
-  }
-
-  private withHistoryMuted(action: () => void) {
-    this.historyMuted = true;
-    try {
-      action();
-    } finally {
-      this.historyMuted = false;
-    }
-  }
-
   // @define_prop
   // private readonly serviceToJSON = () => this.dumpData;
-
-  private syncChangesFromHistory() {
-    const activeHistory = this.historyIndex >= 0 ? this.history.slice(0, this.historyIndex + 1) : [];
-    this.changes = activeHistory.flatMap((item) => item.patches);
-    this.inverseChanges = activeHistory.flatMap((item) => item.inversePatches);
-  }
-
-  private applyHistoryPatches(patches: TPatch[]) {
-    if (!patches.length) return;
-
-    applyPatches(this.draft, patches);
-
-    const fields = new Set(patches.map((item) => item.field).filter(Boolean));
-    if (fields.size === 0) return;
-
-    this.withHistoryMuted(() => {
-      for (let field of fields) {
-        const draftValue = Reflect.get(this.draft as object, field) ?? Reflect.get(this.initData, field);
-        Reflect.set(this, field, draftValue);
-        this.defineFieldValue(field, Reflect.get(this, field));
-      }
-    });
-  }
-  /**
-   * зафиксировать изменение значения
-   * @param changePath
-   * @param newValue
-   * @param endField
-   * @returns
-   */
-  /**
-   * Зафиксировать изменение в draft и собрать патчи.
-   */
-  @action
-  private produceDraft(changePath: string, newValue: any, endField?: string) {
-    if (this.historyMuted) return;
-
-    let originField: string;
-    let latestPatches: TPatch[] = [];
-    if (changePath) {
-      originField = changePath.split(".")[0];
-      if (originField && !this.getFieldMeta(originField)!.collectChanges) return;
-    }
-
-    produce(
-      this.draft,
-      (draft) => {
-        if (changePath) {
-          let current: Record<string, any> = draft;
-          const paths = changePath.split(".");
-
-          if (paths.length > 1) {
-            for (let i = 0; i < paths.length; i++) {
-
-              if (!(i == paths.length - 1) && !isObject(current)) {
-                break;
-              }
-
-              isObject(current) && (current = current[paths[i]]);
-            }
-          } else {
-            endField = changePath;
-          }
-
-          current && (current[endField] = newValue);
-        }
-      },
-      (patches, inversePatches) => {
-        if (originField) {
-          patches = patches.map((item) => ({ ...item, field: originField }));
-          inversePatches = inversePatches.map((item) => ({ ...item, field: originField }));
-        }
-        latestPatches = patches;
-        if (!patches.length && !inversePatches.length) return;
-
-        if (this.historyIndex < this.history.length - 1) {
-          this.history = this.history.slice(0, this.historyIndex + 1);
-          this.syncChangesFromHistory();
-        }
-
-        this.changes.push(...patches);
-        this.inverseChanges.push(...inversePatches);
-        this.history.push({ patches, inversePatches });
-        this.historyIndex = this.history.length - 1;
-      }
-    );
-    if (latestPatches.length) {
-      applyPatches(this.draft, latestPatches);
-    }
-  }
   /**
    * сделать значение наблюдаемым, повесить observable в глубину
    * @param value
@@ -387,8 +219,6 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
 
         value = newValue;
 
-        this.produceDraft(changePath, value, String(p));
-
         this.checkChange(originField, Reflect.get(this, originField));
 
         return Reflect.set(target, p, newValue, receiver);
@@ -421,7 +251,6 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
         get: () => value.get(),
         set: (v) => {
           runInAction(() => value.set(v));
-          this.produceDraft(resolvedFieldInstance.name, value.get());
           this.checkChange(resolvedFieldInstance.name, value.get());
         },
         enumerable: true,
@@ -522,61 +351,15 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
    * Вернуть модель к исходным данным.
    */
   @action protected toInit(): Model<T> {
-    this.withHistoryMuted(() => {
-      this.init(this.initData);
-    });
+    this.init(this.initData);
     return this;
-  }
-
-  /**
-   * Откатить изменения на один шаг истории.
-   */
-  @action protected undo() {
-    if (this.historyIndex < 0) return;
-
-    this.applyHistoryPatches(this.history[this.historyIndex].inversePatches);
-    this.historyIndex -= 1;
-    this.syncChangesFromHistory();
-  }
-
-  /**
-   * Повторить ранее откатанные изменения.
-   */
-  @action protected redo() {
-    if (this.historyIndex >= this.history.length - 1) return;
-
-    this.historyIndex = this.historyIndex + 1;
-    this.applyHistoryPatches(this.history[this.historyIndex].patches);
-    this.syncChangesFromHistory();
-  }
-
-  /**
-   * Перейти к конкретному шагу истории.
-   */
-  @action protected goToHistory(index: number) {
-    if (index < -1 || index >= this.history.length) return;
-    if (index === this.historyIndex) return;
-
-    while (this.historyIndex < index) {
-      this.historyIndex = this.historyIndex + 1;
-      this.applyHistoryPatches(this.history[this.historyIndex].patches);
-    }
-
-    while (this.historyIndex > index) {
-      this.applyHistoryPatches(this.history[this.historyIndex].inversePatches);
-      this.historyIndex -= 1;
-    }
-
-    this.syncChangesFromHistory();
   }
 
   /**
    * Перезагрузить данные модели.
    */
   protected loadData(data?: Partial<T>): Model<T> {
-    this.withHistoryMuted(() => {
-      this.init(data);
-    });
+    this.init(data);
     return this;
   }
 
@@ -650,7 +433,7 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
    */
   private get serviceApi(): Pick<
     ModelService<T>,
-    "loadData" | "reject" | "commit" | "commitField" | "toInit" | "undo" | "redo" | "goToHistory"
+    "loadData" | "reject" | "commit" | "commitField" | "toInit"
   > {
     return {
       loadData   : (data?: Partial<T>): Model<T> => this.loadData(data),
@@ -658,9 +441,6 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
       commit     : (): void => this.commit(),
       commitField: (field: keyof T): void => this.commitField(field),
       toInit     : (): Model<T> => this.toInit(),
-      undo       : (): void => this.undo(),
-      redo       : (): void => this.redo(),
-      goToHistory: (index: number): void => this.goToHistory(index),
     }
   };
 
@@ -670,14 +450,9 @@ export class Model<T extends Record<string, any> = any > implements TModel<any> 
         dumpData      : this.dumpData,
         // toJSON        : this.serviceToJSON,
         validation    : this.validation,
-        changes       : this.changes,
-        inverseChanges: this.inverseChanges,
-        history       : this.history,
-        historyIndex  : this.historyIndex,
         ...this.serviceApi,
     };
   }
 }
 
 export * from './types';
-export * from './devtools';

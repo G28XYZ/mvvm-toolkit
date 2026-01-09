@@ -3,7 +3,7 @@ import { Store, StoreBase } from "rvm-toolkit";
 import { TodoModel } from "./model";
 
 @Store
-export class TodoStore extends StoreBase<any> {
+export class TodoStore extends StoreBase<TodoModel> {
 
   private nextId = 1;
 
