@@ -280,9 +280,53 @@ export function mvvmServiceDiPlugin(): VitePluginLike {
       return `${updated.trimEnd()}\n${block}`;
     }
 
-    if (!new RegExp(`${escapeRegExp(entry.entryKey)}\\s*:`).test(interfaceBlock.body)) {
+    const entryLineRe =
+      /^\s*("(?:\\.|[^"])*"|'(?:\\.|[^'])*'|[^:]+)\s*:\s*typeof\s+([A-Za-z0-9_$]+)\s*;.*$/;
+    const lines = interfaceBlock.body.split("\n");
+    const cleanedLines: string[] = [];
+    let hasEntry = false;
+    let changed = false;
+
+    for (const line of lines) {
+      const match = line.match(entryLineRe);
+      if (!match) {
+        cleanedLines.push(line);
+        continue;
+      }
+      const keyText = match[1].trim();
+      const typeName = match[2].trim();
+      if (keyText === entry.entryKey) {
+        if (typeName === entry.className) {
+          hasEntry = true;
+          cleanedLines.push(line);
+        } else {
+          const entryLine = `${interfaceBlock.indent}${entry.entryKey}: typeof ${entry.className};`;
+          cleanedLines.push(entryLine);
+          hasEntry = true;
+          changed = true;
+        }
+        continue;
+      }
+      if (typeName === entry.className) {
+        changed = true;
+        continue;
+      }
+      cleanedLines.push(line);
+    }
+
+    if (!hasEntry) {
       const entryLine = `${interfaceBlock.indent}${entry.entryKey}: typeof ${entry.className};`;
-      updated = updated.slice(0, interfaceBlock.endIndex) + `\n${entryLine}` + updated.slice(interfaceBlock.endIndex);
+      const insertIndex =
+        cleanedLines.length > 0 && cleanedLines[cleanedLines.length - 1] === ""
+          ? cleanedLines.length - 1
+          : cleanedLines.length;
+      cleanedLines.splice(insertIndex, 0, entryLine);
+      changed = true;
+    }
+
+    if (changed) {
+      const newBody = cleanedLines.join("\n");
+      updated = updated.slice(0, interfaceBlock.startIndex) + newBody + updated.slice(interfaceBlock.endIndex);
     }
 
     return updated;
@@ -373,7 +417,7 @@ export function mvvmServiceDiPlugin(): VitePluginLike {
     const indentMatch = body.match(/\n(\s*)\w/);
     const indent = indentMatch ? indentMatch[1] : "  ";
 
-    return { body, endIndex, indent };
+    return { body, endIndex, indent, startIndex };
   }
 
   /** Исправить устаревший синтаксис interface DiServices, X {} на extends. */
