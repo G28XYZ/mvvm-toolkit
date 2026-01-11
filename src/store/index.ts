@@ -2,8 +2,10 @@ import { action, computed, makeObservable, observable } from "mobx";
 import { GetService, Inject, Service, type IServiceOptions } from "../typedi";
 import type { Model } from "../model";
 
-export type ApplyLoadedOptions<T> = {
-  model?: new (...args: any) => T;
+type StoreModelCtor<T extends Model = Model> = new (...args: any[]) => T;
+
+export type ApplyLoadedOptions<T extends Model> = {
+  model?: StoreModelCtor<T>;
   mode?: "replace" | "append";
   cash?: boolean;
 };
@@ -27,9 +29,10 @@ const getStoreState = (store: StoreBase<any>): StoreStateSnapshot => ({
   })),
 });
 
-export class StoreBase<T extends Model = Model> {
+class StoreBaseCore<T extends Model = Model> {
   @observable accessor items: T[] = [];
   @observable protected accessor _cash: unknown[] = [];
+  protected _model?: StoreModelCtor<T>;
 
   constructor() {
     makeObservable(this);
@@ -97,13 +100,14 @@ export class StoreBase<T extends Model = Model> {
    */
   @action applyLoaded(items: any[], options: ApplyLoadedOptions<T> = {}) {
     const { model, mode = "replace", cash = true } = options;
+    const resolvedModel = model === undefined ? this._model : model;
     if (cash) this.setCash(items);
+    const resolved = resolvedModel ? items.map((el) => new resolvedModel(el)) : items;
     if (mode === "append") {
-      const resolved = model ? items.map((el) => new model(el)) : items;
       this.addMany(resolved);
       return;
     }
-    this.items = model ? items.map((el) => new model(el)) : items;
+    this.items = resolved;
   }
 
   /**
@@ -114,6 +118,32 @@ export class StoreBase<T extends Model = Model> {
   }
 
 }
+
+type StoreBaseFactory = {
+  <T extends Model>(model: StoreModelCtor<T>): new (...args: any[]) => StoreBaseCore<T>;
+  new <T extends Model = Model>(): StoreBaseCore<T>;
+  prototype: StoreBaseCore<any>;
+};
+
+// Callable/constructable wrapper to support StoreBase(Model) in extends.
+export const StoreBase = function StoreBase<T extends Model = Model>(
+  model?: StoreModelCtor<T>
+) {
+  if (new.target) {
+    return Reflect.construct(StoreBaseCore, [], new.target);
+  }
+  return class StoreBaseWithModel extends StoreBaseCore<T> {
+    constructor() {
+      super();
+      this._model = model;
+    }
+  };
+} as StoreBaseFactory;
+
+StoreBase.prototype = StoreBaseCore.prototype;
+Object.setPrototypeOf(StoreBase, StoreBaseCore);
+
+export type StoreBase<T extends Model = Model> = StoreBaseCore<T>;
 
 /**
  * Получить только Store-сервис по имени или классу.

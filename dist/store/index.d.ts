@@ -1,7 +1,8 @@
 import { type IServiceOptions } from "../typedi";
 import type { Model } from "../model";
-export type ApplyLoadedOptions<T> = {
-    model?: new (...args: any) => T;
+type StoreModelCtor<T extends Model = Model> = new (...args: any[]) => T;
+export type ApplyLoadedOptions<T extends Model> = {
+    model?: StoreModelCtor<T>;
     mode?: "replace" | "append";
     cash?: boolean;
 };
@@ -14,9 +15,10 @@ type StoreItemSnapshot = {
 type StoreStateSnapshot = {
     items: StoreItemSnapshot[];
 };
-export declare class StoreBase<T extends Model = Model> {
+declare class StoreBaseCore<T extends Model = Model> {
     accessor items: T[];
     protected accessor _cash: unknown[];
+    protected _model?: StoreModelCtor<T>;
     constructor();
     add(item: T): void;
     addMany(items: T[]): void;
@@ -50,6 +52,13 @@ export declare class StoreBase<T extends Model = Model> {
      */
     setCash(data: unknown[]): void;
 }
+type StoreBaseFactory = {
+    <T extends Model>(model: StoreModelCtor<T>): new (...args: any[]) => StoreBaseCore<T>;
+    new <T extends Model = Model>(): StoreBaseCore<T>;
+    prototype: StoreBaseCore<any>;
+};
+export declare const StoreBase: StoreBaseFactory;
+export type StoreBase<T extends Model = Model> = StoreBaseCore<T>;
 /**
  * Получить только Store-сервис по имени или классу.
  */

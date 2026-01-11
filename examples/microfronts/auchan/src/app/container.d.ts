@@ -1,14 +1,18 @@
-import type { AuchanMainVM } from "./vm";
-import type { CardVM } from "./cardVM";
+import type { ProductItemVM } from "./itemVM";
+import type { ProductListVM } from "./listVM";
 import type { SearchVM } from "./searchVM";
-import type { AuchanStore } from "./store";
+import type { ProductVM } from "./vm";
+import type { ProductStore } from "./store";
+import type { Api } from "./api";
 
 export interface AppServices {
-  "auchan:CardVM": typeof CardVM;
+  "auchan:ProductListVM": typeof ProductListVM;
+  "auchan:Api": typeof Api;
   "auchan:SearchVM": typeof SearchVM;
-  "auchan:MainVM": typeof AuchanMainVM;
+  "auchan:ProductItemVM": typeof ProductItemVM;
+  "auchan:ProductVM": typeof ProductVM;
 }
 
 export interface AppStores {
-  "auchan:Store": typeof AuchanStore;
+  "auchan:ProductStore": typeof ProductStore;
 }

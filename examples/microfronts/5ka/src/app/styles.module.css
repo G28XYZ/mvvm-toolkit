@@ -1,0 +1,510 @@
+/* Minimal styles (optional). Feel free to replace with your design system / Tailwind. */
+
+:global(.fiveka-root) {
+  height: 100%;
+  min-height: 0;
+}
+
+.productCard,
+.productCard * {
+  box-sizing: border-box;
+}
+
+/* Card should take all available height of parent container */
+.productCard {
+  max-width: 560px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+
+  margin: 0 auto;
+  padding: 12px;
+}
+
+.productCard__inner {
+  height: 100%;
+  min-height: 0;
+
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  padding: 16px;
+  background: #fff;
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* IMPORTANT: prevents page scrolling, keeps scroll inside list */
+}
+
+/* ---------- Header ---------- */
+
+.productHeader {
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin-bottom: 12px;
+}
+
+.productHeader__title {
+  font-size: 18px;
+  margin: 0;
+}
+
+.productHeader__right {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+/* ---------- Search ---------- */
+
+.productSearch {
+  flex: 0 0 auto;
+}
+
+.productSearch__row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.productSearch__input {
+  flex: 1;
+  min-width: 0;
+
+  padding: 10px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  outline: none;
+}
+
+.productSearch__input:focus {
+  border-color: rgba(0, 0, 0, 0.35);
+}
+
+.productSearch__btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background: #f5f5f5;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.productSearch__btn.isLoading {
+  cursor: progress;
+}
+
+.productSearch__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- List wrap (meta + scroll area) ---------- */
+
+.productListWrap {
+  flex: 1 1 auto;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.productListWrap__meta {
+  flex: 0 0 auto;
+
+  font-size: 12px;
+  opacity: 0.7;
+  margin-bottom: 8px;
+}
+
+.productListWrap__correction {
+  opacity: 0.85;
+}
+
+.productListWrap__empty {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+
+  padding: 12px 2px;
+  opacity: 0.8;
+}
+
+/* Scroll happens here (ul itself) */
+.productList {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overflow-x: hidden;
+
+  list-style: none;
+  padding: 2px 0;
+  margin: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ---------- Headless UI Transition classes ---------- */
+
+.productTransitionEnter {
+  transition: opacity 150ms ease-out, transform 150ms ease-out;
+}
+.productTransitionEnterFrom {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+.productTransitionEnterTo {
+  opacity: 1;
+  transform: translateY(0);
+}
+.productTransitionLeave {
+  transition: opacity 120ms ease-out, transform 120ms ease-out;
+}
+.productTransitionLeaveFrom {
+  opacity: 1;
+  transform: translateY(0);
+}
+.productTransitionLeaveTo {
+  opacity: 0;
+  transform: translateY(-2px);
+}
+
+/* ---------- Item ---------- */
+
+.productItem {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.productItem.isAdded {
+  border-color: rgba(0, 0, 0, 0.22);
+}
+
+.productItem__row {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  padding: 10px;
+}
+
+.productItem__btn {
+  flex: 1;
+  min-width: 0;
+
+  display: block;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.productItem__btn:hover {
+  opacity: 0.98;
+}
+
+.productItem__main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.productItem__img,
+.productItem__imgStub {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  flex: 0 0 44px;
+}
+
+.productItem__img {
+  object-fit: cover;
+}
+
+.productItem__imgStub {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.productItem__text {
+  min-width: 0;
+  flex: 1;
+}
+
+.productItem__titleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.productItem__title {
+  flex: 1;
+  min-width: 0;
+
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+
+  overflow: hidden;
+
+  /* show more text: 2 lines instead of single-line ellipsis */
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.productItem__badge {
+  margin-left: auto;
+  flex: 0 0 auto;
+
+  font-size: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  border-radius: 999px;
+  padding: 2px 8px;
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+.productItem__badge.isOff {
+  opacity: 0.55;
+}
+
+.productItem__sub {
+  margin-top: 4px;
+  font-size: 13px;
+  opacity: 0.9;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: baseline;
+
+  min-width: 0;
+}
+
+.productItem__price {
+  white-space: nowrap;
+}
+
+.productItem__oldPrice {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.productItem__priceNow {
+  font-weight: 700;
+}
+
+.productItem__brand {
+  opacity: 0.9;
+}
+
+/* Make add button a bit narrower so more title fits */
+.productItem__addBtn {
+  flex: 0 0 auto;
+
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  border-radius: 10px;
+  padding: 0 12px;
+  min-width: 92px;
+
+  background: rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.productItem__addBtn.isAdded,
+.productItem__addBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ---------- Details panel ---------- */
+
+.productItem__panel {
+  border-top: 1px solid rgba(0, 0, 0, 0.10);
+  padding: 12px;
+}
+
+.productItem__dl {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  row-gap: 8px;
+  column-gap: 12px;
+  margin: 0;
+}
+
+.productItem__dl dt {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.productItem__dl dd {
+  margin: 0;
+  font-size: 13px;
+}
+
+.productItem__link {
+  text-decoration: underline;
+}
+
+.productItem__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.productItem__chip {
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.productItem__chip.isDirect {
+  opacity: 1;
+  font-weight: 600;
+}
+
+.productItem__kv {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.productItem__kvRow {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.productItem__kvKey {
+  font-weight: 600;
+}
+
+.productItem__skuList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.productItem__sku {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.productItem__skuTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.productItem__skuName {
+  font-weight: 600;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.productItem__skuBadge {
+  font-size: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  border-radius: 999px;
+  padding: 1px 8px;
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+.productItem__skuBadge.isOff {
+  opacity: 0.55;
+}
+
+.productItem__skuBottom {
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+.productItem__skuAttrs {
+  margin-top: 6px;
+}
+
+
+/* Экран/контейнер: запрещаем скролл снаружи */
+.productScreen {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+
+  display: flex;
+}
+
+/* Карточка и внутренности тоже должны уметь сжиматься */
+.productCard {
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+}
+
+.productCard__inner {
+  height: 100%;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* важно: чтобы не скроллилась страница */
+}
+
+/* Обёртка списка */
+.productListWrap {
+  flex: 1 1 auto;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+/* СКРОЛЛ ТОЛЬКО ЗДЕСЬ */
+.productList {
+  flex: 1 1 auto;
+  min-height: 0;
+
+  overflow: auto;
+  overflow-x: hidden;
+
+  overscroll-behavior: contain; /* чтобы скролл не "пробрасывался" наружу */
+}
+
+.pageContent {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+}
+
+.productListWrap__scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto; /* вот сам скролл */
+  padding-right: 2px; /* чтобы скроллбар не прилипал к контенту */
+}

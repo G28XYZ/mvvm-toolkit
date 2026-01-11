@@ -538,4 +538,3 @@ ${m}`;
 export {
   ge as mvvmServiceDiPlugin
 };
-//# sourceMappingURL=mvvm-di.js.map

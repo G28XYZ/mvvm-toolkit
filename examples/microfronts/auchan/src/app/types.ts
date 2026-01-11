@@ -43,3 +43,6 @@ export type DigineticaSearchResponse = {
   products: DigineticaProduct[];
   // facets/selectedFacets можно добавить при необходимости
 };
+
+export type Product = DigineticaProduct;
+export type ProductId = DigineticaProduct["id"];

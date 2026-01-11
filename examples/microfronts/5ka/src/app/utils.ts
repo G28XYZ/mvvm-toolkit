@@ -1,0 +1,1 @@
+export const servicePrefix = '5ka' as const;
