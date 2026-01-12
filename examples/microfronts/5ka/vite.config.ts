@@ -10,27 +10,31 @@ const rootDir = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const base = env.VITE_BASE ?? "./";
-  const isFederationBuild =
-    env.VITE_MICROFRONT_MODE === "federation" || mode === "federation";
+  const isFederationBuild = env.VITE_MICROFRONT_MODE === "federation" || mode === "federation";
+  const shared = {
+    react: { singleton: true },
+    "react-dom": { singleton: true },
+  };
+
+  const plugins = [
+      mvvmServiceDiPlugin(),
+      react(),
+    ]
+  
+    isFederationBuild && plugins.push(
+      federation({
+                name: "mf5ka",
+                filename: "remoteEntry.js",
+                exposes: {
+                  "./microfront": "./src/microfront.tsx"
+                },
+                shared,
+              })
+    )
 
   return {
     base,
-    plugins: [
-      mvvmServiceDiPlugin(),
-      react(),
-      ...(isFederationBuild
-        ? [
-            federation({
-              name: "mf5ka",
-              filename: "remoteEntry.js",
-              exposes: {
-                "./microfront": "./src/microfront.tsx"
-              },
-              shared: ["react", "react-dom"]
-            }),
-          ]
-        : []),
-    ],
+    plugins: plugins,
     resolve: {
       dedupe: ["react", "react-dom", "mobx", "mobx-react", "mobx-react-lite", "reflect-metadata"],
     },
@@ -64,5 +68,8 @@ export default defineConfig(({ mode }) => {
       treeShaking: true,
       keepNames: true,
     },
+    server: {
+      port: 5175
+    }
   };
 });

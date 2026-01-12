@@ -1,6 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { defineConfig, loadEnv } from "vite";
+import { ConfigEnv, defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import {federation} from "@module-federation/vite";
 import { mvvmServiceDiPlugin } from "rvm-toolkit/vite-plugins";
@@ -10,27 +10,32 @@ const rootDir = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const base = env.VITE_BASE ?? "./";
-  const isFederationBuild =
-    env.VITE_MICROFRONT_MODE === "federation" || mode === "federation";
+  const isFederationBuild = env.VITE_MICROFRONT_MODE === "federation" || mode === "federation";
+  const shared = {
+    react: { singleton: true },
+    "react-dom": { singleton: true },
+  };
 
-  return {
-    base,
-    plugins: [
-      mvvmServiceDiPlugin(),
-      react(),
-      ...(isFederationBuild
-        ? [
-            federation({
+  const plugins = [
+    mvvmServiceDiPlugin(),
+    react(),
+  ]
+
+  isFederationBuild && plugins.push(
+    federation({
               name: "mfauchan",
               filename: "remoteEntry.js",
               exposes: {
                 "./microfront": "./src/microfront.tsx"
               },
-              shared: ["react", "react-dom"]
-            }),
-          ]
-        : []),
-    ],
+              shared,
+            })
+  )
+
+
+  return {
+    base,
+    plugins: plugins,
     resolve: {
       dedupe: ["react", "react-dom", "mobx", "mobx-react", "mobx-react-lite", "reflect-metadata"],
     },
@@ -49,12 +54,15 @@ export default defineConfig(({ mode }) => {
             },
         output: {
           entryFileNames: (chunk) => {
+            console.log(chunk.name);
             if (!isFederationBuild && chunk.name === "microfront") return "microfront.js";
             if (chunk.name === "remoteEntry") return "remoteEntry.js";
             return "assets/[name]-[hash].js";
           },
           assetFileNames: (assetInfo) => {
-            if (assetInfo.name?.endsWith(".css")) return "microfront.css";
+            if (assetInfo.name?.endsWith(".css")) {
+              return "microfront.css"
+            };
             return "assets/[name]-[hash][extname]";
           }
         }
@@ -64,5 +72,8 @@ export default defineConfig(({ mode }) => {
       treeShaking: true,
       keepNames: true,
     },
+    server: {
+      port: 5174
+    }
   };
 });

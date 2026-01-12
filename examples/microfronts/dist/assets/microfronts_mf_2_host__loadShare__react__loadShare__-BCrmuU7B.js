@@ -1,0 +1,2 @@
+import{g as r}from"./_commonjsHelpers-Cn9vc4LF.js";import{m as t}from"./microfronts_mf_2_host__mf_v__runtimeInit__mf_v__-BdYEaO_e.js";const{initPromise:e}=t,_=e.then(o=>o.loadShare("react",{customShareInfo:{shareConfig:{singleton:!0,strictVersion:!1,requiredVersion:"^18.3.1"}}})),s=await _.then(o=>o());var a=s;const m=r(a);export{m as R,a as m};
+//# sourceMappingURL=microfronts_mf_2_host__loadShare__react__loadShare__-BCrmuU7B.js.map

@@ -2,9 +2,6 @@ import React, { Suspense, useMemo, useState } from "react";
 import { microfrontsResource } from "../resource";
 import { ErrorBoundary } from "../errorBoundary";
 import { searchBridge } from "../searchBridge";
-
-// если хочешь убрать state для query — можно перейти на useSyncExternalStore,
-// но это отдельный шаг. Пока оставлю как было.
 import { useEffect } from "react";
 
 function MicrofrontsShell(): JSX.Element {
@@ -13,7 +10,8 @@ function MicrofrontsShell(): JSX.Element {
   const active = useMemo(() => microfronts.find((m) => m.key === activeKey) ?? null, [microfronts, activeKey]);
 
   const [query, setQuery] = useState(searchBridge.getQuery());
-  useEffect(() => searchBridge.onQuery(setQuery), []); // это можно тоже убрать через useSyncExternalStore
+
+  useEffect(() => searchBridge.onQuery(setQuery), []);
 
   return (
     <div className="app">

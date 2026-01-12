@@ -14,9 +14,13 @@ const joinBase = (base: string, p: string) => {
   return `${normalized}${p.replace(/^\//, "")}`;
 };
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const base = env.VITE_BASE ?? "./";
+  const shared = {
+    react: { singleton: true },
+    "react-dom": { singleton: true },
+  };
 
   // ✅ у тебя в примере местами пропали "||"
   const microfrontMode = resolveMode(env.VITE_MICROFRONT_MODE ?? mode);
@@ -24,13 +28,26 @@ export default defineConfig(({ mode }) => {
 
   // базовый префикс где лежат remoteEntry, если надо:
   const federationBase = env.VITE_FEDERATION_BASE ?? base;
+  const useDevRemotes = command === "serve" && !env.VITE_FEDERATION_BASE;
 
   const remotes = Object.fromEntries(
     Object.values(MICROFRONTS).map((mf) => {
-      const envKey = `VITE_FEDERATION_${mf.remote.toUpperCase()}_URL`; // VITE_FEDERATION_MF5KA_URL и т.п.
+      const envKey = `VITE_FEDERATION_${mf.remote.toUpperCase()}_URL`;
+      const legacyEnvKey = `VITE_FEDERATION_${mf.remote.replace(/^mf/i, "").toUpperCase()}_URL`;
+      const envUrl = env[envKey] ?? env[legacyEnvKey];
       const url =
-        (env as any)[envKey] ?? joinBase(federationBase, mf.defaultRemoteEntryPath);
-      return [mf.remote, url];
+        envUrl ??
+        (useDevRemotes ? mf.remoteUrl : undefined) ??
+        joinBase(federationBase, mf.defaultRemoteEntryPath);
+      return [
+        mf.remote,
+        {
+          type: "module",
+          name: mf.remote,
+          entry: url,
+          shareScope: "default",
+        },
+      ];
     })
   );
 
@@ -40,20 +57,24 @@ export default defineConfig(({ mode }) => {
     ? []
     : Object.values(MICROFRONTS).map((mf) => `${mf.remote}/${mf.exposedModule}`);
 
-  return {
-    base,
-    plugins: [
+  const plugins = [
       react(),
       mvvmServiceDiPlugin(),
-      ...(isFederationBuild
-        ? [
-            federation({
-              name: "microfronts-host",
-              remotes,
-            }),
-          ]
-        : []),
-    ],
+  ];
+
+  isFederationBuild &&
+  plugins.push(
+    federation({
+          remotes,
+          shared,
+          name   : "microfronts-host",
+          exposes: { "./shared": "./src/main.tsx" },
+        })
+    )
+
+  return {
+    base,
+    plugins: plugins,
     resolve: {
       dedupe: ["react", "react-dom", "mobx", "mobx-react", "mobx-react-lite", "reflect-metadata"],
     },

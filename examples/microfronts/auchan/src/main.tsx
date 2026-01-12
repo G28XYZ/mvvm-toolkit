@@ -5,7 +5,11 @@ import { I18nProvider } from "./i18n/I18nProvider";
 
 const STYLE_ID = "microfront-style-auchan";
 
-const resolvedStylesUrl = import.meta.env.PROD ? new URL("./microfront.css", import.meta.url).href : "";
+// делаем абсолютный URL относительно URL модуля
+
+const resolvedStylesUrl = import.meta.env.PROD
+  ? new URL("../microfront.css", import.meta.url).href
+  : "";
 
 function ensureStyles() {
   if (!resolvedStylesUrl || typeof document === "undefined") return;
@@ -16,6 +20,8 @@ function ensureStyles() {
   link.href = resolvedStylesUrl;
   link.dataset.microfrontStyle = STYLE_ID;
   document.head.appendChild(link);
+
+  console.log(link);
 }
 
 // ✅ никаких эффектов: просто вызываем один раз при инициализации модуля

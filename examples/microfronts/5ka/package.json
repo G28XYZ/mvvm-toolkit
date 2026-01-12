@@ -11,6 +11,7 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev:federation": "vite --mode federation",
     "build": "vite build",
     "build:federation": "vite build --mode federation",
     "preview": "vite preview"

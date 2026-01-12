@@ -5,7 +5,7 @@ import { I18nProvider } from "./i18n/I18nProvider";
 
 const STYLE_ID = "microfront-style-5ka";
 
-const resolvedStylesUrl = import.meta.env.PROD ? new URL("./microfront.css", import.meta.url).href : "";
+const resolvedStylesUrl = import.meta.env.PROD ? new URL("../microfront.css", import.meta.url).href : "";
 
 function ensureStyles() {
   if (!resolvedStylesUrl || typeof document === "undefined") return;
