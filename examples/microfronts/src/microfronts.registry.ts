@@ -1,0 +1,33 @@
+export type MicrofrontKey = "5ka-microfront" | "auchan-microfront";
+
+export type MicrofrontRegistryItem = {
+  key: MicrofrontKey;
+  remote: string; // mf5ka, mfauchan
+  defaultRemoteEntryPath: string;
+
+  importers: {
+    packages: () => Promise<any>;
+    federation: () => Promise<any>;
+  };
+};
+
+export const MICROFRONTS: Record<MicrofrontKey, MicrofrontRegistryItem> = {
+  "5ka-microfront": {
+    key: "5ka-microfront",
+    remote: "mf5ka",
+    defaultRemoteEntryPath: "microfronts/5ka-microfront/remoteEntry.js",
+    importers: {
+      packages: () => import("mf5ka/microfront"),
+      federation: () => import("mf5ka/microfront"),
+    },
+  },
+  "auchan-microfront": {
+    key: "auchan-microfront",
+    remote: "mfauchan",
+    defaultRemoteEntryPath: "microfronts/auchan-microfront/remoteEntry.js",
+    importers: {
+      packages: () => import("mfauchan/microfront"),
+      federation: () => import("mfauchan/microfront"),
+    },
+  },
+};

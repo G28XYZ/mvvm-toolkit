@@ -2,7 +2,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
-import federation from "@originjs/vite-plugin-federation";
+import {federation} from "@module-federation/vite";
 import { mvvmServiceDiPlugin } from "rvm-toolkit/vite-plugins";
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
@@ -44,7 +44,7 @@ export default defineConfig(({ mode }) => {
               app: path.resolve(rootDir, "index.html"),
             }
           : {
-              app: path.resolve(rootDir, "index.html"),
+              app       : path.resolve(rootDir, "index.html"),
               microfront: path.resolve(rootDir, "src/microfront.tsx")
             },
         output: {
@@ -54,9 +54,7 @@ export default defineConfig(({ mode }) => {
             return "assets/[name]-[hash].js";
           },
           assetFileNames: (assetInfo) => {
-            if (assetInfo.names && assetInfo.names.some(name => name.endsWith(".css"))) {
-              return "microfront.css";
-            }
+            if (assetInfo.name?.endsWith(".css")) return "microfront.css";
             return "assets/[name]-[hash][extname]";
           }
         }

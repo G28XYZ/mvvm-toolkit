@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --force",
+    "dev:federation": "vite --force --mode federation",
     "build": "npm run sync:manifest && vite build",
     "build:federation": "npm run sync:manifest && vite build --mode federation && npm run sync:dist",
     "preview": "vite preview",

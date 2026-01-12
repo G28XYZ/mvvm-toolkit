@@ -1,41 +1,44 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
-import federation from "@originjs/vite-plugin-federation";
+import { federation } from "@module-federation/vite";
 import { mvvmServiceDiPlugin } from "rvm-toolkit/vite-plugins";
+import { MICROFRONTS } from "./src/microfronts.registry";
+
+type MicrofrontMode = "packages" | "federation";
+
+const resolveMode = (value: unknown): MicrofrontMode =>
+  String(value ?? "").trim().toLowerCase() === "federation" ? "federation" : "packages";
+
+const joinBase = (base: string, p: string) => {
+  const normalized = base.endsWith("/") ? base : `${base}/`;
+  return `${normalized}${p.replace(/^\//, "")}`;
+};
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const base = env.VITE_BASE ?? "./";
-  const isFederationBuild =
-    env.VITE_MICROFRONT_MODE === "federation" || mode === "federation";
 
-  const resolveFederationBase = (value: string) => {
-    if (!value) return "/";
-    if (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("//")) {
-      return value;
-    }
-    if (value.startsWith("/")) return value;
-    return "/";
-  };
+  // ✅ у тебя в примере местами пропали "||"
+  const microfrontMode = resolveMode(env.VITE_MICROFRONT_MODE ?? mode);
+  const isFederationBuild = microfrontMode === "federation";
 
-  const withBase = (path: string) => {
-    const normalized = base.endsWith("/") ? base : `${base}/`;
-    return `${normalized}${path.replace(/^\//, "")}`;
-  };
-  const federationBase = resolveFederationBase(base);
-  const withFederationBase = (path: string) => {
-    const normalized = federationBase.endsWith("/") ? federationBase : `${federationBase}/`;
-    return `${normalized}${path.replace(/^\//, "")}`;
-  };
-  const federationRemotes = {
-    mf5ka:
-      env.VITE_FEDERATION_5KA_URL ??
-      withFederationBase("./microfronts/5ka-microfront/assets/remoteEntry.js"),
-    mfauchan:
-      env.VITE_FEDERATION_AUCHAN_URL ??
-      withFederationBase("./microfronts/auchan-microfront/assets/remoteEntry.js"),
-  };
-  const external = isFederationBuild ? [] : ["mf5ka/microfront", "mfauchan/microfront"];
+  // базовый префикс где лежат remoteEntry, если надо:
+  const federationBase = env.VITE_FEDERATION_BASE ?? base;
+
+  const remotes = Object.fromEntries(
+    Object.values(MICROFRONTS).map((mf) => {
+      const envKey = `VITE_FEDERATION_${mf.remote.toUpperCase()}_URL`; // VITE_FEDERATION_MF5KA_URL и т.п.
+      const url =
+        (env as any)[envKey] ?? joinBase(federationBase, mf.defaultRemoteEntryPath);
+      return [mf.remote, url];
+    })
+  );
+
+  console.log(remotes);
+
+  const external = isFederationBuild
+    ? []
+    : Object.values(MICROFRONTS).map((mf) => `${mf.remote}/${mf.exposedModule}`);
 
   return {
     base,
@@ -46,8 +49,7 @@ export default defineConfig(({ mode }) => {
         ? [
             federation({
               name: "microfronts-host",
-              remotes: federationRemotes,
-              shared: ["react", "react-dom"],
+              remotes,
             }),
           ]
         : []),

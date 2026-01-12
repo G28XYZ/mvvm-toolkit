@@ -11,8 +11,14 @@ export interface AppServices {
   "auchan:SearchVM": typeof SearchVM;
   "auchan:ProductItemVM": typeof ProductItemVM;
   "auchan:ProductVM": typeof ProductVM;
+  "auchan:Api": typeof Api;
+  "auchan:ProductItemVM": typeof ProductItemVM;
+  "auchan:ProductListVM": typeof ProductListVM;
+  "auchan:SearchVM": typeof SearchVM;
+  "auchan:ProductVM": typeof ProductVM;
 }
 
 export interface AppStores {
+  "auchan:ProductStore": typeof ProductStore;
   "auchan:ProductStore": typeof ProductStore;
 }

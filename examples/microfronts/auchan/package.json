@@ -3,11 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "./dist/microfront.js",
   "exports": {
     ".": {
-      "development": "./src/microfront.tsx",
-      "default": "./dist/microfront.js"
+      "development": "./src/main.tsx",
+      "default": "./dist/remoteEntry.js"
     }
   },
   "scripts": {
@@ -27,9 +26,10 @@
     "rvm-toolkit": "file:../../../"
   },
   "devDependencies": {
+    "@module-federation/vite": "^1.9.4",
+    "@originjs/vite-plugin-federation": "^1.3.9",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
-    "@originjs/vite-plugin-federation": "^1.3.9",
     "@vitejs/plugin-react": "^4.3.4",
     "typescript": "^5.8.2",
     "vite": "^7.3.0"
