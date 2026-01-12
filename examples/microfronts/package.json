@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run sync:manifest && vite build",
+    "build:federation": "npm run sync:manifest && vite build --mode federation && npm run sync:dist",
     "preview": "vite preview",
     "sync:manifest": "node ./scripts/sync-microfronts.mjs --manifest-only",
     "sync:dist": "node ./scripts/sync-microfronts.mjs --copy-only --dest=dist",
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
+    "@originjs/vite-plugin-federation": "^1.3.9",
     "@vitejs/plugin-react": "^4.3.4",
     "typescript": "^5.8.2",
     "vite": "^7.3.0"

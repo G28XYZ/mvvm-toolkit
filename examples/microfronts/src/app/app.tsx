@@ -4,6 +4,19 @@ import { MicrofrontModule, MicrofrontDefinition, MicrofrontRecord } from "./type
 
 // const Fiveka = lazy(() => import('5ka-microfront'));
 
+type MicrofrontMode = "packages" | "federation";
+
+const resolveMicrofrontMode = (value: unknown): MicrofrontMode => {
+  if (typeof value !== "string") return "packages";
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "federation") return "federation";
+  return "packages";
+};
+
+const microfrontMode = resolveMicrofrontMode(
+  import.meta.env.VITE_MICROFRONT_MODE ?? import.meta.env.MODE
+);
+
 const defer = (callback: () => void) => {
   if (typeof queueMicrotask === "function") {
     queueMicrotask(callback);
@@ -12,10 +25,26 @@ const defer = (callback: () => void) => {
   }
 };
 
-const microfrontImporters: Record<string, () => Promise<MicrofrontModule>> = {
+const packageImporters: Record<string, () => Promise<MicrofrontModule>> = {
   "5ka-microfront"   : () => import("5ka-microfront"),
   "auchan-microfront": () => import("auchan-microfront"),
 };
+
+const federationOrigins: Record<string, string> = {
+  "5ka-microfront": "mf5ka",
+  "auchan-microfront": "mfauchan",
+};
+
+const federationImporters: Record<string, () => Promise<MicrofrontModule>> = {
+  "5ka-microfront": () => import("mf5ka/microfront"),
+  "auchan-microfront": () => import("mfauchan/microfront"),
+};
+
+const selectImporters = (mode: MicrofrontMode) =>
+  mode === "federation" ? federationImporters : packageImporters;
+
+const resolveOrigin = (packageName: string, mode: MicrofrontMode) =>
+  mode === "federation" ? federationOrigins[packageName] ?? packageName : packageName;
 
 const baseUrl = import.meta.env.BASE_URL ?? "/";
 const withBase = (path: string) => {
@@ -49,10 +78,14 @@ const isMicrofrontDefinition = (value: unknown): value is MicrofrontDefinition =
   );
 };
 
-const loadMicrofrontModule = async (packageName: string): Promise<MicrofrontRecord> => {
-  const importer = microfrontImporters[packageName];
+const loadMicrofrontModule = async (
+  packageName: string,
+  mode: MicrofrontMode
+): Promise<MicrofrontRecord> => {
+  const importers = selectImporters(mode);
+  const importer = importers[packageName];
   if (!importer) {
-    throw new Error(`Unknown microfront package "${packageName}".`);
+    throw new Error(`Unknown microfront package "${packageName}" for mode "${mode}".`);
   }
   const mod = await importer();
   const candidates = [mod.microfront, mod.default, ...Object.values(mod)];
@@ -70,12 +103,12 @@ const loadMicrofrontModule = async (packageName: string): Promise<MicrofrontReco
     title,
     description: candidate.description,
     mount: candidate.mount,
-    origin: packageName,
+    origin: resolveOrigin(packageName, mode),
   };
 };
 
 const loadMicrofront = async (packageName: string): Promise<MicrofrontRecord> => {
-  return await loadMicrofrontModule(packageName);
+  return await loadMicrofrontModule(packageName, microfrontMode);
 };
 
 function MicrofrontMount({ microfront }: { microfront: MicrofrontRecord }): JSX.Element {

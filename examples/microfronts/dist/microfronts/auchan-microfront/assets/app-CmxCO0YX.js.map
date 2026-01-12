@@ -1,0 +1,1 @@
+{"version":3,"file":"app-CmxCO0YX.js","sources":["../../src/main.tsx"],"sourcesContent":["import { microfront } from \"./microfront\";\n\nconst root = document.getElementById(\"root\");\n\nif (root) {\n  microfront.mount(root);\n}\n"],"names":["root","microfront"],"mappings":"w3BAEA,MAAMA,EAAO,SAAS,eAAe,MAAM,EAEvCA,GACFC,EAAW,MAAMD,CAAI"}
