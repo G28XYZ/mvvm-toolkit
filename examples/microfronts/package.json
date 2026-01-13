@@ -1,8 +1,8 @@
 {
   "name": "microfronts-host",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
+  "types": "./src/index.ts",
   "scripts": {
     "dev": "vite --force",
     "dev:federation": "vite --force --mode federation",

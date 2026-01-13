@@ -13,6 +13,6 @@
     "emitDecoratorMetadata": true,
     "strictNullChecks": false
   },
-  "include": ["src", "vite-env.d.ts"],
+  "include": ["src", "vite-env.d.ts", "di.d.ts"],
   "exclude": ["5ka", "auchan"]
 }

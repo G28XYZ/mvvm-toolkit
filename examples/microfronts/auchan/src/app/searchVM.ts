@@ -1,4 +1,4 @@
-import { action, observable } from "mobx";
+import { action, observable, computed } from "mobx";
 import {
   Inject,
   InjectStore,
@@ -8,30 +8,10 @@ import {
   MakeObservable,
   Service,
   ViewModel,
+  GetService,
 } from "rvm-toolkit";
 import { servicePrefix } from "./utils";
 
-type SearchBridge = {
-  getQuery: () => string;
-  setQuery: (value: string) => void;
-  submit: () => void;
-  onQuery: (listener: (value: string) => void) => () => void;
-  onSubmit: (listener: () => void) => () => void;
-};
-
-declare global {
-  interface Window {
-    __microfrontSearch?: SearchBridge;
-  }
-}
-
-const getExternalSearchBridge = (): SearchBridge | null => {
-  if (typeof window === "undefined") return null;
-  const bridge = window.__microfrontSearch;
-  if (!bridge) return null;
-  if (typeof bridge.onQuery !== "function" || typeof bridge.onSubmit !== "function") return null;
-  return bridge as SearchBridge;
-};
 
 @Service({ id: `${servicePrefix}:SearchVM` })
 @MakeObservable
@@ -42,8 +22,6 @@ export class SearchVM extends ViewModel {
   @Inject("auchan:ProductVM") parent: InjectType<"auchan:ProductVM">;
 
   @Inject("auchan:Api") api: InjectType<'auchan:Api'>;
-
-  @observable hasExternalSearch = Boolean(getExternalSearchBridge());
 
   private externalDisposers: Array<() => void> = [];
 
@@ -59,8 +37,8 @@ export class SearchVM extends ViewModel {
     this.parent.setQuery(value);
   }
 
-  @action.bound setHasExternalSearch(value: boolean) {
-    this.hasExternalSearch = value;
+  @computed get hasExternalSearch() {
+    return GetService('mfHost:AppVM', 'instance');
   }
 
   @action.bound clear() {
@@ -68,10 +46,13 @@ export class SearchVM extends ViewModel {
   }
 
   onInit() {
-    const bridge = getExternalSearchBridge();
+    const searchVM5ka = GetService('5ka:SearchVM', 'instance');
+
+    console.log(searchVM5ka);
+
+    const bridge = this.hasExternalSearch;
     if (!bridge) return;
 
-    this.setHasExternalSearch(true);
     this.parent.setQuery(bridge.getQuery());
 
     this.externalDisposers.push(
@@ -92,6 +73,5 @@ export class SearchVM extends ViewModel {
       dispose();
     }
     this.externalDisposers = [];
-    this.setHasExternalSearch(false);
   }
 }

@@ -102,13 +102,6 @@
 
 /* ---------- List wrap (meta + scroll area) ---------- */
 
-.productListWrap {
-  flex: 1 1 auto;
-  min-height: 0;
-
-  display: flex;
-  flex-direction: column;
-}
 
 .productListWrap__meta {
   flex: 0 0 auto;
@@ -480,6 +473,8 @@
 
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  max-height: 80vh;
 }
 
 /* СКРОЛЛ ТОЛЬКО ЗДЕСЬ */

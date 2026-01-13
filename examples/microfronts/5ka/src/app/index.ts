@@ -7,3 +7,4 @@ export * from "./searchVM";
 export * from "./itemVM";
 
 export * from "./view";
+export * from './utils';

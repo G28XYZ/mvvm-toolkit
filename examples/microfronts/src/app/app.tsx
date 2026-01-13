@@ -1,17 +1,12 @@
 import React, { Suspense, useMemo, useState } from "react";
 import { microfrontsResource } from "../resource";
 import { ErrorBoundary } from "../errorBoundary";
-import { searchBridge } from "../searchBridge";
-import { useEffect } from "react";
+import { view } from "rvm-toolkit";
 
-function MicrofrontsShell(): JSX.Element {
+const MicrofrontsShell = view('mfHost:AppVM', ({ viewModel: vm }) => {
   const microfronts = microfrontsResource.read();
   const [activeKey, setActiveKey] = useState(() => microfronts[0]?.key ?? "");
   const active = useMemo(() => microfronts.find((m) => m.key === activeKey) ?? null, [microfronts, activeKey]);
-
-  const [query, setQuery] = useState(searchBridge.getQuery());
-
-  useEffect(() => searchBridge.onQuery(setQuery), []);
 
   return (
     <div className="app">
@@ -24,15 +19,15 @@ function MicrofrontsShell(): JSX.Element {
         className="search"
         onSubmit={(e) => {
           e.preventDefault();
-          searchBridge.submit();
+          vm.submit();
         }}
       >
         <input
-          type="search"
-          value={query}
-          onChange={(e) => searchBridge.setQuery(e.target.value)}
-          placeholder="Search products"
-          aria-label="Search products"
+          type        = "search"
+          value       = {vm.query}
+          onChange    = {(e) => vm.setQuery(e.target.value)}
+          placeholder = "Search products"
+          aria-label  = "Search products"
         />
         <button type="submit">Search</button>
       </form>
@@ -71,7 +66,7 @@ function MicrofrontsShell(): JSX.Element {
       </div>
     </div>
   );
-}
+})
 
 export function MicrofrontsApp(): JSX.Element {
   return (

@@ -1,3 +1,0 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./microfront-C84eC6gD.js","./mf5ka__mf_v__runtimeInit__mf_v__-RyIHmAgr.js","./mf5ka__loadShare__react__loadShare__-BA0rPJcW.js","./_commonjsHelpers-Cn9vc4LF.js"])))=>i.map(i=>d[i]);
-var r=Object.defineProperty;var o=(t,e)=>r(t,"name",{value:e,configurable:!0});import{_ as a}from"./preload-helper-Cc2_yIPf.js";const u={"./microfront":o(async()=>{const t=await a(()=>import("./microfront-C84eC6gD.js"),__vite__mapDeps([0,1,2,3]),import.meta.url),e={};return Object.assign(e,t),Object.defineProperty(e,"__esModule",{value:!0,enumerable:!1}),e},"./microfront")};export{u as default};
-//# sourceMappingURL=virtualExposes-DiOVsZZl.js.map

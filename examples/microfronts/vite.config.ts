@@ -23,6 +23,10 @@ export default defineConfig(({ mode, command }) => {
   const shared = {
     react: { singleton: true },
     "react-dom": { singleton: true },
+    "rvm-toolkit": { singleton: true },
+    "mobx-react-lite": { singleton: true },
+    "mobx-react": { singleton: true },
+    "mobx": { singleton: true },
   };
 
   // ✅ у тебя в примере местами пропали "||"

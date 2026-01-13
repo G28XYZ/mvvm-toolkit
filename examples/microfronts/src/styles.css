@@ -112,6 +112,8 @@ button {
   padding: 12px;
   display: grid;
   gap: 8px;
+  overflow: auto;
+  max-height: 85vh;
 }
 
 .microfront-frame {

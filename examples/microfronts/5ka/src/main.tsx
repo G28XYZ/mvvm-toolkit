@@ -18,7 +18,6 @@ function ensureStyles() {
   document.head.appendChild(link);
 }
 
-// ✅ никаких эффектов: просто вызываем один раз при инициализации модуля
 ensureStyles();
 
 export const microfrontMeta = {

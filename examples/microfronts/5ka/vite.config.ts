@@ -12,8 +12,12 @@ export default defineConfig(({ mode }) => {
   const base = env.VITE_BASE ?? "./";
   const isFederationBuild = env.VITE_MICROFRONT_MODE === "federation" || mode === "federation";
   const shared = {
-    react: { singleton: true },
-    "react-dom": { singleton: true },
+    react            : { singleton: true },
+    "react-dom"      : { singleton: true },
+    "rvm-toolkit"    : { singleton: true },
+    "mobx-react-lite": { singleton: true },
+    "mobx-react"     : { singleton: true },
+    "mobx"           : { singleton: true },
   };
 
   const plugins = [
@@ -23,13 +27,11 @@ export default defineConfig(({ mode }) => {
   
     isFederationBuild && plugins.push(
       federation({
-                name: "mf5ka",
-                filename: "remoteEntry.js",
-                exposes: {
-                  "./microfront": "./src/microfront.tsx"
-                },
-                shared,
-              })
+        name    : "mf5ka",
+        filename: "remoteEntry.js",
+        exposes : { "./microfront": "./src/microfront.tsx" },
+        shared,
+      })
     )
 
   return {
