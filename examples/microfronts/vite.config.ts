@@ -38,10 +38,11 @@ export default defineConfig(({ mode, command }) => {
       const envKey = `VITE_FEDERATION_${mf.remote.toUpperCase()}_URL`;
       const legacyEnvKey = `VITE_FEDERATION_${mf.remote.replace(/^mf/i, "").toUpperCase()}_URL`;
       const envUrl = env[envKey] ?? env[legacyEnvKey];
-      const url =
-        envUrl ??
-        (useDevRemotes ? mf.devUrl : undefined) ??
-        joinBase(federationBase, GITHUB_PAGES ? mf.remoteUrl : mf.defaultRemoteEntryPath);
+      let url = '';
+      if(GITHUB_PAGES) url = mf.remoteUrl;
+      else {
+        url = envUrl ?? (useDevRemotes ? mf.devUrl : undefined) ?? joinBase(federationBase, mf.defaultRemoteEntryPath);
+      }
       return [
         mf.remote,
         {
