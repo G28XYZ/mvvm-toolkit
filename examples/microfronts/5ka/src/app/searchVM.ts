@@ -1,4 +1,4 @@
-import { action, observable } from "mobx";
+import { action, computed, observable } from "mobx";
 import {
   Inject,
   InjectStore,
@@ -8,31 +8,9 @@ import {
   MakeObservable,
   Service,
   ViewModel,
+  GetService,
 } from "rvm-toolkit";
 import { servicePrefix } from "./utils";
-
-type SearchBridge = {
-  getQuery: () => string;
-  setQuery: (value: string) => void;
-  submit: () => void;
-  onQuery: (listener: (value: string) => void) => () => void;
-  onSubmit: (listener: () => void) => () => void;
-};
-
-declare global {
-  interface Window {
-    __microfrontSearch?: SearchBridge;
-  }
-}
-
-const getExternalSearchBridge = (): SearchBridge | null => {
-  if (typeof window === "undefined") return null;
-  const bridge = window.__microfrontSearch;
-  if (!bridge) return null;
-  if (typeof bridge.onQuery !== "function" || typeof bridge.onSubmit !== "function") return null;
-  return bridge as SearchBridge;
-};
-
 @Service({ id: `${servicePrefix}:SearchVM` })
 @MakeObservable
 export class SearchVM extends ViewModel {
@@ -43,12 +21,17 @@ export class SearchVM extends ViewModel {
 
   @Inject("5ka:Api") api: InjectType<'5ka:Api'>;
 
-  @observable hasExternalSearch = Boolean(getExternalSearchBridge());
+  @observable lastQuery = '';
+
+  @computed get hasExternalSearch() {
+    return GetService('mfHost:AppVM', 'instance');
+  }
 
   private externalDisposers: Array<() => void> = [];
 
   private async *_search() {
-    await this.store.search(this.parent.query);
+    this.lastQuery = this.parent.query;
+    return await this.store.search(this.parent.query);
   }
 
   search = flowCommand(() => this._search(), {
@@ -59,19 +42,14 @@ export class SearchVM extends ViewModel {
     this.parent.setQuery(value);
   }
 
-  @action.bound setHasExternalSearch(value: boolean) {
-    this.hasExternalSearch = value;
-  }
-
   @action.bound clear() {
     this.parent.setQuery("");
   }
 
   onInit() {
-    const bridge = getExternalSearchBridge();
+    const bridge = this.hasExternalSearch;
     if (!bridge) return;
 
-    this.setHasExternalSearch(true);
     this.parent.setQuery(bridge.getQuery());
 
     this.externalDisposers.push(
@@ -92,6 +70,5 @@ export class SearchVM extends ViewModel {
       dispose();
     }
     this.externalDisposers = [];
-    this.setHasExternalSearch(false);
   }
 }

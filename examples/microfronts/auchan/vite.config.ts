@@ -1,6 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { ConfigEnv, defineConfig, loadEnv } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import {federation} from "@module-federation/vite";
 import { mvvmServiceDiPlugin } from "rvm-toolkit/vite-plugins";
@@ -58,7 +58,6 @@ export default defineConfig(({ mode }) => {
             },
         output: {
           entryFileNames: (chunk) => {
-            console.log(chunk.name);
             if (!isFederationBuild && chunk.name === "microfront") return "microfront.js";
             if (chunk.name === "remoteEntry") return "remoteEntry.js";
             return "assets/[name]-[hash].js";

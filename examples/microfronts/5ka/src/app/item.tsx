@@ -19,14 +19,14 @@ function resolveImageUrl(links?: FiveKaImageLinks) {
 }
 
 export const ProductItem = view("5ka:ProductItemVM", ({ viewModel: vm, item }: Props) => {
-  const imageUrl = resolveImageUrl(item.image_links);
+  const imageUrl     = resolveImageUrl(item.image_links);
   const regularPrice = item.prices?.regular ?? "";
-  const promoPrice = item.prices?.discount ?? item.prices?.cpd_promo_price ?? "";
-  const hasPromo = Boolean(promoPrice && regularPrice && promoPrice !== regularPrice);
-  const priceText = formatNumberLikePrice(hasPromo ? promoPrice : regularPrice) || promoPrice || regularPrice;
+  const promoPrice   = item.prices?.discount ?? item.prices?.cpd_promo_price ?? "";
+  const hasPromo     = Boolean(promoPrice && regularPrice && promoPrice !== regularPrice);
+  const priceText    = formatNumberLikePrice(hasPromo ? promoPrice : regularPrice) || promoPrice || regularPrice;
   const oldPriceText = hasPromo ? formatNumberLikePrice(regularPrice) || regularPrice : "";
-  const available = item.is_available ?? true;
-  const labels = item.labels ?? [];
+  const available    = item.is_available ?? true;
+  const labels       = item.labels ?? [];
 
   return (
     <li

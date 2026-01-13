@@ -9,6 +9,7 @@ export class ProductStore extends StoreBase(ProductModel) {
   async search(query: string) {
     const res = await this.api.simpleSearch(query);
     res?.products && this.applyLoaded(res.products);
+    return res;
   }
 
 }

@@ -3,7 +3,7 @@ import { ProductItem } from "./item";
 import styles from "./styles.module.css";
 
 export const ProductList = view('auchan:ProductListVM', ({ viewModel: vm }) => {
-  const hasQuery = Boolean(vm.lastQuery.trim());
+  const hasQuery = Boolean(vm.searchVM.lastQuery.trim());
 
   return (
     <>
@@ -19,7 +19,7 @@ export const ProductList = view('auchan:ProductListVM', ({ viewModel: vm }) => {
         </div>
       )}
 
-      <>
+      <div className={styles.productListWrap__scroll}>
         {vm.resultCount === 0 ? (
           <div className={styles.productListWrap__empty}>
             {hasQuery ? "Ничего не найдено" : "Введите название товара и нажмите «Поиск»."}
@@ -31,7 +31,7 @@ export const ProductList = view('auchan:ProductListVM', ({ viewModel: vm }) => {
             ))}
           </ul>
         )}
-      </>
+      </div>
     </>
   );
 });

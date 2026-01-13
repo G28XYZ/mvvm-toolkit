@@ -498,6 +498,7 @@
 .productListWrap__scroll {
   flex: 1 1 auto;
   min-height: 0;
-  overflow: auto; /* вот сам скролл */
-  padding-right: 2px; /* чтобы скроллбар не прилипал к контенту */
+  overflow: auto;
+  padding-right: 2px;
+  max-height: 80vh;
 }

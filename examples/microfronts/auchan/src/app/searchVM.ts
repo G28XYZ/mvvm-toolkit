@@ -25,8 +25,11 @@ export class SearchVM extends ViewModel {
 
   private externalDisposers: Array<() => void> = [];
 
+  @observable lastQuery = '';
+
   private async *_search() {
-    await this.store.search(this.parent.query);
+    this.lastQuery = this.parent.query;
+    return await this.store.search(this.parent.query);
   }
 
   search = flowCommand(() => this._search(), {
@@ -47,8 +50,6 @@ export class SearchVM extends ViewModel {
 
   onInit() {
     const searchVM5ka = GetService('5ka:SearchVM', 'instance');
-
-    console.log(searchVM5ka);
 
     const bridge = this.hasExternalSearch;
     if (!bridge) return;

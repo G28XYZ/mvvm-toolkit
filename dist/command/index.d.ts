@@ -75,6 +75,8 @@ export type CommandScope<TStates extends CommandStatesMap = CommandStates> = {
     isDisposed: boolean;
     /** Последняя ошибка (если trackError=true). */
     error: unknown;
+    /** Последний результат выполнения (успех -> TResult, ошибка/отмена -> undefined) */
+    result: unknown;
 };
 /**
  * Опции команды.
@@ -209,6 +211,8 @@ export interface ICommand<TArgs extends any[] = [], TResult = void, TExtraStates
     readonly isDisposed: boolean;
     /** Последняя ошибка (observable, если trackError=true). */
     readonly error: unknown;
+    /** Последний результат выполнения (успех -> TResult, ошибка/отмена -> undefined) */
+    readonly result: TResult;
     /** Сбросить ошибку. */
     resetError: () => void;
     /**

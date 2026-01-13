@@ -1,11 +1,12 @@
 export type MicrofrontKey = "5ka-microfront" | "auchan-microfront";
 
 export type MicrofrontRegistryItem = {
-  key                   : MicrofrontKey;
-  remote                : string; // mf5ka, mfauchan
-  remoteUrl             : string;
-  devUrl                : string;
-  defaultRemoteEntryPath: string;
+  key                    : MicrofrontKey;
+  remote                 : string;         // mf5ka, mfauchan
+  remoteUrl              : string;
+  devUrl                 : string;
+  defaultRemoteEntryPath : string;
+  exposedModule         ?: string;
 
   importers: {
     packages: () => Promise<any>;

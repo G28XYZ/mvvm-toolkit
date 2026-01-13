@@ -30,14 +30,19 @@ describe("command", () => {
     const deferred = createDeferred<number>();
     const cmd = asyncCommand(async () => deferred.promise);
 
+    expect(cmd.result).toBeUndefined();
+
     const promise = cmd.execute();
     expect(cmd.isExecuting).toBe(true);
     expect(cmd.canExecute).toBe(false);
+    expect(cmd.result).toBeUndefined();
 
     deferred.resolve(7);
     const result = await promise;
 
     expect(result).toBe(7);
+    expect(cmd.result).toBe(7);
+
     expect(cmd.isExecuting).toBe(false);
     expect(cmd.canExecute).toBe(true);
     expect(cmd.error).toBe(null);
@@ -48,14 +53,17 @@ describe("command", () => {
     const cmd = asyncCommand(async () => deferred.promise);
 
     expect(cmd.state).toBe("ready");
+    expect(cmd.result).toBeUndefined();
 
     const promise = cmd.execute();
     expect(cmd.state).toBe("load");
+    expect(cmd.result).toBeUndefined();
 
     deferred.resolve();
     await promise;
 
     expect(cmd.state).toBe("ready");
+    expect(cmd.result).toBeUndefined();
 
     const errorCmd = asyncCommand(async () => {
       throw new Error("boom");
@@ -63,6 +71,7 @@ describe("command", () => {
 
     await errorCmd.execute();
     expect(errorCmd.state).toBe("failure");
+    expect(errorCmd.result).toBeUndefined();
   });
 
   it("canExecute получает scope и может проверять state", async () => {
@@ -282,10 +291,14 @@ describe("command", () => {
     second.resolve("second");
 
     const result2 = await p2;
-    const result1 = await p1;
-
     expect(result2).toBe("second");
+    expect(cmd.result).toBe("second");
+
+    const result1 = await p1;
     expect(result1).toBeUndefined();
+
+    // важно: отменённый первый запуск не должен “затереть” успешный результат второго
+    expect(cmd.result).toBe("second");
     expect(cmd.error).toBe(null);
   });
 
@@ -313,6 +326,7 @@ describe("command", () => {
 
     cmd.cancel?.();
     expect(cmd.isCanceled).toBe(true);
+    expect(cmd.result).toBeUndefined();
 
     await p1;
 
@@ -322,6 +336,8 @@ describe("command", () => {
 
     second.resolve();
     await p2;
+
+    expect(cmd.result).toBeUndefined();
   });
 
   it("dispose помечает команду как недоступную", async () => {
@@ -331,6 +347,7 @@ describe("command", () => {
 
     expect(cmd.isDisposed).toBe(true);
     expect(cmd.canExecute).toBe(false);
+    expect(cmd.result).toBeUndefined();
     await expect(cmd.execute()).resolves.toBeUndefined();
   });
 
@@ -347,12 +364,14 @@ describe("command", () => {
 
     await cmd.execute();
     expect(cmd.error).toBe(error);
+    expect(cmd.result).toBeUndefined();
 
     const promise = cmd.execute();
     expect(cmd.error).toBe(null);
 
     await promise;
     expect(cmd.error).toBe(null);
+    expect(cmd.result).toBe(1);
   });
 
   it("resetErrorOnExecute=false сохраняет error до ручного сброса", async () => {
@@ -368,12 +387,14 @@ describe("command", () => {
 
     await cmd.execute();
     expect(cmd.error).toBe(error);
+    expect(cmd.result).toBeUndefined();
 
     const promise = cmd.execute();
     expect(cmd.error).toBe(error);
 
     await promise;
     expect(cmd.error).toBe(error);
+    expect(cmd.result).toBe(1);
 
     cmd.resetError();
     expect(cmd.error).toBe(null);
@@ -393,6 +414,8 @@ describe("command", () => {
     const result = await cmd.execute(2);
 
     expect(result).toBe(3);
+    expect(cmd.result).toBe(3);
+
     expect(onStart).toHaveBeenCalledWith(2);
     expect(onSuccess).toHaveBeenCalledWith(3, 2);
     expect(onFinally).toHaveBeenCalledWith({ ok: true, canceled: false, error: null }, 2);
@@ -415,6 +438,8 @@ describe("command", () => {
     });
 
     await cmd.execute();
+
+    expect(cmd.result).toBeUndefined();
 
     expect(onStart).toHaveBeenCalledTimes(1);
     expect(onSuccess).not.toHaveBeenCalled();
@@ -450,6 +475,8 @@ describe("command", () => {
 
     await promise;
 
+    expect(cmd.result).toBeUndefined();
+
     expect(onStart).toHaveBeenCalledTimes(1);
     expect(onSuccess).not.toHaveBeenCalled();
     expect(onFinally).toHaveBeenCalledWith({ ok: false, canceled: true, error: null });
@@ -464,6 +491,7 @@ describe("command", () => {
 
     const result = await cmd.execute();
     expect(result).toBeUndefined();
+    expect(cmd.result).toBeUndefined();
     expect(cmd.error).toBe(error);
 
     const cmd2 = asyncCommand(async () => {
@@ -471,6 +499,7 @@ describe("command", () => {
     }, { swallowError: false });
 
     await expect(cmd2.execute()).rejects.toBe(error);
+    expect(cmd2.result).toBeUndefined();
     expect(cmd2.error).toBe(error);
   });
 
@@ -485,13 +514,18 @@ describe("command", () => {
       return value;
     });
 
+    expect(cmd.result).toBeUndefined();
+
     const promise = cmd.execute();
     expect(cmd.isExecuting).toBe(true);
+    expect(cmd.result).toBeUndefined();
 
     deferred.resolve(5);
     const result = await promise;
 
     expect(result).toBe(5);
+    expect(cmd.result).toBe(5);
+
     expect(steps).toEqual(["start", "end"]);
     expect(cmd.isExecuting).toBe(false);
   });

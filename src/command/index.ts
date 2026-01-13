@@ -107,6 +107,8 @@ export type CommandScope<TStates extends CommandStatesMap = CommandStates> = {
   isDisposed: boolean;
   /** Последняя ошибка (если trackError=true). */
   error: unknown;
+  /** Последний результат выполнения (успех -> TResult, ошибка/отмена -> undefined) */
+  result: unknown;
 };
 
 type AsyncFn<TArgs extends any[], TResult> = (...args: [...TArgs, AbortSignal?]) => Promise<TResult>;
@@ -272,6 +274,8 @@ export interface ICommand<TArgs extends any[] = [], TResult = void, TExtraStates
 
   /** Последняя ошибка (observable, если trackError=true). */
   readonly error: unknown;
+  /** Последний результат выполнения (успех -> TResult, ошибка/отмена -> undefined) */
+  readonly result: TResult;
 
   /** Сбросить ошибку. */
   resetError: () => void;
@@ -325,11 +329,13 @@ const noop = (): void => {};
 class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown), TExtraStates extends CommandStatesMap = {}>
   implements ICommand<TArgs, TResult, TExtraStates>
 {
-  isExecuting = false;
-  activeCount = 0;
-  isCanceled = false;
-  isDisposed = false;
-  error: unknown = null;
+  isExecuting: boolean  = false;
+  activeCount: number   = 0;
+  isCanceled : boolean  = false;
+  isDisposed : boolean  = false;
+  error      : unknown  = null;
+  result     : TResult  = undefined;
+
   readonly states: CommandStates<TExtraStates>;
 
   private readonly fn: AsyncFn<TArgs, TResult>;
@@ -341,6 +347,7 @@ class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown
   private runningPromise: Promise<TResult> | null = null;
   private queueTail: Promise<unknown> = Promise.resolve();
   private cancelToken = 0;
+
 
   /**
    * @param fn Асинхронная функция, которую выполняет команда.
@@ -423,13 +430,14 @@ class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown
    */
   private getScope(): CommandScope<CommandStates<TExtraStates>> {
     return {
-      state: this.state,
-      states: this.states,
+      state      : this.state,
+      states     : this.states,
       isExecuting: this.isExecuting,
       activeCount: this.activeCount,
-      isCanceled: this.isCanceled,
-      isDisposed: this.isDisposed,
-      error: this.error,
+      isCanceled : this.isCanceled,
+      isDisposed : this.isDisposed,
+      error      : this.error,
+      result     : this.result
     };
   }
 
@@ -468,7 +476,8 @@ class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown
    */
   cancel() {
     this.cancelToken += 1;
-    this.isCanceled = true;
+    this.isCanceled   = true;
+    this.result       = undefined;
     this.opt.onCancel?.();
     if (this.opt.cancelQueued) this.clearQueue();
     for (const controller of this.controllers) {
@@ -483,6 +492,7 @@ class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown
   dispose() {
     if (this.isDisposed) return;
     this.isDisposed = true;
+    this.result     = undefined;
     this.clearQueue();
     this.cancel();
   }
@@ -540,8 +550,9 @@ class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown
 
       runInAction(() => {
         this.activeCount += 1;
-        this.isExecuting = this.activeCount > 0;
-        this.isCanceled = false;
+        this.isExecuting  = this.activeCount > 0;
+        this.isCanceled   = false;
+        this.result       = undefined;
         if (this.opt.trackError && this.opt.resetErrorOnExecute) this.error = null;
       });
 
@@ -561,8 +572,15 @@ class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown
         // Логическая отмена: если cancelToken изменился, считаем, что результат устарел.
         canceled = this.cancelToken !== startCancelToken;
         if (canceled) {
+          runInAction(() => {
+            this.isCanceled = true;
+            this.result = undefined;
+          });
           return undefined;
         }
+
+        runInAction(() => { this.result = result; });
+
         this.opt.onSuccess?.(result, ...args);
         ok = true;
         return result;
@@ -571,6 +589,7 @@ class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown
         if (this.opt.abortable && controller?.signal.aborted) {
           runInAction(() => {
             this.isCanceled = true;
+            this.result     = undefined;
           });
           canceled = true;
           error = null;
@@ -581,11 +600,10 @@ class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown
         // Если cancelToken поменялся — считаем запуск отменённым логически.
         canceled = this.cancelToken !== startCancelToken;
 
-        if (this.opt.trackError) {
-          runInAction(() => {
-            this.error = e;
-          });
-        }
+        runInAction(() => {
+          this.result = undefined as TResult; // <-- на ошибке результата нет
+          if (this.opt.trackError) this.error = e;
+        });
         this.opt.onError?.(e);
 
         if (!this.opt.swallowError) throw e;
