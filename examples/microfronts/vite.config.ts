@@ -40,8 +40,8 @@ export default defineConfig(({ mode, command }) => {
       const envUrl = env[envKey] ?? env[legacyEnvKey];
       const url =
         envUrl ??
-        (useDevRemotes ? mf.remoteUrl : undefined) ??
-        joinBase(federationBase, mf.defaultRemoteEntryPath);
+        (useDevRemotes ? mf.devUrl : undefined) ??
+        joinBase(federationBase, GITHUB_PAGES ? mf.remoteUrl : mf.defaultRemoteEntryPath);
       return [
         mf.remote,
         {
