@@ -46,6 +46,8 @@ jobs:
           cd ./auchan && npm install --include=optional --no-package-lock && npm run build:federation
           cd ../5ka && npm install --include=optional --no-package-lock && npm run build:federation
           cd ../ && npm install --include=optional --no-package-lock && npm run build:federation
+          ls ./dist
+          ls ./dist/microfront
 
       - name: Prepare Pages site
         run: |
