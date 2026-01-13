@@ -6,6 +6,9 @@ import { MICROFRONTS } from "./src/microfronts.registry";
 
 type MicrofrontMode = "packages" | "federation";
 
+const GITHUB_PAGES = Boolean(process.env.GITHUB_PAGES);
+console.log({ GITHUB_PAGES });
+
 const resolveMode = (value: unknown): MicrofrontMode =>
   String(value ?? "").trim().toLowerCase() === "federation" ? "federation" : "packages";
 

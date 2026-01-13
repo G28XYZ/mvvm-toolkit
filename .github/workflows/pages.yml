@@ -41,6 +41,8 @@ jobs:
           npm run build
       
       - name: Install and build microfronts
+        env:
+          GITHUB_PAGES: "true"
         working-directory: examples/microfronts
         run: |
           cd ./auchan && npm install --include=optional --no-package-lock && npm run build:federation
