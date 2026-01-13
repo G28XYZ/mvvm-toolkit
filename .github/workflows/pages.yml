@@ -64,12 +64,14 @@ jobs:
         run: |
           mkdir -p site/examples/todo-list
           mkdir -p site/examples/microfronts
-          mkdir -p site/examples/microfronts/microfront
+          mkdir -p site/examples/microfronts/auchan
+          mkdir -p site/examples/microfronts/5ka
           cp examples/index.html site/index.html
           cp examples/index.css site/index.css
           cp -R examples/todo-list/dist/. site/examples/todo-list/
           cp -R examples/microfronts/dist/. site/examples/microfronts/
-          cp -R examples/microfronts/dist/microfront/. site/examples/microfronts/microfront
+          cp -R examples/microfronts/auchan/dist/. site/examples/microfronts/auchan/
+          cp -R examples/microfronts/5ka/dist/. site/examples/microfronts/5ka/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
