@@ -3,7 +3,7 @@ import typescriptPlugin from "@typescript-eslint/eslint-plugin";
 
 export default [
   {
-    ignores: ["**/dist/**", "**/node_modules/**", "vite.config.ts"],
+    ignores: ["**/dist/**", "**/node_modules/**", "vite.config.ts", "**/examples/**"],
   },
   {
     languageOptions: {

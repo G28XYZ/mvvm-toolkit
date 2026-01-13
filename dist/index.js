@@ -989,6 +989,11 @@ const ke = {
 }, te = () => {
 };
 class it {
+  /**
+   * @param fn Асинхронная функция, которую выполняет команда.
+   *           Если `abortable=true`, в неё будет передан `AbortSignal` последним аргументом.
+   * @param opt Опции команды.
+   */
   constructor(t, n) {
     var o, i, s, r, c, l, u;
     this.isExecuting = !1, this.activeCount = 0, this.isCanceled = !1, this.isDisposed = !1, this.error = null, this.controllers = /* @__PURE__ */ new Set(), this.queue = [], this.runningPromise = null, this.queueTail = Promise.resolve(), this.cancelToken = 0, this.fn = t, this.opt = Object.assign({ concurrency: (o = n?.concurrency) !== null && o !== void 0 ? o : "ignore", trackError: (i = n?.trackError) !== null && i !== void 0 ? i : !0, resetErrorOnExecute: (s = n?.resetErrorOnExecute) !== null && s !== void 0 ? s : !0, swallowError: (r = n?.swallowError) !== null && r !== void 0 ? r : !0, abortable: (c = n?.abortable) !== null && c !== void 0 ? c : !1 }, n), this.states = Object.assign(Object.assign({}, ke), (l = n?.states) !== null && l !== void 0 ? l : {}), this.stateKeys = Object.assign(Object.assign({}, tt), (u = n?.stateKeys) !== null && u !== void 0 ? u : {}), Fe(this, {
@@ -1005,14 +1010,27 @@ class it {
       cancelToken: !1
     }, { autoBind: !0 });
   }
+  /**
+   * Можно ли выполнить команду прямо сейчас.
+   * Учитывает:
+   * - dispose
+   * - `opt.canExecute(scope)`
+   * - политику конкурентности: для `"ignore"` запрещает запуск при `isExecuting=true`
+   */
   get canExecute() {
     return this.isDisposed || !(this.opt.canExecute ? this.opt.canExecute(this.getScope()) : !0) ? !1 : this.opt.concurrency === "ignore" ? !this.isExecuting : !0;
   }
+  /**
+   * Разрешает лейбл состояния по “роли” (load/ready/failure/...) с учётом stateKeys/states.
+   */
   resolveState(t) {
     var n, o;
     const i = (n = this.stateKeys[t]) !== null && n !== void 0 ? n : t;
     return (o = this.states[i]) !== null && o !== void 0 ? o : ke[t];
   }
+  /**
+   * Возвращает текущий scope (снимок) для передачи в `canExecute`.
+   */
   getScope() {
     return {
       state: this.state,
@@ -1024,21 +1042,50 @@ class it {
       error: this.error
     };
   }
+  /**
+   * Computed “машина состояний”.
+   *
+   * Приоритет:
+   * 1) disposed
+   * 2) load (если выполняется)
+   * 3) failure (если есть error)
+   * 4) canceled (если isCanceled)
+   * 5) ready
+   */
   get state() {
     return this.isDisposed ? this.resolveState("disposed") : this.isExecuting ? this.resolveState("load") : this.error ? this.resolveState("failure") : this.isCanceled ? this.resolveState("canceled") : this.resolveState("ready");
   }
+  /**
+   * Сбрасывает `error`.
+   */
   resetError() {
     this.error = null;
   }
+  /**
+   * Отменяет текущие активные выполнения:
+   * - увеличивает cancelToken (помечает текущий запуск “устаревшим”)
+   * - ставит isCanceled=true
+   * - вызывает onCancel
+   * - при cancelQueued=true — очищает очередь
+   * - при abortable=true — abort() все активные AbortController
+   */
   cancel() {
     var t, n;
     this.cancelToken += 1, this.isCanceled = !0, (n = (t = this.opt).onCancel) === null || n === void 0 || n.call(t), this.opt.cancelQueued && this.clearQueue();
     for (const o of this.controllers)
       o.abort();
   }
+  /**
+   * Помечает команду как уничтоженную, очищает очередь и отменяет активные выполнения.
+   * После dispose новые execute() не выполняются.
+   */
   dispose() {
     this.isDisposed || (this.isDisposed = !0, this.clearQueue(), this.cancel());
   }
+  /**
+   * Очищает очередь (concurrency="queue").
+   * Все ожидающие элементы резолвятся в `undefined`.
+   */
   clearQueue() {
     if (this.queue.length === 0)
       return;
@@ -1046,6 +1093,14 @@ class it {
     for (const n of t)
       n.canceled = !0, n.settled || (n.settled = !0, n.resolve(void 0));
   }
+  /**
+   * Выполняет команду с учётом выбранной конкурентности.
+   *
+   * @remarks
+   * Возвращаемое значение часто типизируется как `TResult | undefined`, потому что:
+   * - при отмене/abort результат принудительно становится `undefined`
+   * - при swallowError=true ошибка не пробрасывается, а возвращается `undefined`
+   */
   execute(...t) {
     var n;
     if (this.isDisposed)
