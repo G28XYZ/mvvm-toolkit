@@ -44,7 +44,7 @@ const baseUrl = import.meta.env.BASE_URL ?? "/";
 const withBase = (p: string) => (baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`) + p.replace(/^\//, "");
 
 async function loadManifestKeys(): Promise<MicrofrontKey[]> {
-  const res = await fetch(withBase("microfronts.json"), { cache: "no-store" });
+  const res = await fetch(withBase("microfront.json"), { cache: "no-store" });
   if (!res.ok) throw new Error(`Manifest request failed (${res.status})`);
   const data = await res.json();
   if (!Array.isArray(data)) throw new Error("Manifest must be an array.");

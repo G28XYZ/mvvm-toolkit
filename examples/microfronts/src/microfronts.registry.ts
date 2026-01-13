@@ -17,7 +17,7 @@ export const MICROFRONTS: Record<MicrofrontKey, MicrofrontRegistryItem> = {
     key: "5ka-microfront",
     remote: "mf5ka",
     remoteUrl: "http://localhost:5175/remoteEntry.js",
-    defaultRemoteEntryPath: "microfronts/5ka-microfront/remoteEntry.js",
+    defaultRemoteEntryPath: "microfront/5ka-microfront/remoteEntry.js",
     importers: {
       packages: () => import("mf5ka/microfront"),
       federation: () => import("mf5ka/microfront"),
@@ -27,7 +27,7 @@ export const MICROFRONTS: Record<MicrofrontKey, MicrofrontRegistryItem> = {
     key: "auchan-microfront",
     remote: "mfauchan",
     remoteUrl: "http://localhost:5174/remoteEntry.js",
-    defaultRemoteEntryPath: "microfronts/auchan-microfront/remoteEntry.js",
+    defaultRemoteEntryPath: "microfront/auchan-microfront/remoteEntry.js",
     importers: {
       packages: () => import("mfauchan/microfront"),
       federation: () => import("mfauchan/microfront"),

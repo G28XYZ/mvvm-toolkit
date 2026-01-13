@@ -69,14 +69,14 @@ const listMicrofronts = async () => {
 };
 
 const writeManifest = async (items) => {
-  const manifestPath = path.join(root, "public", "microfronts.json");
+  const manifestPath = path.join(root, "public", "microfront.json");
   await fs.mkdir(path.dirname(manifestPath), { recursive: true });
   const packages = items.map((item) => item.packageName);
   await fs.writeFile(manifestPath, `${JSON.stringify(packages, null, 2)}\n`, "utf8");
 };
 
 const copyDist = async (items) => {
-  const targetRoot = path.join(root, dest, "microfronts");
+  const targetRoot = path.join(root, dest, "microfront");
   await fs.mkdir(targetRoot, { recursive: true });
 
   for (const item of items) {
