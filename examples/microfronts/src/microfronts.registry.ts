@@ -17,7 +17,7 @@ export const MICROFRONTS: Record<MicrofrontKey, MicrofrontRegistryItem> = {
   "5ka-microfront": {
     key                   : "5ka-microfront",
     remote                : "mf5ka",
-    remoteUrl             : "https://g28xyz.github.io/rvm-toolkit/examples/microfronts/auchan/remoteEntry.js",
+    remoteUrl             : "https://g28xyz.github.io/rvm-toolkit/examples/microfronts/5ka/remoteEntry.js",
     devUrl                : "http://localhost:5175/remoteEntry.js",
     defaultRemoteEntryPath: "microfront/5ka-microfront/remoteEntry.js",
     importers             : {
