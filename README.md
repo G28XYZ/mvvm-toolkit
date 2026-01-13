@@ -1,7 +1,7 @@
 # rvm-toolkit
 
 [![Tests](https://github.com/G28XYZ/rvm-toolkit/actions/workflows/tests.yml/badge.svg)](https://github.com/G28XYZ/rvm-toolkit/actions/workflows/tests.yml)
-[![GitHub Pages](https://github.com/G28XYZ/rvm-toolkit/actions/workflows/todo-list-pages.yml/badge.svg)](https://g28xyz.github.io/rvm-toolkit/examples/todo-list)
+[![GitHub Pages](https://github.com/G28XYZ/rvm-toolkit/actions/workflows/pages.yml/badge.svg)](https://g28xyz.github.io/rvm-toolkit/examples/todo-list)
 [![License](https://img.shields.io/github/license/G28XYZ/rvm-toolkit?style=flat)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/G28XYZ/rvm-toolkit?style=flat)](https://github.com/G28XYZ/rvm-toolkit/stargazers)
 [![Issues](https://img.shields.io/github/issues/G28XYZ/rvm-toolkit?style=flat)](https://github.com/G28XYZ/rvm-toolkit/issues)

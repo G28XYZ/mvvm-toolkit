@@ -39,6 +39,14 @@ jobs:
         run: |
           npm install --include=optional --no-package-lock
           npm run build
+      
+      - name: Install and build microfronts
+        working-directory: examples/microfronts
+        run: |
+          npm install --include=optional --no-package-lock
+          cd ./auchan && npm install --include=optional --no-package-lock && npm run build:federation
+          cd ./5ka && npm install --include=optional --no-package-lock && npm run build:federation
+          npm run build:federation
 
       - name: Prepare Pages site
         run: |
@@ -57,6 +65,7 @@ jobs:
           cp examples/index.html site/index.html
           cp examples/index.css site/index.css
           cp -R examples/todo-list/dist/. site/examples/todo-list/
+          cp -R examples/microfronts/dist/. site/examples/microfronts/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
