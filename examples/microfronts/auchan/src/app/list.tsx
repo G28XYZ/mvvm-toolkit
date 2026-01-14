@@ -26,9 +26,7 @@ export const ProductList = view('auchan:ProductListVM', ({ viewModel: vm }) => {
           </div>
         ) : (
           <ul className={styles.productList} aria-label="Результаты поиска">
-            {vm.items.map((p) => (
-              <ProductItem key={p.id} item={p} />
-            ))}
+            {vm.items.map(item => <ProductItem key={item.id} item={item} />)}
           </ul>
         )}
       </div>

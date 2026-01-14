@@ -25,6 +25,8 @@ button {
   padding: 24px;
   display: grid;
   gap: 16px;
+  height: 100vh;
+  box-sizing: border-box;
 }
 
 .header h1 {
@@ -107,13 +109,12 @@ button {
 }
 
 .preview {
-  border: 1px solid #ddd;
+  border       : 1px solid #ddd;
   border-radius: 4px;
-  padding: 12px;
-  display: grid;
-  gap: 8px;
-  /* overflow: auto; */
-  /* max-height: 85vh; */
+  padding      : 12px;
+  gap          : 8px;
+  height       : calc(100vh - 150px);
+  overflow     : hidden;
 }
 
 .microfront-frame {

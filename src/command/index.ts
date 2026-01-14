@@ -37,7 +37,7 @@ const DEFAULT_STATE_KEYS = {
 
 type StripAbortSignal<T extends any[]> =
   T extends [...infer A, infer L]
-    ? (L extends AbortSignal | undefined ? A : T)
+    ? ([L] extends [AbortSignal | undefined] ? A : T)
     : T;
 
 type PromiseResult<F> = F extends (...args: any[]) => Promise<infer R> ? R : never;

@@ -11,7 +11,7 @@ export const ProductSearchBar = view('5ka:SearchVM', ({ viewModel: vm }) => {
       className={styles.productSearch}
       onSubmit={(e) => {
         e.preventDefault();
-        vm.search.execute()
+        vm.search.execute(true)
       }}
     >
       <div className={styles.productSearch__row}>

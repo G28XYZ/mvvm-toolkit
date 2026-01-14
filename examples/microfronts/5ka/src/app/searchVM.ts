@@ -9,6 +9,7 @@ import {
   Service,
   ViewModel,
   GetService,
+  asyncCommand,
 } from "rvm-toolkit";
 import { servicePrefix } from "./utils";
 @Service({ id: `${servicePrefix}:SearchVM` })
@@ -29,14 +30,12 @@ export class SearchVM extends ViewModel {
 
   private externalDisposers: Array<() => void> = [];
 
-  private async *_search() {
+  private async _search(test: string) {
     this.lastQuery = this.parent.query;
     return await this.store.search(this.parent.query);
   }
 
-  search = flowCommand(() => this._search(), {
-    canExecute: ({ state, states }) => this.parent.query.trim().length > 0 && state === states.ready,
-  });
+  search = asyncCommand((test: boolean) => this._search(''));
 
   @action.bound updateQuery(value: string) {
     this.parent.setQuery(value);
@@ -60,7 +59,8 @@ export class SearchVM extends ViewModel {
 
     this.externalDisposers.push(
       bridge.onSubmit(() => {
-        this.search.execute();
+        const t: boolean = true;
+        this.search.execute(t);
       })
     );
   }

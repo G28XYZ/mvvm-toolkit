@@ -474,7 +474,6 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  max-height: 80vh;
 }
 
 /* СКРОЛЛ ТОЛЬКО ЗДЕСЬ */
@@ -500,5 +499,5 @@
   min-height: 0;
   overflow: auto;
   padding-right: 2px;
-  max-height: 80vh;
+  height: 100%;
 }

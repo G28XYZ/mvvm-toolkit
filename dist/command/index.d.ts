@@ -18,7 +18,7 @@ declare const DEFAULT_STATES: {
     readonly canceled: "canceled";
     readonly disposed: "disposed";
 };
-type StripAbortSignal<T extends any[]> = T extends [...infer A, infer L] ? (L extends AbortSignal | undefined ? A : T) : T;
+type StripAbortSignal<T extends any[]> = T extends [...infer A, infer L] ? ([L] extends [AbortSignal | undefined] ? A : T) : T;
 type PromiseResult<F> = F extends (...args: any[]) => Promise<infer R> ? R : never;
 type GeneratorResult<F> = F extends (...args: any[]) => Generator<any, infer R, any> ? R : F extends (...args: any[]) => AsyncGenerator<any, infer R, any> ? R : never;
 /**
