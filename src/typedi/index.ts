@@ -1,4 +1,4 @@
-import lodash from "lodash";
+import isFunction from "lodash/isFunction";
 import { defineMetadata, getOwnMetadata, TInstance } from "../utils";
 import { createLegacyClassContext, isDecoratorContext, isLegacyPropertyDecoratorArgs } from "../utils/decorators";
 
@@ -258,7 +258,7 @@ export function Service<This, Args extends any[]>(
     }
   }
 
-  if (lodash.isFunction(options)) {
+  if (isFunction(options)) {
     return callback(options as TInstance<This, Args>, ctx);
   }
 

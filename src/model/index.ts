@@ -1,4 +1,5 @@
-import { isEqual, isEmpty } from "lodash";
+import isEmpty from "lodash/isEmpty";
+import isEqual from "lodash/isEqual";
 import { action, computed, isObservable, observable, runInAction } from "mobx";
 import {
   FieldMetadata,
