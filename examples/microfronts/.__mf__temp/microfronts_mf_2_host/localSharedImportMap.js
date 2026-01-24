@@ -189,7 +189,7 @@
         ,
           "rvm-toolkit": {
             name: "rvm-toolkit",
-            version: "1.0.6",
+            version: "1.0.7",
             scope: ["default"],
             loaded: false,
             from: "microfronts-host",
@@ -212,7 +212,7 @@
             },
             shareConfig: {
               singleton: true,
-              requiredVersion: "^1.0.6",
+              requiredVersion: "^1.0.7",
               
             }
           }

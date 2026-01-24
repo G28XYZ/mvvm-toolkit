@@ -37,8 +37,6 @@ export class ItemVM extends ViewModel {
   @action.bound onCommit() {
     this.isEditing = false;
     this.item.service.commit();
-    console.log(this.item.service.dumpData);
-    console.log(this.item, isObservable(this.item.id));
 
   }
 

@@ -20,7 +20,6 @@ export class ProductItemVM extends ViewModel {
   @observable isAdded = false
 
   onInit() {
-    console.log(this);
   }
 
 }
