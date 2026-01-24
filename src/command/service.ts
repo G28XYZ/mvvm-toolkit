@@ -1,4 +1,3 @@
-import { makeAutoObservable } from "mobx";
 import { asyncCommand, type CommandOptions, type ICommand } from "./index";
 
 type CommandFn<TArgs extends unknown[] = [], TResult = void> =
