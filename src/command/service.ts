@@ -268,6 +268,5 @@ export class CommandService implements CommandServiceType {
 
   constructor() {
     applyCommandMethods(this);
-    makeAutoObservable(this, {}, { autoBind: true });
   }
 }
