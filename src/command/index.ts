@@ -14,10 +14,10 @@ export type Concurrency = "ignore" | "restart" | "queue" | "parallel";
  * Значения (лейблы) состояний по умолчанию.
  * Можно переопределять через `CommandOptions.states`.
  */
-const DEFAULT_STATES = {
-  load: "load",
-  failure: "failure",
-  ready: "ready",
+export const DEFAULT_STATES = {
+  load    : "load",
+  failure : "failure",
+  ready   : "ready",
   canceled: "canceled",
   disposed: "disposed",
 } as const;
@@ -28,9 +28,9 @@ const DEFAULT_STATES = {
  * через `CommandOptions.stateKeys`, но при этом сохранить типовую совместимость.
  */
 const DEFAULT_STATE_KEYS = {
-  load: "load",
-  failure: "failure",
-  ready: "ready",
+  load    : "load",
+  failure : "failure",
+  ready   : "ready",
   canceled: "canceled",
   disposed: "disposed",
 } as const;
@@ -846,3 +846,5 @@ export function commandAction<TThis, TArgs extends any[], TResult>(
     return runInAction(() => fn.apply(this, args));
   };
 }
+
+export * from './service';
