@@ -184,7 +184,16 @@ export interface ICommand<TArgs extends unknown[] = [], TResult = void> {
   /** Текущее состояние (computed): load/failure/ready/canceled/disposed. */
   readonly state: CommandStateValue;
 
-  /** Карта лейблов состояний (статичная). */
+  /**
+   * Карта лейблов состояний (статичная).
+   *
+   * @example
+   * ```ts
+   * if (cmd.state === cmd.states.ready) {
+   *   // можно запускать
+   * }
+   * ```
+   */
   readonly states: CommandStates;
 
   /** Выполняется ли сейчас команда (observable). */
@@ -254,6 +263,18 @@ type AsyncCommandObservableKeys =
   | "queueTail"
   | "cancelToken";
 
+const ASYNC_COMMAND_ANNOTATIONS: Record<AsyncCommandObservableKeys, false> = {
+  fn            : false,
+  opt           : false,
+  states        : false,
+  resolveState  : false,
+  getScope      : false,
+  queue         : false,
+  runningPromise: false,
+  queueTail     : false,
+  cancelToken   : false,
+};
+
 /**
  * Внутренняя реализация команды для Promise-функций.
  *
@@ -275,13 +296,13 @@ class AsyncCommandImpl<TArgs extends unknown[], TResult>
 
   readonly states: CommandStates = DEFAULT_STATES;
 
-  private readonly fn: AsyncFn<TArgs, TResult>;
+  private readonly fn : AsyncFn<TArgs,         TResult>;
   private readonly opt: RequiredOptions<TArgs, TResult>;
 
-  private readonly queue: QueueEntry<TResult>[] = [];
+  private readonly queue: QueueEntry<TResult>[]   = [];
   private runningPromise: Promise<TResult> | null = null;
-  private queueTail: Promise<unknown> = Promise.resolve();
-  private cancelToken = 0;
+  private queueTail: Promise<unknown>             = Promise.resolve();
+  private cancelToken                             = 0;
 
   /**
    * @param fn Асинхронная функция, которую выполняет команда.
@@ -290,28 +311,14 @@ class AsyncCommandImpl<TArgs extends unknown[], TResult>
   constructor(fn: AsyncFn<TArgs, TResult>, opt?: CommandOptions<TArgs, TResult>) {
     this.fn = fn;
     this.opt = {
-      concurrency: opt?.concurrency ?? "ignore",
-      trackError: opt?.trackError ?? true,
+      concurrency        : opt?.concurrency         ?? "ignore",
+      trackError         : opt?.trackError          ?? true,
       resetErrorOnExecute: opt?.resetErrorOnExecute ?? true,
-      swallowError: opt?.swallowError ?? true,
+      swallowError       : opt?.swallowError        ?? true,
       ...opt,
     };
 
-    makeAutoObservable<this, AsyncCommandObservableKeys>(
-      this,
-      {
-        fn            : false,
-        opt           : false,
-        states        : false,
-        resolveState  : false,
-        getScope      : false,
-        queue         : false,
-        runningPromise: false,
-        queueTail     : false,
-        cancelToken   : false,
-      },
-      { autoBind: true }
-    );
+    makeAutoObservable<this, AsyncCommandObservableKeys>(this, ASYNC_COMMAND_ANNOTATIONS, { autoBind: true });
   }
 
   /**

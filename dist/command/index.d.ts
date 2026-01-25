@@ -149,7 +149,16 @@ export interface ICommand<TArgs extends unknown[] = [], TResult = void> {
     readonly canExecute: boolean;
     /** Текущее состояние (computed): load/failure/ready/canceled/disposed. */
     readonly state: CommandStateValue;
-    /** Карта лейблов состояний (статичная). */
+    /**
+     * Карта лейблов состояний (статичная).
+     *
+     * @example
+     * ```ts
+     * if (cmd.state === cmd.states.ready) {
+     *   // можно запускать
+     * }
+     * ```
+     */
     readonly states: CommandStates;
     /** Выполняется ли сейчас команда (observable). */
     readonly isExecuting: boolean;
