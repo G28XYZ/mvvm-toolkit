@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { asyncCommand, commandAction, flowCommand } from "../src";
+import { asyncCommand, commandAction, flowCommand, DEFAULT_STATES } from "../src";
 
 type Deferred<T> = {
   promise: Promise<T>;
@@ -18,12 +18,6 @@ const createDeferred = <T>(): Deferred<T> => {
 };
 
 const flushPromises = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0));
-
-const createAbortError = (): Error => {
-  const error = new Error("aborted");
-  (error as { name: string }).name = "AbortError";
-  return error;
-};
 
 describe("command", () => {
   it("управляет состоянием выполнения и canExecute", async () => {
@@ -123,28 +117,20 @@ describe("command", () => {
     expect(cmd.isExecuting).toBe(false);
   });
 
-  it("поддерживает переопределение и дополнительные состояния", async () => {
+  it("использует дефолтные состояния", async () => {
     const deferred = createDeferred<void>();
-    const cmd = asyncCommand(async () => deferred.promise, {
-      states: {
-        ready: "idle",
-        failure: "error",
-        saving: "saving",
-      },
-      stateKeys: {
-        load: "saving",
-      },
-    });
+    const cmd = asyncCommand(async () => deferred.promise);
 
-    expect(cmd.state).toBe("idle");
+    expect(cmd.states).toEqual(DEFAULT_STATES);
+    expect(cmd.state).toBe(DEFAULT_STATES.ready);
 
     const promise = cmd.execute();
-    expect(cmd.state).toBe("saving");
+    expect(cmd.state).toBe(DEFAULT_STATES.load);
 
     deferred.resolve();
     await promise;
 
-    expect(cmd.state).toBe("idle");
+    expect(cmd.state).toBe(DEFAULT_STATES.ready);
   });
 
   it("ignore возвращает текущий промис при повторном вызове", async () => {
@@ -270,32 +256,24 @@ describe("command", () => {
     const first = createDeferred<"first">();
     const second = createDeferred<"second">();
 
-    const fn = vi.fn(async (label: "first" | "second", signal?: AbortSignal) => {
+    const fn = vi.fn(async (label: "first" | "second") => {
       const current = label === "first" ? first : second;
-      if (signal) {
-        if (signal.aborted) throw createAbortError();
-        signal.addEventListener(
-          "abort",
-          () => current.reject(createAbortError()),
-          { once: true }
-        );
-      }
       return current.promise;
     });
 
-    const cmd = asyncCommand(fn, { concurrency: "restart", abortable: true });
+    const cmd = asyncCommand(fn, { concurrency: "restart" });
 
     const p1 = cmd.execute("first");
     const p2 = cmd.execute("second");
 
-    second.resolve("second");
-
-    const result2 = await p2;
-    expect(result2).toBe("second");
-    expect(cmd.result).toBe("second");
-
+    first.resolve("first");
     const result1 = await p1;
     expect(result1).toBeUndefined();
+    expect(cmd.result).toBeUndefined();
+
+    second.resolve("second");
+    const result2 = await p2;
+    expect(result2).toBe("second");
 
     // важно: отменённый первый запуск не должен “затереть” успешный результат второго
     expect(cmd.result).toBe("second");
@@ -307,19 +285,9 @@ describe("command", () => {
     const second = createDeferred<void>();
     let current = first;
 
-    const fn = vi.fn(async (signal?: AbortSignal) => {
-      if (signal) {
-        if (signal.aborted) throw createAbortError();
-        signal.addEventListener(
-          "abort",
-          () => current.reject(createAbortError()),
-          { once: true }
-        );
-      }
-      return current.promise;
-    });
+    const fn = vi.fn(async () => current.promise);
 
-    const cmd = asyncCommand(fn, { abortable: true });
+    const cmd = asyncCommand(fn);
 
     const p1 = cmd.execute();
     expect(cmd.isCanceled).toBe(false);
@@ -328,6 +296,7 @@ describe("command", () => {
     expect(cmd.isCanceled).toBe(true);
     expect(cmd.result).toBeUndefined();
 
+    first.resolve();
     await p1;
 
     current = second;
@@ -453,18 +422,7 @@ describe("command", () => {
     const onSuccess = vi.fn();
     const onFinally = vi.fn();
 
-    const cmd = asyncCommand(async (signal?: AbortSignal) => {
-      if (signal) {
-        if (signal.aborted) throw createAbortError();
-        signal.addEventListener(
-          "abort",
-          () => deferred.reject(createAbortError()),
-          { once: true }
-        );
-      }
-      return deferred.promise;
-    }, {
-      abortable: true,
+    const cmd = asyncCommand(async () => deferred.promise, {
       onStart,
       onSuccess,
       onFinally,
@@ -472,6 +430,7 @@ describe("command", () => {
 
     const promise = cmd.execute();
     cmd.cancel?.();
+    deferred.resolve();
 
     await promise;
 

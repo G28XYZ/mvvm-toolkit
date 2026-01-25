@@ -12,7 +12,6 @@ export type Concurrency = "ignore" | "restart" | "queue" | "parallel";
 
 /**
  * Значения (лейблы) состояний по умолчанию.
- * Можно переопределять через `CommandOptions.states`.
  */
 export const DEFAULT_STATES = {
   load    : "load",
@@ -22,29 +21,9 @@ export const DEFAULT_STATES = {
   disposed: "disposed",
 } as const;
 
-/**
- * Ключи состояний по умолчанию.
- * Нужны, чтобы можно было “переименовать” ключи (например, вместо `load` использовать `loading`)
- * через `CommandOptions.stateKeys`, но при этом сохранить типовую совместимость.
- */
-const DEFAULT_STATE_KEYS = {
-  load    : "load",
-  failure : "failure",
-  ready   : "ready",
-  canceled: "canceled",
-  disposed: "disposed",
-} as const;
-
-type StripAbortSignal<T extends any[]> =
-  T extends [...infer A, infer L]
-    ? ([L] extends [AbortSignal | undefined] ? A : T)
-    : T;
-
-type PromiseResult<F> = F extends (...args: any[]) => Promise<infer R> ? R : never;
-
 type GeneratorResult<F> =
-  F extends (...args: any[]) => Generator<any, infer R, any> ? R :
-  F extends (...args: any[]) => AsyncGenerator<any, infer R, any> ? R :
+  F extends (...args: unknown[]) => Generator<unknown, infer R, unknown> ? R :
+  F extends (...args: unknown[]) => AsyncGenerator<unknown, infer R, unknown> ? R :
   never;
 
 /**
@@ -53,50 +32,23 @@ type GeneratorResult<F> =
 export type DefaultCommandStates = typeof DEFAULT_STATES;
 
 /**
- * Карта состояний в формате `{ key: label }`.
- * Пример: `{ loading: "loading", success: "success" }`.
+ * Набор состояний команды.
  */
-export type CommandStatesMap = Record<string, string>;
-
-/**
- * Итоговый набор состояний команды: дефолтные + дополнительные/переопределённые.
- *
- * @template TExtra Дополнительные ключи/лейблы состояний.
- */
-export type CommandStates<TExtra extends CommandStatesMap = {}> =
-  Omit<DefaultCommandStates, keyof TExtra> & TExtra;
+export type CommandStates = DefaultCommandStates;
 
 /**
  * Возможные значения `state` (лейблы) из `states`.
  */
-export type CommandStateValue<TStates extends CommandStatesMap> = TStates[keyof TStates & string];
-
-/**
- * Ключи состояний (какие поля в `states` считать load/failure/ready/...).
- * Полезно, если вы хотите хранить состояния под другими ключами.
- *
- * Пример:
- * ```ts
- * stateKeys: { load: "loading", ready: "idle" }
- * states: { loading: "loading", idle: "idle", ... }
- * ```
- */
-export type CommandStateKeys<TStates extends CommandStatesMap = CommandStates> = {
-  load?: keyof TStates & string;
-  failure?: keyof TStates & string;
-  ready?: keyof TStates & string;
-  canceled?: keyof TStates & string;
-  disposed?: keyof TStates & string;
-};
+export type CommandStateValue = CommandStates[keyof CommandStates & string];
 
 /**
  * “Снимок” состояния команды, который прокидывается в `canExecute`.
  */
-export type CommandScope<TStates extends CommandStatesMap = CommandStates> = {
+export type CommandScope = {
   /** Текущее computed-состояние команды (лейбл). */
-  state: CommandStateValue<TStates>;
+  state: CommandStateValue;
   /** Карта всех лейблов состояний. */
-  states: TStates;
+  states: CommandStates;
   /** Выполняется ли команда сейчас (activeCount > 0). */
   isExecuting: boolean;
   /** Число активных параллельных запусков. */
@@ -111,7 +63,7 @@ export type CommandScope<TStates extends CommandStatesMap = CommandStates> = {
   result: unknown;
 };
 
-type AsyncFn<TArgs extends any[], TResult> = (...args: [...TArgs, AbortSignal?]) => Promise<TResult>;
+type AsyncFn<TArgs extends unknown[], TResult> = (...args: TArgs) => Promise<TResult>;
 type FlowPromise<TResult> = Promise<TResult> & { cancel?: () => void };
 
 type QueueEntry<TResult> = {
@@ -126,26 +78,24 @@ type QueueEntry<TResult> = {
  * Опции команды.
  *
  * @template TArgs Аргументы `execute`.
- * @template TExtraStates Дополнительные/кастомные состояния.
  * @template TResult Результат выполнения.
  *
  * @example
  * ```ts
  * const cmd = asyncCommand(fetchUser, {
  *   concurrency: "restart",
- *   abortable: true,
  *   onError: console.error,
  * })
  * ```
  */
-export interface CommandOptions<TArgs extends any[], TExtraStates extends CommandStatesMap = {}, TResult = void> {
+export interface CommandOptions<TArgs extends unknown[], TResult = void> {
   /**
    * Предикат, разрешающий выполнение команды.
    * Вызывается с текущим `scope`. Если вернёт `false`, `execute()` не стартует новую операцию.
    */
-  canExecute?: (scope: CommandScope<CommandStates<TExtraStates>>) => boolean;
+  canExecute?: (scope: CommandScope) => boolean;
 
-  /** Хук на ошибку (вызывается при исключении, если оно не связано с abort). */
+  /** Хук на ошибку (вызывается при исключении). */
   onError?: (e: unknown) => void;
 
   /** Хук на отмену (вызывается в `cancel()`). */
@@ -160,8 +110,8 @@ export interface CommandOptions<TArgs extends any[], TExtraStates extends Comman
   /**
    * Хук в `finally` после завершения (успех/ошибка/отмена).
    * `ok` — было ли успешное завершение,
-   * `canceled` — был ли запуск отменён (cancel или abort),
-   * `error` — ошибка (если была; для abort обычно null).
+   * `canceled` — был ли запуск отменён (cancel),
+   * `error` — ошибка (если была).
    */
   onFinally?: (info: { ok: boolean; canceled: boolean; error: unknown }, ...args: TArgs) => void;
 
@@ -196,17 +146,6 @@ export interface CommandOptions<TArgs extends any[], TExtraStates extends Comman
   swallowError?: boolean;
 
   /**
-   * Включить поддержку AbortSignal.
-   * Если true — в `fn` будет добавлен последний аргумент `AbortSignal`.
-   * При `cancel()` все активные контроллеры будут `abort()`.
-   *
-   * Важно: `fn` должен уважать сигнал (например, fetch({ signal })).
-   *
-   * @default false
-   */
-  abortable?: boolean;
-
-  /**
    * Для concurrency="queue": отменять ли ожидающие элементы очереди при `cancel()`.
    *
    * @default false
@@ -219,17 +158,6 @@ export interface CommandOptions<TArgs extends any[], TExtraStates extends Comman
    */
   queueLimit?: number;
 
-  /**
-   * Расширение/переопределение лейблов состояний.
-   * Пример: `{ load: "loading", ready: "idle" }`.
-   */
-  states?: TExtraStates;
-
-  /**
-   * Переопределение того, какие ключи в `states` считать load/ready/failure/...
-   * Полезно, если вы хотите иметь, например, `loading` вместо `load`.
-   */
-  stateKeys?: CommandStateKeys<CommandStates<TExtraStates>>;
 }
 
 /**
@@ -237,9 +165,8 @@ export interface CommandOptions<TArgs extends any[], TExtraStates extends Comman
  *
  * @template TArgs Аргументы `execute`.
  * @template TResult Результат выполнения.
- * @template TExtraStates Дополнительные состояния.
  */
-export interface ICommand<TArgs extends any[] = [], TResult = void, TExtraStates extends CommandStatesMap = {}> {
+export interface ICommand<TArgs extends unknown[] = [], TResult = void> {
   /**
    * Запускает команду.
    * В зависимости от `concurrency` может:
@@ -254,11 +181,11 @@ export interface ICommand<TArgs extends any[] = [], TResult = void, TExtraStates
   /** Можно ли выполнить команду сейчас (computed). */
   readonly canExecute: boolean;
 
-  /** Текущее состояние (computed): load/failure/ready/canceled/disposed или кастомный лейбл. */
-  readonly state: CommandStateValue<CommandStates<TExtraStates>>;
+  /** Текущее состояние (computed): load/failure/ready/canceled/disposed. */
+  readonly state: CommandStateValue;
 
   /** Карта лейблов состояний (статичная). */
-  readonly states: CommandStates<TExtraStates>;
+  readonly states: CommandStates;
 
   /** Выполняется ли сейчас команда (observable). */
   readonly isExecuting: boolean;
@@ -285,7 +212,6 @@ export interface ICommand<TArgs extends any[] = [], TResult = void, TExtraStates
    * - увеличивает cancelToken (для логической отмены “устаревшего” результата)
    * - выставляет isCanceled=true
    * - вызывает onCancel
-   * - abort-ит все активные AbortController (если abortable=true)
    * - может очистить очередь (если cancelQueued=true)
    */
   cancel?: () => void;
@@ -307,15 +233,26 @@ export interface ICommand<TArgs extends any[] = [], TResult = void, TExtraStates
   clearQueue?: () => void;
 }
 
-type RequiredOptions<TArgs extends any[], TExtraStates extends CommandStatesMap, TResult> = Required<
+type RequiredOptions<TArgs extends unknown[], TResult> = Required<
   Pick<
-    CommandOptions<TArgs, TExtraStates, TResult>,
-    "concurrency" | "trackError" | "resetErrorOnExecute" | "swallowError" | "abortable"
+    CommandOptions<TArgs, TResult>,
+    "concurrency" | "trackError" | "resetErrorOnExecute" | "swallowError"
   >
 > &
-  CommandOptions<TArgs, TExtraStates, TResult>;
+  CommandOptions<TArgs, TResult>;
 
 const noop = (): void => {};
+
+type AsyncCommandObservableKeys =
+  | "fn"
+  | "opt"
+  | "states"
+  | "resolveState"
+  | "getScope"
+  | "queue"
+  | "runningPromise"
+  | "queueTail"
+  | "cancelToken";
 
 /**
  * Внутренняя реализация команды для Promise-функций.
@@ -323,11 +260,11 @@ const noop = (): void => {};
  * Основные задачи:
  * - управление конкурентностью (ignore/restart/queue/parallel)
  * - управление состоянием и ошибками
- * - отмена (логическая cancelToken + AbortController при abortable=true)
+ * - отмена (логическая cancelToken)
  * - очередь для concurrency="queue"
  */
-class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown), TExtraStates extends CommandStatesMap = {}>
-  implements ICommand<TArgs, TResult, TExtraStates>
+class AsyncCommandImpl<TArgs extends unknown[], TResult>
+  implements ICommand<TArgs, TResult>
 {
   isExecuting: boolean  = false;
   activeCount: number   = 0;
@@ -336,66 +273,42 @@ class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown
   error      : unknown  = null;
   result     : TResult  = undefined;
 
-  readonly states: CommandStates<TExtraStates>;
+  readonly states: CommandStates = DEFAULT_STATES;
 
   private readonly fn: AsyncFn<TArgs, TResult>;
-  private readonly opt: RequiredOptions<TArgs, TExtraStates, TResult>;
-  private readonly stateKeys: CommandStateKeys<CommandStates<TExtraStates>>;
+  private readonly opt: RequiredOptions<TArgs, TResult>;
 
-  private readonly controllers = new Set<AbortController>();
   private readonly queue: QueueEntry<TResult>[] = [];
   private runningPromise: Promise<TResult> | null = null;
   private queueTail: Promise<unknown> = Promise.resolve();
   private cancelToken = 0;
 
-
   /**
    * @param fn Асинхронная функция, которую выполняет команда.
-   *           Если `abortable=true`, в неё будет передан `AbortSignal` последним аргументом.
    * @param opt Опции команды.
    */
-  constructor(fn: AsyncFn<TArgs, TResult>, opt?: CommandOptions<TArgs, TExtraStates, TResult>) {
+  constructor(fn: AsyncFn<TArgs, TResult>, opt?: CommandOptions<TArgs, TResult>) {
     this.fn = fn;
     this.opt = {
       concurrency: opt?.concurrency ?? "ignore",
       trackError: opt?.trackError ?? true,
       resetErrorOnExecute: opt?.resetErrorOnExecute ?? true,
       swallowError: opt?.swallowError ?? true,
-      abortable: opt?.abortable ?? false,
       ...opt,
     };
 
-    // TODO types
-    this.states = { ...DEFAULT_STATES, ...(opt?.states ?? {}) } as any;
-    this.stateKeys = { ...DEFAULT_STATE_KEYS, ...(opt?.stateKeys ?? {}) };
-
-    makeAutoObservable<
-      this,
-      | "fn"
-      | "opt"
-      | "states"
-      | "stateKeys"
-      | "resolveState"
-      | "getScope"
-      | "controllers"
-      | "queue"
-      | "runningPromise"
-      | "queueTail"
-      | "cancelToken"
-    >(
+    makeAutoObservable<this, AsyncCommandObservableKeys>(
       this,
       {
-        fn: false,
-        opt: false,
-        states: false,
-        stateKeys: false,
-        resolveState: false,
-        getScope: false,
-        controllers: false,
-        queue: false,
+        fn            : false,
+        opt           : false,
+        states        : false,
+        resolveState  : false,
+        getScope      : false,
+        queue         : false,
         runningPromise: false,
-        queueTail: false,
-        cancelToken: false,
+        queueTail     : false,
+        cancelToken   : false,
       },
       { autoBind: true }
     );
@@ -417,18 +330,16 @@ class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown
   }
 
   /**
-   * Разрешает лейбл состояния по “роли” (load/ready/failure/...) с учётом stateKeys/states.
+   * Разрешает лейбл состояния по “роли” (load/ready/failure/...).
    */
-  private resolveState(kind: keyof typeof DEFAULT_STATE_KEYS): CommandStateValue<CommandStates<TExtraStates>> {
-    const key = (this.stateKeys[kind] ?? kind);
-    // TODO types
-    return (this.states[key] ?? DEFAULT_STATES[kind]) as CommandStateValue<CommandStates<TExtraStates>>;
+  private resolveState(kind: keyof typeof DEFAULT_STATES): CommandStateValue {
+    return DEFAULT_STATES[kind];
   }
 
   /**
    * Возвращает текущий scope (снимок) для передачи в `canExecute`.
    */
-  private getScope(): CommandScope<CommandStates<TExtraStates>> {
+  private getScope(): CommandScope {
     return {
       state      : this.state,
       states     : this.states,
@@ -451,7 +362,7 @@ class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown
    * 4) canceled (если isCanceled)
    * 5) ready
    */
-  get state(): CommandStateValue<CommandStates<TExtraStates>> {
+  get state(): CommandStateValue {
      if (this.isDisposed) return this.resolveState("disposed");
      if (this.isExecuting) return this.resolveState("load");
      if (this.error) return this.resolveState("failure");
@@ -472,7 +383,6 @@ class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown
    * - ставит isCanceled=true
    * - вызывает onCancel
    * - при cancelQueued=true — очищает очередь
-   * - при abortable=true — abort() все активные AbortController
    */
   cancel() {
     this.cancelToken += 1;
@@ -480,9 +390,6 @@ class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown
     this.result       = undefined;
     this.opt.onCancel?.();
     if (this.opt.cancelQueued) this.clearQueue();
-    for (const controller of this.controllers) {
-      controller.abort();
-    }
   }
 
   /**
@@ -518,7 +425,7 @@ class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown
    *
    * @remarks
    * Возвращаемое значение часто типизируется как `TResult | undefined`, потому что:
-   * - при отмене/abort результат принудительно становится `undefined`
+   * - при отмене результат принудительно становится `undefined`
    * - при swallowError=true ошибка не пробрасывается, а возвращается `undefined`
    */
   execute(...args: TArgs): Promise<TResult> {
@@ -539,14 +446,10 @@ class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown
 
     /**
      * Один запуск выполнения (внутренняя “транзакция”).
-     * Поднимает activeCount/isExecuting, создаёт AbortController при abortable=true,
-     * вызывает хуки и корректно обрабатывает отмену.
+     * Поднимает activeCount/isExecuting, вызывает хуки и корректно обрабатывает отмену.
      */
     const runOnce = async (): Promise<TResult> => {
       if (this.isDisposed) return undefined;
-
-      const controller = this.opt.abortable ? new AbortController() : null;
-      if (controller) this.controllers.add(controller);
 
       runInAction(() => {
         this.activeCount += 1;
@@ -565,8 +468,7 @@ class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown
       try {
         this.opt.onStart?.(...args);
 
-        const signal = this.opt.abortable ? controller!.signal : undefined;
-        promise = this.fn(...([...args, signal]));
+        promise = this.fn(...args);
         const result = await promise;
 
         // Логическая отмена: если cancelToken изменился, считаем, что результат устарел.
@@ -585,23 +487,13 @@ class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown
         ok = true;
         return result;
       } catch (e) {
-        // Abort-отмена: если abortable и сигнал aborted — трактуем как cancel без ошибки.
-        if (this.opt.abortable && controller?.signal.aborted) {
-          runInAction(() => {
-            this.isCanceled = true;
-            this.result     = undefined;
-          });
-          canceled = true;
-          error = null;
-          return undefined;
-        }
         error = e;
 
         // Если cancelToken поменялся — считаем запуск отменённым логически.
         canceled = this.cancelToken !== startCancelToken;
 
         runInAction(() => {
-          this.result = undefined as TResult; // <-- на ошибке результата нет
+          this.result = undefined; // <-- на ошибке результата нет
           if (this.opt.trackError) this.error = e;
         });
         this.opt.onError?.(e);
@@ -613,7 +505,6 @@ class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown
           this.activeCount = Math.max(0, this.activeCount - 1);
           this.isExecuting = this.activeCount > 0;
         });
-        if (controller) this.controllers.delete(controller);
 
         // На случай, если cancelToken обновился уже после try/catch.
         if (!canceled && this.cancelToken !== startCancelToken) {
@@ -699,53 +590,40 @@ class AsyncCommandImpl<TArgs extends any[], TResult extends (undefined | unknown
  * Создаёт команду для Promise-функции.
  *
  * @template F Функция вида `(...args) => Promise<TResult>`.
- * @template TExtraStates Дополнительные состояния.
  *
  * @remarks
- * Если `abortable=true`, в `fn` будет добавлен `AbortSignal` последним аргументом.
- *
  * @example
  * ```ts
- * const loadUser = async (id: string, signal?: AbortSignal) => {
- *   const res = await fetch(`/api/users/${id}`, { signal });
+ * const loadUser = async (id: string) => {
+ *   const res = await fetch(`/api/users/${id}`);
  *   return res.json() as Promise<User>;
  * };
  *
- * const cmd = asyncCommand(loadUser, { concurrency: "restart", abortable: true });
+ * const cmd = asyncCommand(loadUser, { concurrency: "restart" });
  * await cmd.execute("42");
  * ```
  */
-export function asyncCommand<
-  F extends (...args: any[]) => Promise<any>,
-  TExtraStates extends CommandStatesMap = {}
->(
-  fn: F,
-  opt: CommandOptions<StripAbortSignal<Parameters<F>>, TExtraStates, PromiseResult<F>> & { swallowError: false }
-): ICommand<StripAbortSignal<Parameters<F>>, PromiseResult<F> | undefined, TExtraStates>;
+export function asyncCommand<TArgs extends unknown[], TResult>(
+  fn: (...args: TArgs) => Promise<TResult>,
+  opt: CommandOptions<TArgs, TResult> & { swallowError: false }
+): ICommand<TArgs, TResult | undefined>;
 
-export function asyncCommand<
-  F extends (...args: any[]) => Promise<any>,
-  TExtraStates extends CommandStatesMap = {}
->(
-  fn: F,
-  opt?: CommandOptions<StripAbortSignal<Parameters<F>>, TExtraStates, PromiseResult<F>>
-): ICommand<StripAbortSignal<Parameters<F>>, PromiseResult<F> | undefined, TExtraStates>;
+export function asyncCommand<TArgs extends unknown[], TResult>(
+  fn: (...args: TArgs) => Promise<TResult>,
+  opt?: CommandOptions<TArgs, TResult>
+): ICommand<TArgs, TResult | undefined>;
 
-export function asyncCommand<
-  F extends (...args: any[]) => Promise<any>,
-  TExtraStates extends CommandStatesMap = {}
->(
-  fn: F,
-  opt?: CommandOptions<StripAbortSignal<Parameters<F>>, TExtraStates, PromiseResult<F>>
-): ICommand<StripAbortSignal<Parameters<F>>, PromiseResult<F> | undefined, TExtraStates> {
-  return new AsyncCommandImpl<any, any, any>(fn, opt);
+export function asyncCommand<TArgs extends unknown[], TResult>(
+  fn: (...args: TArgs) => Promise<TResult>,
+  opt?: CommandOptions<TArgs, TResult>
+): ICommand<TArgs, TResult | undefined> {
+  return new AsyncCommandImpl<TArgs, TResult>(fn, opt);
 }
 
 /**
  * Создаёт команду для mobx `flow` (generator/async generator).
  *
  * @template F Генераторная функция (yield) или async generator.
- * @template TExtraStates Дополнительные состояния.
  *
  * @remarks
  * Реализация оборачивает `flow(fn)` в `asyncCommand`.
@@ -764,33 +642,30 @@ export function asyncCommand<
  * ```
  */
 export function flowCommand<
-  F extends (...args: any[]) => (Generator<any, any, any> | AsyncGenerator<any, any, any>),
-  TExtraStates extends CommandStatesMap = {}
+  F extends (...args: unknown[]) => (Generator<unknown, unknown, unknown> | AsyncGenerator<unknown, unknown, unknown>)
 >(
   fn: F,
-  opt: CommandOptions<StripAbortSignal<Parameters<F>>, TExtraStates, GeneratorResult<F>> & { swallowError: false }
-): ICommand<StripAbortSignal<Parameters<F>>, GeneratorResult<F> | undefined, TExtraStates>;
+  opt: CommandOptions<Parameters<F>, GeneratorResult<F>> & { swallowError: false }
+): ICommand<Parameters<F>, GeneratorResult<F> | undefined>;
 
 export function flowCommand<
-  F extends (...args: any[]) => (Generator<any, any, any> | AsyncGenerator<any, any, any>),
-  TExtraStates extends CommandStatesMap = {}
+  F extends (...args: unknown[]) => (Generator<unknown, unknown, unknown> | AsyncGenerator<unknown, unknown, unknown>)
 >(
   fn: F,
-  opt?: CommandOptions<StripAbortSignal<Parameters<F>>, TExtraStates, GeneratorResult<F>>
-): ICommand<StripAbortSignal<Parameters<F>>, GeneratorResult<F> | undefined, TExtraStates>;
+  opt?: CommandOptions<Parameters<F>, GeneratorResult<F>>
+): ICommand<Parameters<F>, GeneratorResult<F> | undefined>;
 
 export function flowCommand<
-  F extends (...args: any[]) => (Generator<any, any, any> | AsyncGenerator<any, any, any>),
-  TExtraStates extends CommandStatesMap = {}
+  F extends (...args: unknown[]) => (Generator<unknown, unknown, unknown> | AsyncGenerator<unknown, unknown, unknown>)
 >(
   fn: F,
-  opt?: CommandOptions<StripAbortSignal<Parameters<F>>, TExtraStates, GeneratorResult<F>>
-): ICommand<StripAbortSignal<Parameters<F>>, GeneratorResult<F> | undefined, TExtraStates> {
-  const runner = flow(fn);
-  const active = new Set<FlowPromise<any>>();
+  opt?: CommandOptions<Parameters<F>, GeneratorResult<F>>
+): ICommand<Parameters<F>, GeneratorResult<F> | undefined> {
+  const runner = flow(fn) as (...args: Parameters<F>) => FlowPromise<GeneratorResult<F>>;
+  const active = new Set<FlowPromise<GeneratorResult<F>>>();
   const userOnCancel = opt?.onCancel;
 
-  const cmd = asyncCommand((...args: any[]) => {
+  const cmd = asyncCommand<Parameters<F>, GeneratorResult<F>>((...args: Parameters<F>) => {
     const flowPromise = runner(...args);
     active.add(flowPromise);
 
@@ -799,25 +674,24 @@ export function flowCommand<
     };
     flowPromise.then(cleanup, cleanup);
 
-    return new Promise<any>((resolve, reject) => {
+    return new Promise<GeneratorResult<F> | undefined>((resolve, reject) => {
       flowPromise.then(resolve, (error: Error) => {
-        if (isFlowCancellationError(error)) {
+        const err = error;
+        if (isFlowCancellationError(err)) {
           resolve(undefined);
           return;
         }
-        reject(error);
+        reject(err);
       });
     });
   }, {
-    // TODO types
-    ...(opt as any),
+    ...opt,
     onCancel: () => {
       for (const promise of active) promise.cancel?.();
       userOnCancel?.();
     },
   });
-  // TODO types
-  return cmd as any;
+  return cmd;
 }
 
 /**
@@ -839,7 +713,7 @@ export function flowCommand<
  * }
  * ```
  */
-export function commandAction<TThis, TArgs extends any[], TResult>(
+export function commandAction<TThis, TArgs extends unknown[], TResult>(
   fn: (this: TThis, ...args: TArgs) => TResult
 ): (this: TThis, ...args: TArgs) => TResult {
   return function (this: TThis, ...args: TArgs): TResult {

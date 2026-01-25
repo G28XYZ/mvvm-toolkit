@@ -1,9 +1,16 @@
-import { asyncCommand, type CommandOptions, type ICommand } from "./index";
+import {
+  asyncCommand,
+  DEFAULT_STATES,
+  type CommandOptions,
+  type CommandStateValue,
+  type CommandStates,
+  type ICommand,
+} from "./index";
 
 type CommandFn<TArgs extends unknown[] = [], TResult = void> =
   ((...args: TArgs) => Promise<TResult>) & {
-    state       : ServiceState;
-    states      : typeof SERVICE_STATES;
+    state       : CommandStateValue;
+    states      : CommandStates;
     isExecuting : boolean;
     activeCount : number;
     isCanceled  : boolean;
@@ -23,8 +30,8 @@ type CommandFn<TArgs extends unknown[] = [], TResult = void> =
  * - Собирает состояние на классе (state/isExecuting/error/...).
  */
 
-type AnyCommandOptions = CommandOptions<unknown[], Record<string, string>, unknown>;
-type AnyCommand = ICommand<unknown[], unknown, Record<string, string>>;
+type AnyCommandOptions = CommandOptions<unknown[], unknown>;
+type AnyCommand = ICommand<unknown[], unknown>;
 
 type CommandMethodsMap<T> = Partial<Record<keyof T & string, string | boolean>>;
 /**
@@ -47,10 +54,12 @@ const DEFAULT_METHOD_KEYS = ["load", "save", "remove", "delete"] as const;
 
 const STORE_STATE_KEY = Symbol("storeState");
 const LAST_CMD_KEY = Symbol("lastCommand");
+const LAST_LOAD_LABEL_KEY = Symbol("lastLoadLabel");
 
 type CommandServiceMeta = {
   [STORE_STATE_KEY]?: true;
   [LAST_CMD_KEY]?: AnyCommand;
+  [LAST_LOAD_LABEL_KEY]?: string;
 };
 
 type CommandServiceType = {
@@ -73,7 +82,7 @@ type CommandServiceType = {
  * но сохраняет доступ к состояниям команды через геттеры.
  */
 function makeCommandCallable<TArgs extends unknown[], TResult>(
-  cmd: ICommand<TArgs, TResult, Record<string, string>>
+  cmd: ICommand<TArgs, TResult>
 ): CommandFn<TArgs, TResult> {
   const run = (...args: TArgs) => cmd.execute(...args);
   Object.defineProperties(run, {
@@ -113,17 +122,17 @@ function ensureStoreState(target: CommandServiceType & CommandServiceMeta): void
       target.error = null;
       const cmd = target[LAST_CMD_KEY];
       cmd?.resetError?.();
-      syncFromCommand(target, cmd);
+      syncFromCommand(target, cmd, target[LAST_LOAD_LABEL_KEY]);
     },
     cancel: () => {
       const cmd = target[LAST_CMD_KEY];
       cmd?.cancel?.();
-      syncFromCommand(target, cmd);
+      syncFromCommand(target, cmd, target[LAST_LOAD_LABEL_KEY]);
     },
     dispose: () => {
       const cmd = target[LAST_CMD_KEY];
       cmd?.dispose?.();
-      syncFromCommand(target, cmd);
+      syncFromCommand(target, cmd, target[LAST_LOAD_LABEL_KEY]);
     },
     clearQueue: () => {
       const cmd = target[LAST_CMD_KEY];
@@ -136,33 +145,23 @@ function ensureStoreState(target: CommandServiceType & CommandServiceMeta): void
  * Синхронизирует состояние класса с актуальным состоянием команды.
  * Последняя команда "побеждает" и определяет все поля.
  */
-function syncFromCommand(target: CommandServiceType, cmd: AnyCommand | undefined): void {
+function syncFromCommand(
+  target: CommandServiceType,
+  cmd: AnyCommand | undefined,
+  loadLabel?: string
+): void {
   if (!cmd) return;
-  for (const [key, value] of Object.entries(cmd.states ?? {})) {
-    target.states[key] = value;
+  if (cmd.state === DEFAULT_STATES.load && loadLabel) {
+    target.state = loadLabel;
+  } else {
+    target.state = cmd.state;
   }
-  target.state       = cmd.state;
   target.isExecuting = cmd.isExecuting;
   target.activeCount = cmd.activeCount;
   target.isCanceled  = cmd.isCanceled;
   target.isDisposed  = cmd.isDisposed;
   target.error       = cmd.error;
   target.result      = cmd.result;
-}
-
-/**
- * Прописывает load-лейбл в states/stateKeys для команды.
- */
-function withLoadLabel(
-  label: string | undefined,
-  opt?: AnyCommandOptions
-): AnyCommandOptions | undefined {
-  if (!label) return opt;
-  return {
-    ...opt,
-    states   : { ...(opt?.states ?? {}), [label]: label },
-    stateKeys: { ...(opt?.stateKeys ?? {}), load: label },
-  };
 }
 
 /**
@@ -180,27 +179,28 @@ function withStoreHooks(
     onStart: (...args: unknown[]) => {
       const cmd = getCmd?.();
       target[LAST_CMD_KEY] = cmd;
+      target[LAST_LOAD_LABEL_KEY] = loadLabel;
       target.state = loadLabel;
       target.isExecuting = true;
       target.isCanceled = false;
       if (opt?.resetErrorOnExecute ?? true) target.error = null;
-      syncFromCommand(target, cmd);
+      syncFromCommand(target, cmd, loadLabel);
       opt?.onStart?.(...args);
     },
     onSuccess: (result: unknown, ...args: unknown[]) => {
-      syncFromCommand(target, getCmd?.());
+      syncFromCommand(target, getCmd?.(), loadLabel);
       opt?.onSuccess?.(result, ...args);
     },
     onError: (e: unknown) => {
-      syncFromCommand(target, getCmd?.());
+      syncFromCommand(target, getCmd?.(), loadLabel);
       opt?.onError?.(e);
     },
     onCancel: () => {
-      syncFromCommand(target, getCmd?.());
+      syncFromCommand(target, getCmd?.(), loadLabel);
       opt?.onCancel?.();
     },
     onFinally: (info, ...args: unknown[]) => {
-      syncFromCommand(target, getCmd?.());
+      syncFromCommand(target, getCmd?.(), loadLabel);
       opt?.onFinally?.(info, ...args);
     },
   };
@@ -235,10 +235,9 @@ export function applyCommandMethods<T extends CommandServiceType>(target: T, map
 
     let cmd: AnyCommand | undefined;
     const hookedOptions = withStoreHooks(target, loadLabel ?? SERVICE_STATES.load, () => cmd);
-    const commandOptions = withLoadLabel(loadLabel, hookedOptions);
     cmd = asyncCommand(
       async (...args: unknown[]) => original.apply(target, args),
-      commandOptions
+      hookedOptions
     );
     const callable = makeCommandCallable(cmd);
 
