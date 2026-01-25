@@ -1,6 +1,6 @@
 import "reflect-metadata";
-import { d as fe, _ as G, a as H, b as N, c as D } from "./tslib.es6-B_Omq7a0.js";
-import { makeObservable as ir, observable as oe, isObservable as mr, runInAction as U, computed as $, action as z, flow as Ai, isFlowCancellationError as Ci, makeAutoObservable as ji } from "mobx";
+import { d as fe, _ as G, a as V, b as N, c as D } from "./tslib.es6-B_Omq7a0.js";
+import { makeObservable as ir, observable as oe, isObservable as mr, runInAction as U, computed as $, action as H, flow as Ai, isFlowCancellationError as Ci, makeAutoObservable as ji } from "mobx";
 import { observer as Ti } from "mobx-react";
 import { useMemo as Mi, useEffect as Ei, isValidElement as Di } from "react";
 var ce = typeof globalThis < "u" ? globalThis : typeof window < "u" ? window : typeof global < "u" ? global : typeof self < "u" ? self : {};
@@ -119,7 +119,7 @@ const Rs = (e, ...t) => {
   function n(...a) {
   }
   return n;
-}, V = (e, t) => !!e && (typeof t == "string" || typeof t == "symbol"), L = (e) => !!e && typeof e == "object" && "kind" in e, Li = (e) => ({
+}, z = (e, t) => !!e && (typeof t == "string" || typeof t == "symbol"), L = (e) => !!e && typeof e == "object" && "kind" in e, Li = (e) => ({
   kind: "class",
   name: e,
   addInitializer: () => {
@@ -145,7 +145,7 @@ function Ki(e) {
     });
   };
   function r(n, a) {
-    if (V(n, a)) {
+    if (z(n, a)) {
       t(n, a);
       return;
     }
@@ -226,7 +226,7 @@ function Me(e) {
     value: void 0
   };
   return function(o, u) {
-    if (V(o, u)) {
+    if (z(o, u)) {
       Object.defineProperty(o, u, {
         configurable: !0,
         enumerable: a.enumerable,
@@ -250,7 +250,7 @@ function Me(e) {
   };
 }
 function Cs(e, t) {
-  return V(e, t) || L(t) ? Me()(e, t) : Me(e);
+  return z(e, t) || L(t) ? Me()(e, t) : Me(e);
 }
 function js(e, t) {
   const r = (i) => class extends i {
@@ -408,7 +408,7 @@ function Ts(e) {
     });
   };
   function n(a, i) {
-    if (V(a, i)) {
+    if (z(a, i)) {
       t(a, i);
       return;
     }
@@ -417,7 +417,7 @@ function Ts(e) {
   }
   return e ? ((a, i) => n(a, i)) : ((a) => a);
 }
-const Mr = /* @__PURE__ */ new WeakMap(), Hi = (e, t) => {
+const Mr = /* @__PURE__ */ new WeakMap(), Vi = (e, t) => {
   if (!e)
     return;
   let r = Mr.get(e);
@@ -435,11 +435,11 @@ function Ms(e) {
   }, r = (a) => {
     a.addInitializer(function() {
       const i = new cr({ callback: e, name: String(a.name) });
-      Hi(Object.getPrototypeOf(this), i);
+      Vi(Object.getPrototypeOf(this), i);
     });
   };
   function n(a, i) {
-    if (V(a, i)) {
+    if (z(a, i)) {
       t(a, i);
       return;
     }
@@ -461,7 +461,7 @@ function hi() {
   return Ee = t, Ee;
 }
 var De, Dr;
-function zi() {
+function Hi() {
   if (Dr) return De;
   Dr = 1;
   function e(t, r) {
@@ -472,17 +472,17 @@ function zi() {
   return De = e, De;
 }
 var Pe, Pr;
-function Vi() {
+function zi() {
   if (Pr) return Pe;
   Pr = 1;
-  var e = zi(), t = e(Object.keys, Object);
+  var e = Hi(), t = e(Object.keys, Object);
   return Pe = t, Pe;
 }
 var Ie, Ir;
 function vi() {
   if (Ir) return Ie;
   Ir = 1;
-  var e = hi(), t = Vi(), r = Object.prototype, n = r.hasOwnProperty;
+  var e = hi(), t = zi(), r = Object.prototype, n = r.hasOwnProperty;
   function a(i) {
     if (!e(i))
       return t(i);
@@ -568,26 +568,26 @@ function ae() {
   }
   return Ge = r, Ge;
 }
-var He, Hr;
+var Ve, Vr;
 function Yi() {
+  if (Vr) return Ve;
+  Vr = 1;
+  var e = ae(), t = B(), r = e(t, "DataView");
+  return Ve = r, Ve;
+}
+var He, Hr;
+function gr() {
   if (Hr) return He;
   Hr = 1;
-  var e = ae(), t = B(), r = e(t, "DataView");
+  var e = ae(), t = B(), r = e(t, "Map");
   return He = r, He;
 }
 var ze, zr;
-function gr() {
+function Qi() {
   if (zr) return ze;
   zr = 1;
-  var e = ae(), t = B(), r = e(t, "Map");
-  return ze = r, ze;
-}
-var Ve, Vr;
-function Qi() {
-  if (Vr) return Ve;
-  Vr = 1;
   var e = ae(), t = B(), r = e(t, "Promise");
-  return Ve = r, Ve;
+  return ze = r, ze;
 }
 var Be, Br;
 function $i() {
@@ -1186,17 +1186,17 @@ function qi() {
   }
   return Lt = i, Lt;
 }
-var Kt, Ha;
+var Kt, Va;
 function kn() {
-  if (Ha) return Kt;
-  Ha = 1;
+  if (Va) return Kt;
+  Va = 1;
   var e = B(), t = e.Uint8Array;
   return Kt = t, Kt;
 }
-var Gt, za;
+var Gt, Ha;
 function xn() {
-  if (za) return Gt;
-  za = 1;
+  if (Ha) return Gt;
+  Ha = 1;
   function e(t) {
     var r = -1, n = Array(t.size);
     return t.forEach(function(a, i) {
@@ -1205,21 +1205,21 @@ function xn() {
   }
   return Gt = e, Gt;
 }
-var Ht, Va;
+var Vt, za;
 function Fn() {
-  if (Va) return Ht;
-  Va = 1;
+  if (za) return Vt;
+  za = 1;
   function e(t) {
     var r = -1, n = Array(t.size);
     return t.forEach(function(a) {
       n[++r] = a;
     }), n;
   }
-  return Ht = e, Ht;
+  return Vt = e, Vt;
 }
-var zt, Ba;
+var Ht, Ba;
 function Ln() {
-  if (Ba) return zt;
+  if (Ba) return Ht;
   Ba = 1;
   var e = vr(), t = kn(), r = bi(), n = qi(), a = xn(), i = Fn(), s = 1, o = 2, u = "[object Boolean]", l = "[object Date]", d = "[object Error]", h = "[object Map]", b = "[object Number]", _ = "[object RegExp]", T = "[object Set]", q = "[object String]", A = "[object Symbol]", R = "[object ArrayBuffer]", p = "[object DataView]", M = e ? e.prototype : void 0, y = M ? M.valueOf : void 0;
   function f(S, O, P, k, x, m, c) {
@@ -1257,18 +1257,18 @@ function Ln() {
     }
     return !1;
   }
-  return zt = f, zt;
+  return Ht = f, Ht;
 }
-var Vt, Na;
+var zt, Na;
 function Kn() {
-  if (Na) return Vt;
+  if (Na) return zt;
   Na = 1;
   function e(t, r) {
     for (var n = -1, a = r.length, i = t.length; ++n < a; )
       t[i + n] = r[n];
     return t;
   }
-  return Vt = e, Vt;
+  return zt = e, zt;
 }
 var Bt, Ua;
 function Gn() {
@@ -1282,7 +1282,7 @@ function Gn() {
   return Bt = r, Bt;
 }
 var Nt, Wa;
-function Hn() {
+function Vn() {
   if (Wa) return Nt;
   Wa = 1;
   function e(t, r) {
@@ -1295,7 +1295,7 @@ function Hn() {
   return Nt = e, Nt;
 }
 var Ut, Ya;
-function zn() {
+function Hn() {
   if (Ya) return Ut;
   Ya = 1;
   function e() {
@@ -1304,10 +1304,10 @@ function zn() {
   return Ut = e, Ut;
 }
 var Wt, Qa;
-function Vn() {
+function zn() {
   if (Qa) return Wt;
   Qa = 1;
-  var e = Hn(), t = zn(), r = Object.prototype, n = r.propertyIsEnumerable, a = Object.getOwnPropertySymbols, i = a ? function(s) {
+  var e = Vn(), t = Hn(), r = Object.prototype, n = r.propertyIsEnumerable, a = Object.getOwnPropertySymbols, i = a ? function(s) {
     return s == null ? [] : (s = Object(s), e(a(s), function(o) {
       return n.call(s, o);
     }));
@@ -1367,7 +1367,7 @@ var Xt, ei;
 function Yn() {
   if (ei) return Xt;
   ei = 1;
-  var e = Gn(), t = Vn(), r = Wn();
+  var e = Gn(), t = zn(), r = Wn();
   function n(a) {
     return e(a, r, t);
   }
@@ -1468,59 +1468,59 @@ let is = (() => {
       return G(this, t, "f");
     }
     set initData(c) {
-      H(this, t, c, "f");
+      V(this, t, c, "f");
     }
     // @define_prop
     get committedData() {
       return G(this, r, "f");
     }
     set committedData(c) {
-      H(this, r, c, "f");
+      V(this, r, c, "f");
     }
     // @define_prop
     get modified_() {
       return G(this, n, "f");
     }
     set modified_(c) {
-      H(this, n, c, "f");
+      V(this, n, c, "f");
     }
     // @define_prop
     get legacyInitDone() {
       return G(this, a, "f");
     }
     set legacyInitDone(c) {
-      H(this, a, c, "f");
+      V(this, a, c, "f");
     }
     // @define_prop
     get options() {
       return G(this, i, "f");
     }
     set options(c) {
-      H(this, i, c, "f");
+      V(this, i, c, "f");
     }
     get [(t = /* @__PURE__ */ new WeakMap(), r = /* @__PURE__ */ new WeakMap(), n = /* @__PURE__ */ new WeakMap(), a = /* @__PURE__ */ new WeakMap(), i = /* @__PURE__ */ new WeakMap(), s = /* @__PURE__ */ new WeakMap(), o = /* @__PURE__ */ new WeakMap(), u = /* @__PURE__ */ new WeakMap(), l = /* @__PURE__ */ new WeakMap(), d = (A = [oe], Y))]() {
       return G(this, s, "f");
     }
     set [d](c) {
-      H(this, s, c, "f");
+      V(this, s, c, "f");
     }
     get [h = te]() {
       return G(this, o, "f");
     }
     set [h](c) {
-      H(this, o, c, "f");
+      V(this, o, c, "f");
     }
     get [b = re]() {
       return G(this, u, "f");
     }
     set [b](c) {
-      H(this, u, c, "f");
+      V(this, u, c, "f");
     }
     get [_ = ee]() {
       return G(this, l, "f");
     }
     set [_](c) {
-      H(this, l, c, "f");
+      V(this, l, c, "f");
     }
     /**
      * Создает модель и инициализирует данные.
@@ -1785,7 +1785,7 @@ let is = (() => {
     }
   }, (() => {
     const m = typeof Symbol == "function" && Symbol.metadata ? /* @__PURE__ */ Object.create(null) : void 0;
-    M = [$], y = [z], f = [z], S = [z], O = [z], P = [$], k = [$], x = [(T = $).struct.bind(T)], D(e, null, A, { kind: "accessor", name: "initData", static: !1, private: !1, access: { has: (c) => "initData" in c, get: (c) => c.initData, set: (c, v) => {
+    M = [$], y = [H], f = [H], S = [H], O = [H], P = [$], k = [$], x = [(T = $).struct.bind(T)], D(e, null, A, { kind: "accessor", name: "initData", static: !1, private: !1, access: { has: (c) => "initData" in c, get: (c) => c.initData, set: (c, v) => {
       c.initData = v;
     } }, metadata: m }, R, p), D(e, null, M, { kind: "getter", name: "dirty", static: !1, private: !1, access: { has: (c) => "dirty" in c, get: (c) => c.dirty }, metadata: m }, null, q), D(e, null, y, { kind: "method", name: "commit", static: !1, private: !1, access: { has: (c) => "commit" in c, get: (c) => c.commit }, metadata: m }, null, q), D(e, null, f, { kind: "method", name: "commitField", static: !1, private: !1, access: { has: (c) => "commitField" in c, get: (c) => c.commitField }, metadata: m }, null, q), D(e, null, S, { kind: "method", name: "reject", static: !1, private: !1, access: { has: (c) => "reject" in c, get: (c) => c.reject }, metadata: m }, null, q), D(e, null, O, { kind: "method", name: "toInit", static: !1, private: !1, access: { has: (c) => "toInit" in c, get: (c) => c.toInit }, metadata: m }, null, q), D(e, null, P, { kind: "getter", name: "validation", static: !1, private: !1, access: { has: (c) => "validation" in c, get: (c) => c.validation }, metadata: m }, null, q), D(e, null, k, { kind: "getter", name: "validAndDirty", static: !1, private: !1, access: { has: (c) => "validAndDirty" in c, get: (c) => c.validAndDirty }, metadata: m }, null, q), D(e, null, x, { kind: "getter", name: "service", static: !1, private: !1, access: { has: (c) => "service" in c, get: (c) => c.service }, metadata: m }, null, q), m && Object.defineProperty(e, Symbol.metadata, { enumerable: !0, configurable: !0, writable: !0, value: m });
   })(), e;
@@ -1801,7 +1801,7 @@ const si = /* @__PURE__ */ new WeakMap(), ns = (e, t) => {
   const a = K(t.metadataKey, e, new Array());
   a.some((i) => i.name === n) || F(t.metadataKey, [...a, t], e), r.add(n);
 }, fr = function(t, r) {
-  const n = V(t, r) ? void 0 : t, a = (o, u) => {
+  const n = z(t, r) ? void 0 : t, a = (o, u) => {
     const l = new ur(Object.assign(Object.assign({}, n), { name: String(u), ctx: null }));
     F(l.metadataKey, [...K(l.metadataKey, o, new Array()), l], o), Object.getOwnPropertyDescriptor(o, u) || Object.defineProperty(o, u, {
       configurable: !0,
@@ -1834,16 +1834,16 @@ const si = /* @__PURE__ */ new WeakMap(), ns = (e, t) => {
     });
   };
   function s(o, u) {
-    if (V(o, u)) {
+    if (z(o, u)) {
       a(o, u);
       return;
     }
     if (L(u))
       return i(u), u.kind === "field" ? (l) => l : u;
   }
-  return V(t, r) ? s(t, r) : n && !L(r) ? (o, u) => s(o, u) : L(r) ? s(void 0, r) : (o, u) => s(o, u);
+  return z(t, r) ? s(t, r) : n && !L(r) ? (o, u) => s(o, u) : L(r) ? s(void 0, r) : (o, u) => s(o, u);
 }, ss = (e) => !e || typeof e != "object" ? { noObserve: !0 } : Object.assign(Object.assign({}, e), { noObserve: !0 }), os = function(t, r) {
-  return V(t, r) || L(r) ? fr({ noObserve: !0 })(t, r) : fr(ss(t));
+  return z(t, r) || L(r) ? fr({ noObserve: !0 })(t, r) : fr(ss(t));
 };
 fr.noObserve = os;
 const oi = /* @__PURE__ */ new WeakMap(), cs = (e, t) => {
@@ -1868,7 +1868,7 @@ function Ds(e) {
     });
   };
   function n(a, i) {
-    if (V(a, i)) {
+    if (z(a, i)) {
       t(a, i);
       return;
     }
@@ -1899,7 +1899,7 @@ function Ps(e) {
     });
   };
   function n(a, i) {
-    if (V(a, i)) {
+    if (z(a, i)) {
       t(a, i);
       return;
     }
@@ -1925,13 +1925,13 @@ let de = (() => {
       return G(this, t, "f");
     }
     set items(f) {
-      H(this, t, f, "f");
+      V(this, t, f, "f");
     }
     get _cash() {
       return G(this, r, "f");
     }
     set _cash(f) {
-      H(this, r, f, "f");
+      V(this, r, f, "f");
     }
     constructor() {
       t.set(this, (N(this, n), N(this, i, []))), r.set(this, (N(this, s), N(this, u, []))), this._model = N(this, l), ir(this);
@@ -2002,7 +2002,7 @@ let de = (() => {
     }
   }, t = /* @__PURE__ */ new WeakMap(), r = /* @__PURE__ */ new WeakMap(), (() => {
     const y = typeof Symbol == "function" && Symbol.metadata ? /* @__PURE__ */ Object.create(null) : void 0;
-    a = [oe], o = [oe], d = [z], h = [z], b = [z], _ = [z], T = [$], q = [$], A = [$], R = [z], p = [z], M = [z], D(e, null, a, { kind: "accessor", name: "items", static: !1, private: !1, access: { has: (f) => "items" in f, get: (f) => f.items, set: (f, S) => {
+    a = [oe], o = [oe], d = [H], h = [H], b = [H], _ = [H], T = [$], q = [$], A = [$], R = [H], p = [H], M = [H], D(e, null, a, { kind: "accessor", name: "items", static: !1, private: !1, access: { has: (f) => "items" in f, get: (f) => f.items, set: (f, S) => {
       f.items = S;
     } }, metadata: y }, i, s), D(e, null, o, { kind: "accessor", name: "_cash", static: !1, private: !1, access: { has: (f) => "_cash" in f, get: (f) => f._cash, set: (f, S) => {
       f._cash = S;
@@ -2078,7 +2078,7 @@ const X = {
   ready: "ready",
   canceled: "canceled",
   disposed: "disposed"
-}, vs = ["load", "save", "remove", "delete"], ui = /* @__PURE__ */ Symbol("storeState"), se = /* @__PURE__ */ Symbol("lastCommand"), le = /* @__PURE__ */ Symbol("lastLoadLabel");
+}, vs = ["load", "save", "remove", "delete"], ui = /* @__PURE__ */ Symbol("SERVICE_STATE"), se = /* @__PURE__ */ Symbol("LAST_CMD"), le = /* @__PURE__ */ Symbol("LAST_LOAD_LABEL");
 function _s(e) {
   const t = (...r) => e.execute(...r);
   return Object.defineProperties(t, {
@@ -2177,7 +2177,7 @@ function ys(e, t) {
     s && (e.states[s] = s), Object.defineProperty(e, n, { value: l, configurable: !0, writable: !0 });
   }
 }
-class Hs {
+class Vs {
   constructor() {
     this.state = X.ready, this.states = Object.assign({}, X), this.isExecuting = !1, this.activeCount = 0, this.isCanceled = !1, this.isDisposed = !1, this.error = null, this.result = void 0, ys(this);
   }
@@ -2386,7 +2386,7 @@ class ps {
 function Ri(e, t) {
   return new ps(e, t);
 }
-function zs(e, t) {
+function Hs(e, t) {
   const r = Ai(e), n = /* @__PURE__ */ new Set(), a = t?.onCancel;
   return Ri((...s) => {
     const o = r(...s);
@@ -2411,13 +2411,13 @@ function zs(e, t) {
     a?.();
   } }));
 }
-function Vs(e) {
+function zs(e) {
   return function(...t) {
     return U(() => e.apply(this, t));
   };
 }
 export {
-  Hs as CommandService,
+  Vs as CommandService,
   dr as DEFAULT_STATES,
   J as GetService,
   xs as GetStore,
@@ -2434,12 +2434,12 @@ export {
   Ks as ViewModel,
   ys as applyCommandMethods,
   Ri as asyncCommand,
-  Vs as commandAction,
+  zs as commandAction,
   F as defineMetadata,
   Cs as define_prop,
   Ms as exclude,
   fr as field,
-  zs as flowCommand,
+  Hs as flowCommand,
   Fi as getExecutingFunctionNameByStack,
   K as getOwnMetadata,
   Os as isSerializable,
