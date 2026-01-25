@@ -52,13 +52,13 @@ type ServiceState = typeof SERVICE_STATES[keyof typeof SERVICE_STATES];
 
 const DEFAULT_METHOD_KEYS = ["load", "save", "remove", "delete"] as const;
 
-const STORE_STATE_KEY = Symbol("storeState");
-const LAST_CMD_KEY = Symbol("lastCommand");
-const LAST_LOAD_LABEL_KEY = Symbol("lastLoadLabel");
+const SERVICE_STATE_KEY   = Symbol("SERVICE_STATE");
+const LAST_CMD_KEY        = Symbol("LAST_CMD");
+const LAST_LOAD_LABEL_KEY = Symbol("LAST_LOAD_LABEL");
 
 type CommandServiceMeta = {
-  [STORE_STATE_KEY]?: true;
-  [LAST_CMD_KEY]?: AnyCommand;
+  [SERVICE_STATE_KEY]  ?: true;
+  [LAST_CMD_KEY]       ?: AnyCommand;
   [LAST_LOAD_LABEL_KEY]?: string;
 };
 
@@ -107,8 +107,8 @@ function makeCommandCallable<TArgs extends unknown[], TResult>(
  * Делается один раз на объект.
  */
 function ensureStoreState(target: CommandServiceType & CommandServiceMeta): void {
-  if (target[STORE_STATE_KEY]) return;
-  Object.defineProperty(target, STORE_STATE_KEY, { value: true });
+  if (target[SERVICE_STATE_KEY]) return;
+  Object.defineProperty(target, SERVICE_STATE_KEY, { value: true });
   Object.assign(target, {
     state      : SERVICE_STATES.ready,
     states     : { ...SERVICE_STATES },
