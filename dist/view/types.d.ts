@@ -19,3 +19,4 @@ export declare class ViewModel {
      */
     onDispose?(): void | Promise<void>;
 }
+export {};
